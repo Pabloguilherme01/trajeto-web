@@ -13,6 +13,8 @@ import {
 import { buildDestinationPlannerUrl, buildOriginPlannerUrl } from "@/lib/tripLinks";
 import { preparePrimaryRoute } from "@/lib/primaryRoutes";
 import { destinationNavigationValue, type UnifiedDestination } from "@/lib/unifiedDestination";
+import { hasBusinessName } from "@/lib/businessCatalogState";
+import { appUrl } from "@/lib/appUrl";
 import {
   isGenericDestinationFavorite,
   toggleGenericDestinationFavorite,
@@ -75,6 +77,13 @@ export function DestinationActions({
             : buildGoogleMapsDestinationUrl(mapValue, true);
     openExternalUrl(url);
   };
+
+  if (isBusiness && !hasBusinessName(destination.name)) return <div className="grid min-w-0 gap-2">
+    <Link href={appUrl("/mapa") + "?q=" + destination.id.slice(9) + "&empresas=cnpj"}
+      className="flex min-h-11 items-center justify-center rounded-xl border border-primary/25 px-3 text-xs font-bold text-primary">Consultar cadastro CNPJ</Link>
+    {isSaved && <button type="button" onClick={toggleSaved} className="min-h-11 rounded-xl border border-border px-3 text-xs font-bold">Remover registro dos salvos</button>}
+    {saveError && <p role="alert" className="text-xs text-warning">Não foi possível atualizar os salvos neste aparelho.</p>}
+  </div>;
 
   return (
     <div className={"grid min-w-0 gap-2 " + (compact ? "grid-cols-2" : "grid-cols-2 sm:grid-cols-4")} role="group" aria-label={"Ações para " + destination.name}>

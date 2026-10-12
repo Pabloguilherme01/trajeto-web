@@ -12,6 +12,9 @@ test("Android/iOS: named companies and CNPJ consultation preserve query and retu
   const amag = page.getByRole("article").filter({ has: page.getByText("AMAG", { exact: true }) });
   await expect(identity.getByRole("button", { name: "Empresas com nome", exact: true })).toHaveAttribute("aria-pressed", "true");
   await expect(amag).toBeVisible({ timeout: 60000 });
+  await page.reload();
+  await expect(identity.getByRole("button", { name: "Empresas com nome", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(amag).toBeVisible({ timeout: 60000 });
   await context.setOffline(true);
   await identity.getByRole("button", { name: "Consultar CNPJ", exact: true }).click();
   await expect(page).toHaveURL(/empresas=cnpj/);
@@ -24,6 +27,11 @@ test("Android/iOS: named companies and CNPJ consultation preserve query and retu
   await expect(amag).toBeVisible();
   await expect(page.getByRole("textbox", { name: "Buscar destino no mapa" })).toHaveValue("42.115.689/0001-40");
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(321);
+  await context.setOffline(false);
+  await page.goto("mapa?camada=ruas&empresas=cnpj&q=Avenida%20Bras%C3%ADlia", { waitUntil: "domcontentloaded" });
+  await page.reload();
+  await expect(identity.getByRole("button", { name: "Mapa completo", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("article").filter({ has: page.getByText("Avenida Brasília", { exact: true }) }).first()).toBeVisible();
 });
 
 test("Android/iOS: sourced bairros stay separate from streets and accessible in planner at 320px", async ({ page }) => {

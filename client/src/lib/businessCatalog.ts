@@ -48,7 +48,7 @@ export function normalizeBusinessRows(value: unknown): CityAtlasItem[] {
         typeof statusDate !== "string" || typeof size !== "string" ||
         typeof mei !== "string" || typeof simples !== "string" ||
         typeof nature !== "string" ||
-        !/^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/.test(cnpj) || !name.trim()) continue;
+        !/^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/.test(cnpj)) continue;
 
     const identifiedName = readableBusinessName(tradeName) || readableBusinessName(name) || readableBusinessName(legalName);
     const hasPoint = Boolean(identifiedName) && typeof lat === "number" && Number.isFinite(lat) && lat > -16.1 && lat < -15.3 &&

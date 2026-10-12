@@ -1,10 +1,10 @@
 import { businessesForMapLayer, searchBusinesses, partitionBusinessCatalog } from "@/lib/businessSearch";
-import { hasBusinessName, readBusinessCatalogMode, type BusinessCatalogMode } from "@/lib/businessCatalogState";
+import { hasBusinessName, type BusinessCatalogMode } from "@/lib/businessCatalogState";
 import { filterCityAtlasStreets, filterCityAtlasAreas } from "@/lib/cityAtlasSearch";
 import { selectCityMapItems, cachedDestinationKey, type CityMapCandidate } from "@/lib/cityMapSelection";
 import { useBusinessCatalog } from "@/hooks/useBusinessCatalog";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
-import { CITY_MAP_CATEGORIES, cityMapAtlasLayer, cityMapLayerUrl, cityMapRelatedServicesUrl, cityMapNeedsAnp, cityMapNeedsBusinessCatalog, isReadyRouteLayer, readCityMapLayer, readCityMapCoordinateMode, type CityMapCoordinateMode, type CityMapCategory, type CityMapLayer } from "@/lib/cityMapLayers";
+import { CITY_MAP_CATEGORIES, cityMapAtlasLayer, cityMapLayerUrl, cityMapRelatedServicesUrl, cityMapNeedsAnp, cityMapNeedsBusinessCatalog, isReadyRouteLayer, readCityMapLayer, readCityMapCoordinateMode, readCityMapBusinessMode, type CityMapCoordinateMode, type CityMapCategory, type CityMapLayer } from "@/lib/cityMapLayers";
 
 import React from "react";
 import { useEffect, useMemo, useState, useDeferredValue, useRef, useCallback } from "react";
@@ -17,6 +17,7 @@ import QuickFilterChips from "@/components/QuickFilterChips";
 import DestinationResourceModes from "@/components/DestinationResourceModes";
 import DestinationAreaSelect from "@/components/DestinationAreaSelect";
 import DestinationReferenceInfo from "@/components/DestinationReferenceInfo";
+import BusinessRegistryActions from "@/components/BusinessRegistryActions";
 import { mentionsDestinationArea, readDestinationArea } from "@/lib/destinationAreas";
 import { createDestinationPointResolver } from "@/lib/destinationCoordinates";
 import { isAguasLindasRoutePoint } from "@/lib/mapGeometry";
@@ -61,9 +62,9 @@ export default function CityMap() {
   const rawSearch = useSearch();
   const [query, setQuery] = useState(() => new URLSearchParams(rawSearch).get("q") ?? "");
   const [exploreCompanies, setExploreCompanies] = useState(false);
-  const [businessMode, setBusinessMode] = useState(() => readBusinessCatalogMode(new URLSearchParams(rawSearch).get("empresas")));
-  const registryMode = businessMode === "cnpj" || businessMode === "unnamed";
   const initialLayer = readCityMapLayer(new URLSearchParams(rawSearch).get("camada"));
+  const [businessMode, setBusinessMode] = useState(() => readCityMapBusinessMode(new URLSearchParams(rawSearch).get("empresas"), initialLayer));
+  const registryMode = businessMode === "cnpj" || businessMode === "unnamed";
   const [referenceLayer, setReferenceLayer] = useState<"ruas" | "bairros" | null>(() =>
     initialLayer === "ruas" || initialLayer === "bairros" ? initialLayer : null
   );
@@ -207,12 +208,13 @@ export default function CityMap() {
     setCategory(selected === "ruas" || selected === "bairros" ? "todos" : selected);
     setCoordinateMode(readCityMapCoordinateMode(params.get("coordenadas")));
     setSelectedArea(readDestinationArea(params.get("bairro")));
-    setBusinessMode(readBusinessCatalogMode(params.get("empresas")));
+    setBusinessMode(readCityMapBusinessMode(params.get("empresas"), selected));
   }, [rawSearch]);
   const deferredQuery = useDeferredValue(query);
   const syncMapUrl = (nextQuery: string, layer: CityMapLayer, mode: CityMapCoordinateMode = coordinateMode, area = selectedArea, identity = businessMode) => {
     const previous = new URLSearchParams(rawSearch);
-    const current = cityMapLayerUrl(previous.get("q") ?? "", readCityMapLayer(previous.get("camada")), readCityMapCoordinateMode(previous.get("coordenadas")), readDestinationArea(previous.get("bairro")), readBusinessCatalogMode(previous.get("empresas")));
+    const previousLayer = readCityMapLayer(previous.get("camada"));
+    const current = cityMapLayerUrl(previous.get("q") ?? "", previousLayer, readCityMapCoordinateMode(previous.get("coordenadas")), readDestinationArea(previous.get("bairro")), readCityMapBusinessMode(previous.get("empresas"), previousLayer));
     const next = cityMapLayerUrl(nextQuery, layer, mode, area, identity);
     if (next !== current) navigate(next, { replace: true });
   };
@@ -298,8 +300,8 @@ export default function CityMap() {
       return Boolean(target) && (item.id.startsWith("business-") || !key || !routeKeys.has(key));
     });
     const companies = businessMode === "cnpj" ? companyMatches : businessMode === "unnamed" ? companyIdentities.unnamed : companyIdentities.named;
-    const combined = [...publicAtlas, ...companies];
-    return selectedArea ? combined.filter(item => mentionsDestinationArea(selectedArea, item.name, item.detail, item.address, item.destination)) : combined;
+    const publicInArea = selectedArea ? publicAtlas.filter(item => mentionsDestinationArea(selectedArea, item.name, item.detail, item.address, item.destination)) : publicAtlas;
+    return [...publicInArea, ...companies];
   }, [baseAtlas, atlasLayer, categoryDestinations, deferredQuery, referenceLayer, selectedArea, businessMode, companyMatches, companyIdentities]);
   const positionedAtlasDestinations = useMemo(() => registryMode ? [] : allAtlasDestinations.filter(item => isAguasLindasRoutePoint({ lat: item.lat!, lng: item.lng! })), [allAtlasDestinations, registryMode]);
   const atlasDestinations = registryMode ? allAtlasDestinations : coordinateMode === "coordinates" ? positionedAtlasDestinations : coordinateMode === "missing"
@@ -692,8 +694,9 @@ export default function CityMap() {
                     </div>
                   </div>
                   <div className="mt-3">
-                    {item.business && !hasBusinessName(item.name) ? (
-                      <p className="text-xs leading-relaxed text-muted-foreground">Nome não informado no cadastro. Confirme a identificação e o endereço antes de planejar uma viagem.</p>
+                    {item.business && registryMode ? (
+                      <BusinessRegistryActions cnpj={item.business.cnpj}
+                        mapUrl={hasBusinessName(item.name) ? cityMapLayerUrl(item.business.cnpj, activeLayer, "all", selectedArea, "named") : undefined} />
                     ) : item.id.startsWith("atlas-bairro-") ? (
                       <Link href={buildDestinationPlannerUrl(target ?? item.name)}
                         className="flex min-h-11 items-center justify-center rounded-xl border border-primary/25 bg-primary/[.06] px-3 text-xs font-bold text-primary">

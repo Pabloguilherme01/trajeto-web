@@ -1,6 +1,6 @@
 import { appUrl } from "./appUrl";
 import { readDestinationArea } from "./destinationAreas";
-import type { BusinessCatalogMode } from "./businessCatalogState";
+import { readBusinessCatalogMode, type BusinessCatalogMode } from "./businessCatalogState";
 import type { CityAtlasLayer } from "./cityAtlas";
 import type { PublicServiceCategory } from "./publicServices";
 import { ROUTE_DESTINATION_CATEGORIES, type RouteDestinationCategoryFilter } from "./routeDestinationCategories";
@@ -26,6 +26,10 @@ const allowedLayers = new Set<CityMapLayer>([
 /** Only known public map layers may be supplied by URLs. */
 export function readCityMapLayer(value: string | null): CityMapLayer {
   return value && allowedLayers.has(value as CityMapLayer) ? value as CityMapLayer : "todos";
+}
+
+export function readCityMapBusinessMode(value: string | null, layer: CityMapLayer): BusinessCatalogMode {
+  return cityMapNeedsBusinessCatalog(layer) ? readBusinessCatalogMode(value) : "all";
 }
 
 export function cityMapAtlasLayer(layer: CityMapLayer): "todos" | CityAtlasLayer {
@@ -54,7 +58,7 @@ export function cityMapLayerUrl(query: string, layer: CityMapLayer, coordinatesO
   if (coordinatesOnly === "missing") params.set("coordenadas", "0");
   const validArea = readDestinationArea(area);
   if (validArea) params.set("bairro", validArea);
-  if (businesses !== "all") params.set("empresas", businesses === "named" ? "nome" : businesses === "unnamed" ? "sem-nome" : "cnpj");
+  if (businesses !== "all" && cityMapNeedsBusinessCatalog(layer)) params.set("empresas", businesses === "named" ? "nome" : businesses === "unnamed" ? "sem-nome" : "cnpj");
   const suffix = params.toString();
   return appUrl("/mapa") + (suffix ? "?" + suffix : "");
 }
