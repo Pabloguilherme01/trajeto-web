@@ -677,6 +677,22 @@ export default function Planner() {
   const destinationPageKey = JSON.stringify([deferredDestinationFilter.trim(), destinationCategory, destinationResource, destinationArea, originPrivate ? "" : origin, mode]);
   const destinationLimit = destinationPage?.key === destinationPageKey ? destinationPage.limit : 24;
   const displayedDestinations = availableDestinations.slice(0, destinationLimit);
+  const suggestedDestinations = useMemo(() => {
+    if (!destinationArea || deferredDestinationFilter.trim() || destinationResource === "prepared") return [];
+    // Prefer records with a traceable source, then fill without duplicating a category.
+    const picked: typeof availableDestinations = [];
+    const seen = new Set<string>();
+    for (const sourcedOnly of [true, false]) {
+      for (const item of availableDestinations) {
+        if (picked.length >= 3) break;
+        if (sourcedOnly && !item.sourceUrl) continue;
+        if (seen.has(item.category)) continue;
+        picked.push(item);
+        seen.add(item.category);
+      }
+    }
+    return picked;
+  }, [availableDestinations, destinationArea, deferredDestinationFilter, destinationResource]);
 
   const filteredSavedRoutes = useMemo(() => {
     const query = savedRouteQuery.trim().toLocaleLowerCase("pt-BR");
@@ -867,6 +883,17 @@ export default function Planner() {
                     <p className="mt-2 text-xs font-semibold text-muted-foreground" role="status" aria-live="polite" aria-busy={destinationSearchUpdating}>
                       {destinationSearchUpdating ? "Atualizando destinos…" : `${availableDestinations.length} destinos encontrados · ${displayedDestinations.length} exibidos`}
                     </p>
+                    {suggestedDestinations.length > 0 && <div className="mt-3 rounded-xl border border-primary/15 bg-primary/[.025] p-3">
+                      <p className="text-xs font-black text-foreground">Sugestões com região mencionada no cadastro</p>
+                      <div className="mt-2 flex flex-wrap gap-2">{suggestedDestinations.map(item =>
+                        <button key={item.id} type="button" onClick={() => {
+                          resetResult(); setDestination(item.destination); setShowAllDestinations(false);
+                          queueMicrotask(() => plannerFormRef.current?.querySelector<HTMLButtonElement>('button[type="submit"]')?.focus());
+                        }} className="min-h-11 max-w-full rounded-xl border border-primary/20 bg-card px-3 text-left text-xs font-bold text-primary">
+                          {item.label}
+                        </button>)}</div>
+                      <p className="mt-2 text-[11px] text-muted-foreground">São sugestões textuais do catálogo, não locais calculados como mais próximos.</p>
+                    </div>}
                     <div className="mt-3 grid max-h-[22rem] gap-2 overflow-y-auto pr-1 sm:grid-cols-2" tabIndex={0} role="region" aria-label="Lista de destinos disponíveis" aria-busy={destinationSearchUpdating}>
                       {displayedDestinations.map(item => (
                         <button key={item.id} type="button" onClick={() => { resetResult(); setDestination(item.destination); setShowAllDestinations(false); queueMicrotask(() => plannerFormRef.current?.querySelector<HTMLButtonElement>('button[type="submit"]')?.focus()); }} className="premium-card group flex min-h-[5.4rem] min-w-0 items-center gap-3 rounded-2xl border border-border/10 px-3 text-left transition-colors hover:border-accent/30 active:scale-[.99]">
