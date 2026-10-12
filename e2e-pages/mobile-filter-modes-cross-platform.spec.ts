@@ -4,6 +4,42 @@ import { expect, test } from "@playwright/test";
 // or involving the PWA worker. Offline installation has separate coverage.
 test.use({ serviceWorkers: "block" });
 
+test("Android/iOS: service previews follow category, saved scope and mode selection at 320px", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 740 });
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  await page.goto("servicos?q=anatel&categoria=telecom", { waitUntil: "domcontentloaded" });
+  const group = page.getByRole("group", { name: "Recursos disponíveis" });
+  const search = page.getByRole("textbox", { name: "Buscar serviços públicos" });
+  const online = group.getByRole("button", { name: "Resolver online" });
+  const all = group.getByRole("button", { name: "Ver tudo" });
+  const contact = group.getByRole("button", { name: "Ligar ou WhatsApp" });
+  const result = page.getByText(/^\d+ serviços encontrados/);
+  for (const mode of [online, contact, all]) {
+    await mode.click();
+    await expect(mode).toHaveAttribute("aria-pressed", "true");
+    await expect.poll(async () => parseInt(await mode.getByText(/^\d+ serviços?$/).innerText())
+      === parseInt(await result.innerText())).toBe(true);
+    await expect(search).toHaveValue("anatel");
+    expect(new URL(page.url()).searchParams.get("categoria")).toBe("telecom");
+  }
+  // A saved-only directory must not advertise unsaved records in any mode.
+  await page.goto("servicos?q=anatel&categoria=telecom&salvos=1", { waitUntil: "domcontentloaded" });
+  await expect(group.getByText("0 serviços", { exact: true })).toHaveCount(4);
+  await online.click();
+  await expect(result).toHaveText("0 serviços encontrados");
+  expect(new URL(page.url()).searchParams.get("salvos")).toBe("1");
+  await page.goto("servicos", { waitUntil: "domcontentloaded" });
+  await search.fill("zzzx-sem-servicos-2026");
+  await expect(group.getByText("0 serviços", { exact: true })).toHaveCount(4);
+  await contact.click();
+  await expect(result).toHaveText("0 serviços encontrados");
+  await search.fill("");
+  await expect(contact.getByText(/^[1-9][0-9]* serviços?$/)).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(321);
+  expect(errors).toEqual([]);
+});
+
 test("Android/iOS: mode previews match selection and keep search at 320px", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 740 });
   const errors: string[] = [];

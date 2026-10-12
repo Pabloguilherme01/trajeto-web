@@ -8,6 +8,21 @@ import PremiumFilterModeOption from "./PremiumFilterModeOption";
 afterEach(cleanup);
 
 describe("shared Premium filter option", () => {
+  it("exposes availability as an accessible description while retaining the action label", () => {
+    const { rerender } = render(<PremiumFilterModeOption layout="grid" ariaLabel="Resolver online"
+      label="Resolver online" detail="Serviços digitais" availability="5 serviços"
+      icon={MapPin} selected onSelect={() => undefined} />);
+    const button = screen.getByRole("button", { name: "Resolver online" });
+    const descriptionId = button.getAttribute("aria-describedby");
+    expect(descriptionId).toBeTruthy();
+    expect(document.getElementById(descriptionId!)?.textContent).toBe("5 serviços");
+    rerender(<PremiumFilterModeOption layout="grid" ariaLabel="Resolver online"
+      label="Resolver online" detail="Serviços digitais" availability="Atualizando"
+      icon={MapPin} selected onSelect={() => undefined} />);
+    expect(button.getAttribute("aria-describedby")).toBe(descriptionId);
+    expect(document.getElementById(descriptionId!)?.textContent).toBe("Atualizando");
+  });
+
   it("preserves a pressable rail mode and selected state", () => {
     const onSelect = vi.fn();
     const { rerender } = render(

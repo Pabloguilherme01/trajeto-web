@@ -5,7 +5,7 @@ import {
   type PublicService, type PublicServiceCategory,
 } from "./publicServices";
 import type { PublicServiceResourceFilter } from "./publicServiceListFilters";
-import { filterPublicServiceResults } from "./publicServiceListResults";
+import { countPublicServiceResources, filterPublicServiceCandidates, filterPublicServiceResults } from "./publicServiceListResults";
 
 function original({
   query, category, resource, savedOnly, favoriteIds, selectedService,
@@ -29,6 +29,27 @@ function original({
 }
 
 describe("official directory filter parity", () => {
+  it("previews every resource against the same search, category and saved scope", () => {
+    const favoriteIds = new Set(PUBLIC_SERVICES.filter((_, i) => i % 13 === 0).map(s => s.id));
+    const categories = ["todos", "saude", "educacao", "telecom"] as const;
+    const resources = ["todos", "contato", "rota", "online"] as const;
+    for (const query of ["", "upa", "anatel", "cpf", "zzzx-sem-servicos"]) {
+      for (const category of categories) for (const savedOnly of [false, true]) {
+        const services = searchPublicServices(query, category);
+        const idsBefore = services.map(s => s.id);
+        const counts = countPublicServiceResources(services, savedOnly, favoriteIds);
+        for (const resource of resources) {
+          const args = { query, category, resource, savedOnly, favoriteIds };
+          const candidates = filterPublicServiceCandidates(services, resource, savedOnly, favoriteIds);
+          expect(candidates.map(s => s.id)).toEqual(original(args).map(s => s.id));
+          expect(counts[resource]).toBe(candidates.length);
+          candidates.pop();
+        }
+        expect(services.map(s => s.id)).toEqual(idsBefore);
+      }
+    }
+  });
+
   it("keeps the exact original order across categories, resources, saved and text searches", () => {
     const favoriteIds = new Set(PUBLIC_SERVICES.filter((_, i) => i % 13 === 0).map(s => s.id));
     const categories: Array<PublicServiceCategory | "todos"> = [

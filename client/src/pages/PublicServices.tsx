@@ -46,7 +46,7 @@ import { useFilterRail } from "@/hooks/useFilterRail";
 import { cityMapLayerUrl, publicServiceMapLayer } from "@/lib/cityMapLayers";
 import { readPublicServiceListFilters, publicServiceListUrl, type PublicServiceResourceFilter } from "@/lib/publicServiceListFilters";
 import { phoneHref } from "@/lib/contactActions";
-import { filterPublicServiceResults } from "@/lib/publicServiceListResults";
+import { countPublicServiceResources, filterPublicServiceCandidates } from "@/lib/publicServiceListResults";
 import {
   buildOrganicMapsNavigationUrl,
   buildOrganicMapsSearchUrl,
@@ -65,6 +65,7 @@ import {
   PUBLIC_SERVICE_CATEGORIES,
   PUBLIC_SERVICE_SHORTCUTS,
   PUBLIC_SERVICES,
+  searchPublicServices,
   type PublicServiceCategory,
 } from "@/lib/publicServices";
 import { filterPublicServiceRoutes } from "@/lib/publicServiceRouteSearch";
@@ -262,9 +263,19 @@ export default function PublicServices() {
   const readyRouteLimit = readyRoutePage?.key === readyRoutePageKey ? readyRoutePage.limit : 12;
   const displayedReadyRoutes = visibleReadyRoutes.slice(0, readyRouteLimit);
 
-  const results = useMemo(() => filterPublicServiceResults({
-    query: deferredQuery, category, selectedService, savedOnly, favoriteIds, resource,
-  }), [deferredQuery, category, selectedService, savedOnly, favoriteIds, resource]);
+  // Text/category search is shared by previews and results. Switching modes
+  // or favorites does not repeat the search or copy its cached result.
+  const serviceCandidates = useMemo(
+    () => selectedService ? [selectedService] : searchPublicServices(deferredQuery, category),
+    [deferredQuery, category, selectedService],
+  );
+  const resourceModeCounts = useMemo(
+    () => countPublicServiceResources(serviceCandidates, savedOnly, favoriteIds),
+    [serviceCandidates, savedOnly, favoriteIds],
+  );
+  const results = useMemo(() => selectedService ? [selectedService]
+    : filterPublicServiceCandidates(serviceCandidates, resource, savedOnly, favoriteIds),
+  [serviceCandidates, selectedService, savedOnly, favoriteIds, resource]);
 
   // Every filter searches the complete catalog; mounting cards stays bounded.
   // Key pagination to the criteria so no delayed effect can undo Show more.
@@ -653,6 +664,8 @@ export default function PublicServices() {
           <PublicServiceCategoryQuickFilters category={category} onChange={applyCategory} />
           <PublicServiceResourceModes
             resource={resource}
+            modeCounts={resourceModeCounts}
+            updating={searchUpdating}
             onChange={next => {
               setResource(next);
               applyFilters(query, category, false, savedOnly, next);

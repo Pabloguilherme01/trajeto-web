@@ -2,6 +2,7 @@ import React from "react";
 import PremiumFilterModeOption from "@/components/PremiumFilterModeOption";
 import { Globe2, Phone, Route, SlidersHorizontal } from "lucide-react";
 import type { PublicServiceResourceFilter } from "@/lib/publicServiceListFilters";
+import type { PublicServiceResourceCounts } from "@/lib/publicServiceListResults";
 
 const modes = [
   { value: "todos", label: "Ver tudo", detail: "Todos os canais", icon: SlidersHorizontal },
@@ -13,9 +14,13 @@ const modes = [
 export default function PublicServiceResourceModes({
   resource,
   onChange,
+  modeCounts,
+  updating = false,
 }: {
   resource: PublicServiceResourceFilter;
   onChange: (next: PublicServiceResourceFilter) => void;
+  modeCounts?: PublicServiceResourceCounts;
+  updating?: boolean;
 }) {
   return (
     <div className="mb-3 min-w-0 rounded-[1.4rem] border border-primary/15 bg-primary/[.035] p-3 sm:p-4">
@@ -38,6 +43,10 @@ export default function PublicServiceResourceModes({
             ariaLabel={label}
             label={label}
             detail={detail}
+            availability={modeCounts
+              ? updating ? "Atualizando"
+                : `${modeCounts[value]} ${modeCounts[value] === 1 ? "serviço" : "serviços"}`
+              : undefined}
             icon={icon}
             selected={resource === value}
             onSelect={() => onChange(value)}
@@ -45,7 +54,7 @@ export default function PublicServiceResourceModes({
         ))}
       </div>
       <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-        Combine o modo com a categoria e a busca. A seleção mostra apenas os serviços com esse recurso disponível no cadastro.
+        As quantidades consideram sua busca, categoria e favoritos. Trocar o modo mantém esses filtros e mostra os serviços com esse recurso disponível no cadastro.
       </p>
     </div>
   );
