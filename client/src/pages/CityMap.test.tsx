@@ -414,3 +414,24 @@ it("toggles an active quick filter off while keeping its map layer selected", ()
   expect(url).not.toMatch(/lat=|lng=|origem=/);
 });
 
+
+
+it("separates unpositioned company records and restores the missing-location deep link", () => {
+  catalog.items = [
+    { id: "business-with-point", name: "Empresa teste com posição", category: "compras", detail: "Loja", destination: "Empresa teste com posição", sourceLabel: "Arquivo", lat: -15.77, lng: -48.28 },
+    { id: "business-no-point", name: "Empresa teste sem posição", category: "compras", detail: "Loja", destination: "Empresa teste sem posição", sourceLabel: "Arquivo" },
+  ];
+  mapSearch.value = "?camada=compras&q=Empresa+teste&coordenadas=0";
+  render(<CityMap />);
+  const modes = within(screen.getByRole("group", { name: "Recursos dos destinos" }));
+  expect(modes.getByRole("button", { name: "Sem coordenadas" }).getAttribute("aria-pressed")).toBe("true");
+  expect(screen.getByText("Empresa teste sem posição", { selector: "article p" })).toBeTruthy();
+  expect(screen.queryByText("Empresa teste com posição", { selector: "article p" })).toBeNull();
+  expect(screen.getByText(/não geram marcadores ou rotas locais garantidas/)).toBeTruthy();
+  fireEvent.click(modes.getByRole("button", { name: "Com coordenadas" }));
+  expect(screen.getByText("Empresa teste com posição", { selector: "article p" })).toBeTruthy();
+  expect(screen.queryByText("Empresa teste sem posição", { selector: "article p" })).toBeNull();
+  expect(navigate).toHaveBeenLastCalledWith(expect.stringContaining("coordenadas=1"), { replace: true });
+  fireEvent.click(screen.getByRole("button", { name: "Limpar todos os filtros do mapa" }));
+  expect(navigate).toHaveBeenLastCalledWith(expect.stringMatching(/\/mapa$/), { replace: true });
+});
