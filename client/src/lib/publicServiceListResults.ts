@@ -2,6 +2,27 @@ import { publicServiceHasContacts } from "./publicServiceContactCache";
 import { searchPublicServices, type PublicService, type PublicServiceCategory } from "./publicServices";
 import type { PublicServiceResourceFilter } from "./publicServiceListFilters";
 
+export type PublicServiceResourceCounts = Record<PublicServiceResourceFilter, number>;
+
+/** Prepare mode results together; switching modes reuses these ordered lists. */
+export function preparePublicServiceResourceModes(services: readonly PublicService[]) {
+  const results: Record<PublicServiceResourceFilter, PublicService[]> = {
+    todos: services.slice(), contato: [], rota: [], online: [],
+  };
+  // The input already includes text, category, favorites and their ordering.
+  // No second search, text index, sorting or contact parsing is needed.
+  for (const service of services) {
+    if (publicServiceHasContacts(service)) results.contato.push(service);
+    if (service.mapQuery) results.rota.push(service);
+    if (service.actionUrl) results.online.push(service);
+  }
+  const counts: PublicServiceResourceCounts = {
+    todos: results.todos.length, contato: results.contato.length,
+    rota: results.rota.length, online: results.online.length,
+  };
+  return { results, counts };
+}
+
 export function filterPublicServiceResults({
   query,
   category,

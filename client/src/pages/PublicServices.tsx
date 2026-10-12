@@ -46,7 +46,7 @@ import { useFilterRail } from "@/hooks/useFilterRail";
 import { cityMapLayerUrl, publicServiceMapLayer } from "@/lib/cityMapLayers";
 import { readPublicServiceListFilters, publicServiceListUrl, type PublicServiceResourceFilter } from "@/lib/publicServiceListFilters";
 import { phoneHref } from "@/lib/contactActions";
-import { filterPublicServiceResults } from "@/lib/publicServiceListResults";
+import { filterPublicServiceResults, preparePublicServiceResourceModes } from "@/lib/publicServiceListResults";
 import {
   buildOrganicMapsNavigationUrl,
   buildOrganicMapsSearchUrl,
@@ -262,9 +262,16 @@ export default function PublicServices() {
   const readyRouteLimit = readyRoutePage?.key === readyRoutePageKey ? readyRoutePage.limit : 12;
   const displayedReadyRoutes = visibleReadyRoutes.slice(0, readyRouteLimit);
 
-  const results = useMemo(() => filterPublicServiceResults({
-    query: deferredQuery, category, selectedService, savedOnly, favoriteIds, resource,
-  }), [deferredQuery, category, selectedService, savedOnly, favoriteIds, resource]);
+  // Resource switches reuse search, category and favorite ordering. Prepare
+  // all four lists in one pass so their previews describe the exact outcome.
+  const directoryResults = useMemo(() => filterPublicServiceResults({
+    query: deferredQuery, category, selectedService, savedOnly, favoriteIds, resource: "todos",
+  }), [deferredQuery, category, selectedService, savedOnly, favoriteIds]);
+  const resourceModes = useMemo(
+    () => preparePublicServiceResourceModes(directoryResults), [directoryResults],
+  );
+  // A valid deep link always keeps its service visible, regardless of mode.
+  const results = selectedService ? directoryResults : resourceModes.results[resource];
 
   // Every filter searches the complete catalog; mounting cards stays bounded.
   // Key pagination to the criteria so no delayed effect can undo Show more.
@@ -653,6 +660,8 @@ export default function PublicServices() {
           <PublicServiceCategoryQuickFilters category={category} onChange={applyCategory} />
           <PublicServiceResourceModes
             resource={resource}
+            modeCounts={selectedService ? undefined : resourceModes.counts}
+            updating={searchUpdating}
             onChange={next => {
               setResource(next);
               applyFilters(query, category, false, savedOnly, next);

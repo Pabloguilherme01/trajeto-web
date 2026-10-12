@@ -7,6 +7,22 @@ import PublicServiceResourceModes from "./PublicServiceResourceModes";
 afterEach(cleanup);
 
 describe("premium modes in the public services directory", () => {
+  it("shows each mode's result preview including zero and singular counts", () => {
+    const props = { resource: "todos" as const, onChange: vi.fn(), modeCounts: { todos: 3, contato: 1, rota: 0, online: 2 } };
+    const { rerender } = render(<PublicServiceResourceModes {...props} />);
+    const group = screen.getByRole("group", { name: "Recursos disponíveis" });
+    expect(within(within(group).getByRole("button", { name: "Ver tudo" })).getByText("3 serviços")).toBeTruthy();
+    expect(within(within(group).getByRole("button", { name: "Ligar ou WhatsApp" })).getByText("1 serviço")).toBeTruthy();
+    const route = within(group).getByRole("button", { name: "Ir até o local" });
+    expect(within(route).getByText("0 serviços")).toBeTruthy();
+    expect(route.getAttribute("aria-describedby")).toBe(within(route).getByText("0 serviços").id);
+    fireEvent.click(route);
+    expect(props.onChange).toHaveBeenCalledWith("rota");
+    rerender(<PublicServiceResourceModes {...props} updating />);
+    expect(within(group).getAllByText("Atualizando")).toHaveLength(4);
+    expect(within(group).queryByText("3 serviços")).toBeNull();
+  });
+
   it("shows all four resources visibly with accessible pressed states at phone widths", () => {
     const onChange = vi.fn();
     const { rerender } = render(<PublicServiceResourceModes resource="todos" onChange={onChange} />);
