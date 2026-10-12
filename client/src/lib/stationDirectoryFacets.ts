@@ -1,5 +1,5 @@
 import { normalizeCatalogText } from "./catalogSearch";
-import { stationCoordinatePoint } from "./stationListControls";
+import { stationCoordinateWithFallback } from "./stationListControls";
 
 type StationFacetSource = {
   local?: {
@@ -72,10 +72,7 @@ export function buildStationDirectoryFacets<T extends StationFacetSource>(cards:
     const brand = normalizeLabel(brandLabel);
     if (neighborhood && !neighborhoodLabels.has(neighborhood)) neighborhoodLabels.set(neighborhood, neighborhoodLabel);
     if (brand && !brandLabels.has(brand)) brandLabels.set(brand, brandLabel);
-    const point = stationCoordinatePoint(
-      card.anp?.latitude ?? card.local?.anp?.latitude,
-      card.anp?.longitude ?? card.local?.anp?.longitude,
-    );
+    const point = stationCoordinateWithFallback(card.anp, card.local?.anp);
     byCard.set(card, {
       neighborhood,
       brand,

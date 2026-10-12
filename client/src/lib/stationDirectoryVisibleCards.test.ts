@@ -13,10 +13,8 @@ type Saved = { placeId: string };
 
 function previous(cards: Card[], max: number, location: {lat:number;lng:number}|null, saved: Saved[]) {
   return cards.slice(0, max).map((item, i) => {
-    const point = stationCoordinatePoint(
-      item.anp?.latitude ?? item.local?.anp?.latitude,
-      item.anp?.longitude ?? item.local?.anp?.longitude,
-    );
+    const point = stationCoordinatePoint(item.anp?.latitude, item.anp?.longitude)
+      ?? stationCoordinatePoint(item.local?.anp?.latitude, item.local?.anp?.longitude);
     return {
       item,
       index: i + 1,
@@ -45,6 +43,20 @@ describe("station directory visible card presentation", () => {
       }
     }
     expect(cards).toEqual(source);
+  });
+
+  it("keeps local route distance and saved action when official coordinates are invalid", () => {
+    const mapped: Card = {
+      key: "mapped",
+      anp: { latitude: 0, longitude: 0 },
+      local: { anp: { latitude: -15.79, longitude: -48.28 } },
+    };
+    const result = prepareVisibleStationDirectoryCards(
+      [mapped], 1, { lat: -15.79, lng: -48.28 }, new Set(["aguas-lindas:mapped"]),
+    )[0];
+    expect(result.saved).toBe(true);
+    expect(result.point).toEqual({ lat: -15.79, lng: -48.28 });
+    expect(result.distance).toBe(0);
   });
 
   it("changes favorites and origins without mutating source rows", () => {

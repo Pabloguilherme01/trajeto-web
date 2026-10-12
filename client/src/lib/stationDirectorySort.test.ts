@@ -29,10 +29,9 @@ function previousSort(
   return items.slice().sort((a, b) => {
     const label = (item: Station) => item.local?.displayName || item.anp?.razaoSocial || "";
     if (sort === "distance" && coords) {
-      const point = (item: Station) => stationCoordinatePoint(
-        item.anp?.latitude ?? item.local?.anp?.latitude,
-        item.anp?.longitude ?? item.local?.anp?.longitude,
-      );
+      const point = (item: Station) =>
+        stationCoordinatePoint(item.anp?.latitude, item.anp?.longitude)
+          ?? stationCoordinatePoint(item.local?.anp?.latitude, item.local?.anp?.longitude);
       const aa = point(a), bb = point(b);
       const da = aa ? distanceKm(coords, aa) : Number.POSITIVE_INFINITY;
       const db = bb ? distanceKm(coords, bb) : Number.POSITIVE_INFINITY;
@@ -131,6 +130,20 @@ describe("station directory precomputed sorting", () => {
     expect(sortStationDirectoryRows(
       [declared, observed], "brand", null, "all", new Map(),
     ).map(item => item.key)).toEqual(["observed", "declared"]);
+  });
+
+  it("sorts by a valid local point when the ANP coordinate is 0,0", () => {
+    const near: Station = {
+      key: "near", local: { displayName: "Perto", brand: null, anp: { latitude: -15.79, longitude: -48.28 } },
+      anp: { razaoSocial: "Perto", distribuidora: null, latitude: 0, longitude: 0 },
+    };
+    const far: Station = {
+      key: "far", local: null,
+      anp: { razaoSocial: "Longe", distribuidora: null, latitude: -15.85, longitude: -48.35 },
+    };
+    expect(sortStationDirectoryRows(
+      [far, near], "distance", { lat: -15.79, lng: -48.28 }, "all", new Map(),
+    ).map(row => row.key)).toEqual(["near", "far"]);
   });
 
   it("does not invent missing prices or coordinates and preserves input object identity", () => {
