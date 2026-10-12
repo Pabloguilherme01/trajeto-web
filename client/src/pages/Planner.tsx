@@ -7,6 +7,8 @@ import ReadyRouteShortcuts from "@/components/ReadyRouteShortcuts";
 import OfflineReadiness from "@/components/OfflineReadiness";
 import RoutePublicServiceCard from "@/components/RoutePublicServiceCard";
 import QuickFilterChips from "@/components/QuickFilterChips";
+import DestinationResourceModes from "@/components/DestinationResourceModes";
+import { preparePlannerDestinationResources, type PlannerDestinationResource } from "@/lib/plannerDestinationResources";
 import { DestinationActions } from "@/components/DestinationActions";
 import { ArrowLeftRight, Bike, Bookmark, Bus, Car, CheckCircle2, ChevronDown, ExternalLink, Fuel, Loader2, LocateFixed, Map, Navigation, PersonStanding, RefreshCw, Route as RouteIcon, Share2, Trash2, Wifi, WifiOff } from "lucide-react";
 import { useDeferredValue, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
@@ -132,6 +134,7 @@ export default function Planner() {
   const destinationSearchUpdating = destinationFilter !== deferredDestinationFilter;
   const [destinationPage, setDestinationPage] = useState<{ key: string; limit: number } | null>(null);
   const [destinationCategory, setDestinationCategory] = useState<RouteDestinationCategoryFilter>("todos");
+  const [destinationResource, setDestinationResource] = useState<PlannerDestinationResource>("all");
   const { railRef: destinationCategoryRailRef, onFocusCapture: onDestinationCategoryFocus } =
     useFilterRail(destinationCategory, PLANNER_DESTINATION_FILTERS);
   const [savedStations, setSavedStations] = useState<MobileStation[]>(listMobileStationFavorites);
@@ -658,14 +661,15 @@ export default function Planner() {
   };
 
   const destinationCount = useMemo(() => getLocalRoutePresets().length, []);
-  const availableDestinations = useMemo(
-    () => getLocalRoutePresets(deferredDestinationFilter, destinationCategory),
-    [deferredDestinationFilter, destinationCategory]
+  const destinationResources = useMemo(
+    () => showAllDestinations ? preparePlannerDestinationResources(deferredDestinationFilter, destinationCategory) : null,
+    [showAllDestinations, deferredDestinationFilter, destinationCategory]
   );
+  const availableDestinations = destinationResources?.results[destinationResource] ?? [];
   // Filtering always covers the complete catalog. Only render the first page
   // of cards until the user requests more; reset the visible window whenever
   // the search text or selected category changes.
-  const destinationPageKey = JSON.stringify([deferredDestinationFilter.trim(), destinationCategory]);
+  const destinationPageKey = JSON.stringify([deferredDestinationFilter.trim(), destinationCategory, destinationResource]);
   const destinationLimit = destinationPage?.key === destinationPageKey ? destinationPage.limit : 24;
   const displayedDestinations = availableDestinations.slice(0, destinationLimit);
 
@@ -829,11 +833,13 @@ export default function Planner() {
               <details open={showAllDestinations} className="mobile-disclosure mt-3"><summary>Destinos e atalhos <ChevronDown className="size-4" /></summary>
               <div className="mt-3">
                 <button type="button" onClick={() => setShowAllDestinations(value => !value)} aria-expanded={showAllDestinations} aria-controls="all-destinations-panel" className="flex min-h-11 w-full items-center justify-between rounded-xl border border-accent/15 bg-accent/[.04] px-3 text-left">
-                  <span><span className="block text-xs font-black uppercase tracking-[.12em] text-accent">Destinos disponíveis</span><span className="mt-0.5 block text-xs font-bold text-foreground/75">Todos os {destinationCount} destinos locais, lojas e referências, por categoria</span></span>
+                  <span><span className="block text-xs font-black uppercase tracking-[.12em] text-accent">Destinos disponíveis</span><span className="mt-0.5 block text-xs font-bold text-foreground/75">{destinationCount} lugares locais, mais ruas e avenidas no modo de referências</span></span>
                   <ChevronDown className={"size-4 text-accent transition-transform " + (showAllDestinations ? "rotate-180" : "")} />
                 </button>
                 {showAllDestinations && (
                   <div id="all-destinations-panel" className="premium-card mt-2 rounded-2xl border border-border/10 bg-card p-3">
+                    {destinationResources && <DestinationResourceModes value={destinationResource} counts={destinationResources.counts}
+                      onChange={setDestinationResource} streets updating={destinationSearchUpdating} />}
                     <div ref={destinationCategoryRailRef} onFocusCapture={onDestinationCategoryFocus}
                       className="mobile-scroll-x flex max-w-full gap-2 overflow-x-auto pb-1"
                       role="group" aria-label="Categorias dos destinos"
@@ -859,6 +865,7 @@ export default function Planner() {
                               <span className="rounded-full border border-border/15 bg-muted/[.04] px-1.5 py-0.5 text-[0.6rem] font-black uppercase tracking-[.07em] text-primary">{destinationCategoryLabel[item.category]}</span>
                             </span>
                             <span className="mt-1 block line-clamp-2 text-xs leading-relaxed text-muted-foreground">{item.detail}</span>
+                            {item.sourceLabel && <span className="mt-1 block text-[11px] leading-relaxed text-muted-foreground">Fonte: {item.sourceLabel}</span>}
                           </span>
                           <span className="shrink-0 rounded-full bg-primary/10 px-2 py-1 text-[0.65rem] font-black uppercase tracking-[.08em] text-primary">Escolher</span>
                         </button>

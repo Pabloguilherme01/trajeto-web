@@ -6,6 +6,10 @@ import {
 } from "./localRoutePresets";
 
 describe("local route presets", () => {
+  it("classifies derived health services in their actual destination category", () => {
+    expect(getLocalRoutePresets("Barragem V", "saude").some(item => item.id === "esf-barragem-v")).toBe(true);
+    expect(getLocalRoutePresets("Barragem V", "servicos").some(item => item.id === "esf-barragem-v")).toBe(false);
+  });
   it("does not offer an unverified local Saneago destination in the planner", () => {
     expect(getLocalRoutePresets("Saneago")).toEqual([]);
     expect(
