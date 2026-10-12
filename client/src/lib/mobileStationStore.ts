@@ -67,19 +67,25 @@ export type StationCache = {
 
 // Storage is shared with other tabs. Reuse parsed records only while the
 // serialized snapshot is byte-for-byte unchanged; no stale values or TTLs.
-let stationCacheSnapshot: { raw: string | null; entries: readonly StationCache[] } | null = null;
+type PreparedStationCache = { entry: StationCache; savedAtMs: number; stations: MobileStation[] };
+type StationCacheSnapshot = {
+  raw: string | null;
+  entries: readonly StationCache[];
+  byQuery: Map<string, Map<string, PreparedStationCache>> | null;
+};
+let stationCacheSnapshot: StationCacheSnapshot | null = null;
 
-function readStationCacheRecords(): readonly StationCache[] {
+function readStationCacheRecords(): StationCacheSnapshot | null {
   let raw: string | null;
   try {
     raw = localStorage.getItem(CACHE_KEY);
   } catch {
     // Storage access may fail (e.g. privacy mode); never reuse older results.
     stationCacheSnapshot = null;
-    return [];
+    return null;
   }
   if (stationCacheSnapshot && stationCacheSnapshot.raw === raw) {
-    return stationCacheSnapshot.entries;
+    return stationCacheSnapshot;
   }
   let entries: StationCache[] = [];
   try {
@@ -88,34 +94,60 @@ function readStationCacheRecords(): readonly StationCache[] {
   } catch {
     // Even a malformed snapshot should only be parsed once until it changes.
   }
-  stationCacheSnapshot = { raw, entries };
-  return entries;
+  stationCacheSnapshot = { raw, entries, byQuery: null };
+  return stationCacheSnapshot;
+}
+
+function cacheLocationKey(lat?: number, lng?: number) {
+  return lat != null && lng != null ? `${lat.toFixed(4)},${lng.toFixed(4)}` : "";
+}
+
+/** Prepare only on a cache read; writes keep their original records intact. */
+function prepareStationCacheLookup(snapshot: StationCacheSnapshot) {
+  if (snapshot.byQuery) return snapshot.byQuery;
+  const byQuery = new Map<string, Map<string, PreparedStationCache>>();
+  for (const entry of snapshot.entries) {
+    const query = entry.query.trim().toLocaleLowerCase("pt-BR");
+    let locations = byQuery.get(query);
+    if (!locations) {
+      locations = new Map();
+      byQuery.set(query, locations);
+    }
+    const location = cacheLocationKey(entry.lat, entry.lng);
+    // Preserve the first record chosen by the former Array.find lookup.
+    if (locations.has(location)) continue;
+    locations.set(location, {
+      entry,
+      savedAtMs: Date.parse(entry.savedAt),
+      stations: entry.stations.filter(isMobileStation).slice(0, MAX_CACHED),
+    });
+  }
+  snapshot.byQuery = byQuery;
+  return byQuery;
 }
 
 export function getCachedStations(query: string, lat?: number, lng?: number): StationCache | null {
-  const all = readStationCacheRecords();
+  const snapshot = readStationCacheRecords();
+  if (!snapshot) return null;
   const normalized = query.trim().toLocaleLowerCase("pt-BR");
-  const locationKey = lat != null && lng != null ? `${lat.toFixed(4)},${lng.toFixed(4)}` : "";
-  const match = all.find(item =>
-    item.query.trim().toLocaleLowerCase("pt-BR") === normalized &&
-    (locationKey === "" ? item.lat == null && item.lng == null : item.lat != null && item.lng != null && `${item.lat.toFixed(4)},${item.lng.toFixed(4)}` === locationKey)
-  );
+  const match = prepareStationCacheLookup(snapshot).get(normalized)?.get(cacheLocationKey(lat, lng));
   if (!match) return null;
-  const age = Date.now() - Date.parse(match.savedAt);
+  // Retention remains a live check, even when the stored bytes do not change.
+  const age = Date.now() - match.savedAtMs;
   if (!Number.isFinite(age) || age < -300000 || age > CACHE_RETENTION_MS) return null;
-  return { ...match, stations: match.stations.filter(isMobileStation).slice(0, MAX_CACHED) };
+  return { ...match.entry, stations: match.stations.slice() };
 }
 
 export function cacheStations(query: string, stations: MobileStation[], lat?: number, lng?: number) {
   const validStations = stations.filter(isMobileStation);
   if (validStations.length === 0) return;
-  const current = readStationCacheRecords();
+  const current = readStationCacheRecords()?.entries ?? [];
   const normalized = query.trim().toLocaleLowerCase("pt-BR");
-  const locationKey = lat != null && lng != null ? `${lat.toFixed(4)},${lng.toFixed(4)}` : "";
+  const locationKey = cacheLocationKey(lat, lng);
   const next = [
     { query: query.trim(), lat, lng, savedAt: new Date().toISOString(), stations: validStations.slice(0, MAX_CACHED) },
     ...current.filter(item => {
-      const itemLocation = item.lat != null && item.lng != null ? `${item.lat.toFixed(4)},${item.lng.toFixed(4)}` : "";
+      const itemLocation = cacheLocationKey(item.lat, item.lng);
       return !(item.query.trim().toLocaleLowerCase("pt-BR") === normalized && itemLocation === locationKey);
     }),
   ].slice(0, 5);
