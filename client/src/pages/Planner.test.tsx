@@ -636,3 +636,15 @@ it("combines municipal sector refinements with local prepared-route mode without
   fireEvent.click(screen.getByRole("button", { name: "Ver todas as regiões" }));
   expect(selector.value).toBe("");
 });
+
+it("shows sourced neighborhood names in the planner without presenting them as verified street endpoints", () => {
+  state.search = "destinos=1";
+  render(<Planner />);
+  const modes = within(screen.getByRole("group", { name: "Recursos dos destinos" }));
+  fireEvent.click(modes.getByRole("button", { name: "Bairros e setores" }));
+  const picker = screen.getByRole("textbox", { name: "Filtrar todos os destinos disponíveis" });
+  fireEvent.change(picker, { target: { value: "Jardim Brasília" } });
+  const region = within(screen.getByRole("region", { name: "Lista de destinos disponíveis" }));
+  expect(region.getByText("Jardim Brasília")).toBeTruthy();
+  expect(region.getByText(/sem ponto de chegada verificado/)).toBeTruthy();
+});
