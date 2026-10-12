@@ -35,7 +35,7 @@ export default function DestinationReferenceInfo(item: Props) {
         : item.sourceLabel}</p>}
       {item.verifiedAt && <p>Registro verificado em: <time dateTime={item.verifiedAt}>{item.verifiedAt}</time></p>}
       {positioned && <p className="break-words">
-        {item.coordinateKind === "street-midpoint" ? "Centro aproximado da via" : "Coordenadas cadastradas"}: {item.lat!.toFixed(5)}, {item.lng!.toFixed(5)}
+        Coordenadas: {item.lat!.toFixed(5)}, {item.lng!.toFixed(5)}
       </p>}
       {positioned && item.coordinateVerifiedAt && <p>Posição verificada em: <time dateTime={item.coordinateVerifiedAt}>{item.coordinateVerifiedAt}</time></p>}
     </div>

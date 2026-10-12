@@ -10,8 +10,9 @@ it("distinguishes approximate street points from verified record dates", () => {
     coordinateKind="street-midpoint" sourceLabel="OpenStreetMap" sourceUrl="https://www.openstreetmap.org/copyright"
     verifiedAt="2026-10-02" coordinateVerifiedAt="2026-09-30" />);
   expect(screen.getByText("Centro aproximado da via", { exact: true })).toBeTruthy();
+  expect(screen.getAllByText(/Centro aproximado da via/)).toHaveLength(1);
   expect(screen.getByRole("link", { name: "Fonte de Rua 1: OpenStreetMap" })).toBeTruthy();
-  expect(screen.getByText(/Centro aproximado da via: -15.73723, -48.28041/)).toBeTruthy();
+  expect(screen.getByText(/Coordenadas: -15.73723, -48.28041/)).toBeTruthy();
   expect(screen.getByText("2026-10-02").getAttribute("datetime")).toBe("2026-10-02");
   expect(screen.getByText("2026-09-30").getAttribute("datetime")).toBe("2026-09-30");
   expect(screen.queryByText("Posição cadastrada", { exact: true })).toBeNull();
@@ -20,7 +21,7 @@ it("distinguishes approximate street points from verified record dates", () => {
 it.each([[0, 0], [NaN, -48.2], [-23.55, -46.63]])("does not present invalid or outside-city positions as map coordinates", (lat, lng) => {
   render(<DestinationReferenceInfo name="Serviço" category="saude" lat={lat} lng={lng} coordinateVerifiedAt="2026-10-02" />);
   expect(screen.getByText("Endereço sem coordenadas", { exact: true })).toBeTruthy();
-  expect(screen.queryByText(/Coordenadas cadastradas:/)).toBeNull();
+  expect(screen.queryByText(/Coordenadas:/)).toBeNull();
   expect(screen.queryByText(/Posição verificada em:/)).toBeNull();
 });
 
