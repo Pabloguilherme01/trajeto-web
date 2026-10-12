@@ -127,7 +127,6 @@ test("planner searches do not submit a trip and selecting a destination retains 
   await localSearch.fill("HEAL");
   await localSearch.press("Enter");
   await assertUnsubmitted();
-  await page.getByText("Destinos e atalhos", { exact: true }).click();
   await page.getByText(/trajetos prontos pela cidade/).click();
   const readySearch = page.getByRole("searchbox", { name: "Buscar trajeto" });
   await readySearch.fill("HEAL");
