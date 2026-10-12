@@ -74,6 +74,8 @@ type StationCacheSnapshot = {
   byQuery: Map<string, Map<string, PreparedStationCache>> | null;
 };
 let stationCacheSnapshot: StationCacheSnapshot | null = null;
+// A device's search origin is session-only; never persist its coordinates.
+const sessionLocationCache = new Map<string, PreparedStationCache>();
 
 function readStationCacheRecords(): StationCacheSnapshot | null {
   let raw: string | null;
@@ -90,7 +92,18 @@ function readStationCacheRecords(): StationCacheSnapshot | null {
   let entries: StationCache[] = [];
   try {
     const decoded: unknown = raw ? JSON.parse(raw) : null;
-    entries = Array.isArray(decoded) ? decoded.filter(isStationCache) : [];
+    const valid = Array.isArray(decoded) ? decoded.filter(isStationCache) : [];
+    entries = valid.filter(entry => entry.lat == null && entry.lng == null);
+    // Earlier releases persisted a device's search centre. Clear those records
+    // on the first read, preserving generic public-station offline snapshots.
+    if (entries.length !== valid.length) {
+      try {
+        raw = JSON.stringify(entries);
+        localStorage.setItem(CACHE_KEY, raw);
+      } catch {
+        // Privacy-safe view is still enforced even if storage is blocked.
+      }
+    }
   } catch {
     // Even a malformed snapshot should only be parsed once until it changes.
   }
@@ -127,10 +140,16 @@ function prepareStationCacheLookup(snapshot: StationCacheSnapshot) {
 }
 
 export function getCachedStations(query: string, lat?: number, lng?: number): StationCache | null {
-  const snapshot = readStationCacheRecords();
-  if (!snapshot) return null;
   const normalized = query.trim().toLocaleLowerCase("pt-BR");
-  const match = prepareStationCacheLookup(snapshot).get(normalized)?.get(cacheLocationKey(lat, lng));
+  let match: PreparedStationCache | undefined;
+  if (lat != null || lng != null) {
+    if (!validCoordinate(lat, 90) || !validCoordinate(lng, 180)) return null;
+    match = sessionLocationCache.get(`${normalized}:${cacheLocationKey(lat, lng)}`);
+  } else {
+    const snapshot = readStationCacheRecords();
+    if (!snapshot) return null;
+    match = prepareStationCacheLookup(snapshot).get(normalized)?.get("");
+  }
   if (!match) return null;
   // Retention remains a live check, even when the stored bytes do not change.
   const age = Date.now() - match.savedAtMs;
@@ -141,16 +160,18 @@ export function getCachedStations(query: string, lat?: number, lng?: number): St
 export function cacheStations(query: string, stations: MobileStation[], lat?: number, lng?: number) {
   const validStations = stations.filter(isMobileStation);
   if (validStations.length === 0) return;
-  const current = readStationCacheRecords()?.entries ?? [];
   const normalized = query.trim().toLocaleLowerCase("pt-BR");
-  const locationKey = cacheLocationKey(lat, lng);
-  const next = [
-    { query: query.trim(), lat, lng, savedAt: new Date().toISOString(), stations: validStations.slice(0, MAX_CACHED) },
-    ...current.filter(item => {
-      const itemLocation = cacheLocationKey(item.lat, item.lng);
-      return !(item.query.trim().toLocaleLowerCase("pt-BR") === normalized && itemLocation === locationKey);
-    }),
-  ].slice(0, 5);
+  const entry: StationCache = { query: query.trim(), savedAt: new Date().toISOString(), stations: validStations.slice(0, MAX_CACHED) };
+  if (lat != null || lng != null) {
+    if (!validCoordinate(lat, 90) || !validCoordinate(lng, 180)) return;
+    const key = `${normalized}:${cacheLocationKey(lat, lng)}`;
+    sessionLocationCache.delete(key);
+    sessionLocationCache.set(key, { entry, savedAtMs: Date.parse(entry.savedAt), stations: entry.stations });
+    if (sessionLocationCache.size > 5) sessionLocationCache.delete(sessionLocationCache.keys().next().value!);
+    return;
+  }
+  const current = readStationCacheRecords()?.entries ?? [];
+  const next = [entry, ...current.filter(item => item.query.trim().toLocaleLowerCase("pt-BR") !== normalized)].slice(0, 5);
   try { localStorage.setItem(CACHE_KEY, JSON.stringify(next)); } catch {}
 }
 
