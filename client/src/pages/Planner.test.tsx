@@ -648,3 +648,31 @@ it("shows sourced neighborhood names in the planner without presenting them as v
   expect(region.getByText("Jardim Brasília")).toBeTruthy();
   expect(region.getByText(/sem ponto de chegada verificado/)).toBeTruthy();
 });
+
+it("opens the catalog with one button and clears only catalog refinements, keeping the planned trip", () => {
+  state.search = "origem=Casa&destino=Trabalho";
+  render(<Planner />);
+  const toggle = screen.getByRole("button", { name: /Destinos disponíveis/ });
+  expect(toggle.getAttribute("aria-expanded")).toBe("false");
+  fireEvent.click(toggle);
+  expect(toggle.getAttribute("aria-expanded")).toBe("true");
+  const picker = screen.getByRole("combobox", { name: "Filtrar destinos por bairro ou setor" });
+  fireEvent.change(picker, { target: { value: "bairro-jardim-brasilia" } });
+  const modes = within(screen.getByRole("group", { name: "Recursos dos destinos" }));
+  fireEvent.click(modes.getByRole("button", { name: "Bairros e setores" }));
+  const textbox = screen.getByRole("textbox", { name: "Filtrar todos os destinos disponíveis" });
+  fireEvent.change(textbox, { target: { value: "BuscaTeste" } });
+  const filters = within(screen.getByRole("group", { name: "Filtros ativos dos destinos" }));
+  expect(filters.getByText("3 filtros ativos")).toBeTruthy();
+  fireEvent.click(filters.getByRole("button", { name: "Remover filtro: Bairro: Jardim Brasília" }));
+  expect((picker as HTMLSelectElement).value).toBe("");
+  expect((textbox as HTMLInputElement).value).toBe("BuscaTeste");
+  fireEvent.click(filters.getByRole("button", { name: "Limpar todos os refinamentos" }));
+  expect((textbox as HTMLInputElement).value).toBe("");
+  expect(modes.getByRole("button", { name: "Todos os destinos" }).getAttribute("aria-pressed")).toBe("true");
+  expect((screen.getByPlaceholderText("De onde você sai") as HTMLInputElement).value).toBe("Casa");
+  expect((screen.getByPlaceholderText("Para onde você vai") as HTMLInputElement).value).toBe("Trabalho");
+  fireEvent.click(toggle);
+  expect(toggle.getAttribute("aria-expanded")).toBe("false");
+  expect(screen.queryByRole("group", { name: "Filtros ativos dos destinos" })).toBeNull();
+});

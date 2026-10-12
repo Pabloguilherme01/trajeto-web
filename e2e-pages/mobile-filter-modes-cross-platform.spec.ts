@@ -4,6 +4,61 @@ import { expect, test } from "@playwright/test";
 // or involving the PWA worker. Offline installation has separate coverage.
 test.use({ serviceWorkers: "block" });
 
+test("Android/iOS: compact planner catalog opens once and empty filters recover without erasing the trip", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 740 });
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  await page.goto("planejar?origem=Casa&destino=Trabalho", { waitUntil: "domcontentloaded" });
+  const toggle = page.getByRole("button", { name: /Destinos disponíveis/ });
+  await expect(toggle).toBeVisible();
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+  const region = page.getByRole("region", { name: "Lista de destinos disponíveis" });
+  const search = page.getByRole("textbox", { name: "Filtrar todos os destinos disponíveis" });
+  await search.fill("zzzx-inexistente-2026");
+  await expect(region.getByText("Nenhum destino corresponde ao filtro.")).toBeVisible();
+  await expect(region.getByRole("button")).toHaveCount(0);
+  await page.getByRole("group", { name: "Ações para recuperar destinos" }).getByRole("button", { name: "Ver todos os destinos" }).click();
+  await expect(search).toHaveValue("");
+  await expect(page.getByPlaceholder("De onde você sai")).toHaveValue("Casa");
+  await expect(page.getByPlaceholder("Para onde você vai")).toHaveValue("Trabalho");
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(321);
+  expect(errors).toEqual([]);
+});
+
+test("Android/iOS: named companies and CNPJ consultation preserve query and return to the map at 320px", async ({ page, context }) => {
+  test.setTimeout(120_000);
+  await page.setViewportSize({ width: 320, height: 740 });
+  await page.goto("mapa?q=42.115.689/0001-40&empresas=nome", { waitUntil: "domcontentloaded" });
+  const identity = page.getByRole("group", { name: "Identificação das empresas" });
+  const amag = page.getByRole("article").filter({ has: page.getByText("AMAG", { exact: true }) });
+  await expect(identity.getByRole("button", { name: "Empresas com nome", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(amag).toBeVisible({ timeout: 60000 });
+  await page.reload();
+  await expect(identity.getByRole("button", { name: "Empresas com nome", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(amag).toBeVisible({ timeout: 60000 });
+  await context.setOffline(true);
+  await identity.getByRole("button", { name: "Consultar CNPJ", exact: true }).click();
+  await expect(page).toHaveURL(/empresas=cnpj/);
+  await expect(amag).toBeVisible();
+  await expect(page.getByRole("region", { name: "Mapa da cidade", exact: true })).toHaveCount(0);
+  await page.getByRole("button", { name: "Só registros sem nome", exact: true }).click();
+  await expect(page).toHaveURL(/empresas=sem-nome/);
+  await expect(amag).toHaveCount(0);
+  await identity.getByRole("button", { name: "Empresas com nome", exact: true }).click();
+  await expect(amag).toBeVisible();
+  await expect(page.getByRole("textbox", { name: "Buscar destino no mapa" })).toHaveValue("42.115.689/0001-40");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(321);
+  await context.setOffline(false);
+  await page.goto("mapa?camada=ruas&empresas=cnpj&q=Avenida%20Bras%C3%ADlia", { waitUntil: "domcontentloaded" });
+  await page.reload();
+  await expect(identity.getByRole("button", { name: "Mapa completo", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("article").filter({ has: page.getByText("Avenida Brasília", { exact: true }) }).first()).toBeVisible();
+});
+
 test("Android/iOS: sourced bairros stay separate from streets and accessible in planner at 320px", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 740 });
   const errors: string[] = [];
