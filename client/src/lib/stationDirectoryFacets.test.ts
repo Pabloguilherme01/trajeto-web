@@ -135,6 +135,23 @@ describe("station directory facet filters", () => {
     expect(matches(fallback, { brand: "ipiranga" })).toEqual([fallback[2]]);
   });
 
+  it("keeps locally mapped stations eligible if official coordinates are invalid", () => {
+    const rows: Card[] = [
+      {
+        anp: { latitude: 0, longitude: 0, distribuidora: "Ipiranga" },
+        local: { anp: { latitude: -15.79, longitude: -48.28 }, brand: "Shell" },
+      },
+      {
+        anp: { latitude: -15.80, longitude: -48.29 },
+        local: { anp: { latitude: -15.79, longitude: -48.28 } },
+      },
+      { anp: { latitude: 0, longitude: 0 }, local: { anp: { latitude: null, longitude: null } } },
+    ];
+    expect(matches(rows, { coordinatesOnly: true })).toEqual([rows[0], rows[1]]);
+    expect(matches(rows, { coordinatesOnly: true, brand: "ipiranga" })).toEqual([rows[0]]);
+    expect(matches(rows, { coordinatesOnly: true, anpOnly: true })).toEqual([rows[0], rows[1]]);
+  });
+
   it("normalizes each repeated barrio and brand only once per fresh catalog", () => {
     const repeated: Card[] = Array.from({ length: 480 }, (_, index) => ({
       local: {
