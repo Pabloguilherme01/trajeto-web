@@ -270,7 +270,8 @@ export function OfflineRoutePreview({
   liveSpeedMps,
   showRouteDetails = true,
 }: RouteMapProps) {
-  const businesses = useBusinessCatalog();
+  // Do not download the business catalogue while no destination can be mapped.
+  const businesses = useBusinessCatalog(isMapPoint(destination));
   const nearbyBusinesses = useMemo(
     () => nearbyBusinessReferences(businesses.items, destination),
     [businesses.items, destination?.lat, destination?.lng]
@@ -924,7 +925,8 @@ function RouteMapContent({
   liveProgress,
   liveSpeedMps,
 }: RouteMapProps) {
-  const businesses = useBusinessCatalog();
+  // Do not download the business catalogue while no destination can be mapped.
+  const businesses = useBusinessCatalog(isMapPoint(destination));
   const businessReferences = useMemo(
     () => nearbyBusinessReferences(businesses.items, destination),
     [businesses.items, destination?.lat, destination?.lng]
@@ -1123,11 +1125,15 @@ function RouteMapContent({
       );
   };
   const selectedRoute = routes.find(route => route.selected) || routes[0];
-  const selectedRoutePoints = decodeMapPolyline(selectedRoute?.polyline ?? "");
+  // Preserve route geometry between GPS updates, pan/zoom and control state changes.
+  const selectedRoutePoints = useMemo(
+    () => decodeMapPolyline(selectedRoute?.polyline ?? ""),
+    [selectedRoute?.polyline],
+  );
   const destinationReference = destination
     ? atlasDestinationReference(destination)
     : undefined;
-  const nearbyReferences = [
+  const nearbyReferences = useMemo(() => [
     ...nearbyRouteReferences(origin, destination, selectedRoutePoints),
     ...businessReferences.map(item => ({
       ...item,
@@ -1136,7 +1142,10 @@ function RouteMapContent({
       coordinateKind: "area-reference" as const,
       source: "local" as const,
     })),
-  ];
+  ], [
+    origin?.lat, origin?.lng, destination?.lat, destination?.lng,
+    selectedRoutePoints, businessReferences,
+  ]);
   const trafficCounts = (selectedRoute?.trafficIntervals || []).reduce(
     (acc, item) => {
       if (item.speed === "SLOW") acc.slow += 1;
