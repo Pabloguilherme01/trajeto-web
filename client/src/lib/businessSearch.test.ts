@@ -110,3 +110,9 @@ it("ranks only requested business categories while preserving previous stable or
   expect(businessesForMapLayer(items, "compras").map(item => item.id))
     .toEqual(raw.map(item => item.id));
 });
+
+it("accepts a labeled CNPJ without matching unrelated descriptive text", () => {
+  const company = { id: "business-1", name: "Mercado Aurora", category: "compras", business: { cnpj: "12.345.678/0001-90" } } as import("./cityAtlas").CityAtlasItem;
+  const unrelated = { ...company, id: "business-2", name: "CNPJ 12345678000190", business: { ...company.business!, cnpj: "98.765.432/0001-10" } };
+  expect(searchBusinesses([unrelated, company], "CNPJ: 12.345.678/0001-90")).toEqual([company]);
+});

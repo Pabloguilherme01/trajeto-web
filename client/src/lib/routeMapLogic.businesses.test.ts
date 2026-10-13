@@ -43,3 +43,11 @@ it("does not show CNPJ-only names, invalid points or distant locations in route 
   expect(nearbyBusinessReferences(entries, destination).map(item => item.id))
     .toEqual(["business-valid"]);
 });
+
+it("shows the readable company name first in planner references", () => {
+  const destination = { lat: -15.77, lng: -48.28 };
+  const refs = nearbyBusinessReferences([
+    company("named", "CNPJ 12345678000190 · Mercado Aurora", -15.7701, -48.28),
+  ], destination);
+  expect(refs[0].name).toBe("Mercado Aurora");
+});

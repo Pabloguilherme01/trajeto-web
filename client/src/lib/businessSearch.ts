@@ -71,8 +71,9 @@ export function searchBusinesses(items: CityAtlasItem[], query: string) {
   if (category) return categoryItems(items, category);
   const alias = aliases[value];
   if (!alias) {
-    const digits = value.replace(/\D/g, "");
-    const exactCnpj = /^[\d\s./-]+$/.test(value) && digits.length === 14;
+    const registryQuery = value.replace(/^cnpj\s*[:·-]?\s*/, "");
+    const digits = registryQuery.replace(/\D/g, "");
+    const exactCnpj = /^[\d\s./-]+$/.test(registryQuery) && digits.length === 14;
     return exactCnpj ? companyByCnpj(items, digits) : filterCityAtlas(items, value, "todos");
   }
   let cache = aliasResults.get(items);
