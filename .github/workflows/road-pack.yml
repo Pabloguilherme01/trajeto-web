@@ -17,7 +17,11 @@ jobs:
         with:
           node-version-file: .nvmrc
       - run: node --test scripts/offline-road-pack.test.mjs
-      - run: node scripts/offline-road-pack.mjs
+      - name: Refresh OSM data on explicit request
+        if: github.event_name == 'workflow_dispatch'
+        run: node scripts/offline-road-pack.mjs
+      - name: Verify bundled street routing without external providers
+        run: node --test scripts/public-routing-streets.test.mjs
       - uses: actions/upload-artifact@v7
         with:
           name: verified-offline-road-pack
