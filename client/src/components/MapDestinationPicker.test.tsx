@@ -1,7 +1,7 @@
 import React from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
-import MapDestinationPicker from "./MapDestinationPicker";
+import MapDestinationPicker, { prepareMapPickerCatalog } from "./MapDestinationPicker";
 import * as catalogSearch from "@/lib/catalogSearch";
 afterEach(() => cleanup());
 const items = [
@@ -119,4 +119,47 @@ it("does not rescan the selected destination on keystrokes or category filters",
   } finally {
     find.mockRestore();
   }
+});
+
+it("reuses prepared categories and text indexes across openings of the same map catalogue", () => {
+  const records = [
+    { id: "hospital", name: "UPA Mansões Odisseia", address: "Águas Lindas", category: "saude" },
+    { id: "road", name: "Avenida Brasília", address: "Setor Central", coordinateKind: "street-midpoint" },
+    { id: "shop", name: "Mercado Aurora", address: "Jardim Brasília", category: "compras" },
+  ];
+  const index = vi.spyOn(catalogSearch, "createCatalogSearchIndex");
+  try {
+    const original = prepareMapPickerCatalog(records);
+    expect(index).toHaveBeenCalledTimes(records.length);
+    expect(prepareMapPickerCatalog(records)).toBe(original);
+    expect(index).toHaveBeenCalledTimes(records.length);
+    expect(original.categories).toEqual(["Compras", "Saúde", "Via"]);
+    expect(original.byCategory.get("Saúde")?.map(row => row.item.id)).toEqual(["hospital"]);
+    expect(original.byCategory.get("Via")?.map(row => row.item.id)).toEqual(["road"]);
+
+    const next = [...records];
+    expect(prepareMapPickerCatalog(next)).not.toBe(original);
+    expect(index).toHaveBeenCalledTimes(records.length * 2);
+    expect(prepareMapPickerCatalog(next)).toBe(prepareMapPickerCatalog(next));
+    expect(index).toHaveBeenCalledTimes(records.length * 2);
+  } finally {
+    index.mockRestore();
+  }
+});
+
+it("filters large indexed map catalogues by category and still supports keyboard selection", () => {
+  const many = Array.from({ length: 250 }, (_, i) => ({
+    id: "street-" + i, name: "Rua " + i, address: "Centro", coordinateKind: "street-midpoint",
+  }));
+  const records = [...many, { id: "health", name: "UPA Central", address: "Setor Hospitalar", category: "saude" }];
+  const choose = vi.fn();
+  render(<MapDestinationPicker items={records} value={null} label="Escolher local" onSelect={choose} />);
+  fireEvent.click(screen.getByRole("button", { name: "Escolher local" }));
+  fireEvent.click(screen.getByRole("button", { name: "Saúde" }));
+  expect(screen.getAllByRole("option")).toHaveLength(1);
+  const input = screen.getByRole("combobox");
+  fireEvent.change(input, { target: { value: "upa central" } });
+  expect(screen.getAllByRole("option")).toHaveLength(1);
+  fireEvent.keyDown(input, { key: "Enter" });
+  expect(choose).toHaveBeenCalledWith("health");
 });
