@@ -776,7 +776,8 @@ export default function TileStationMap({
                     <span className="text-xs font-black">{routePoints.length > 1 && station.id === "origin" ? "A" : routePoints.length > 1 && station.id === "destination" ? "B" : <MapPlaceIcon item={station} />}</span>
                   </span>
                   {active && <span
-                    className="pointer-events-none absolute left-1/2 top-full mt-1 max-w-[10rem] -translate-x-1/2 truncate rounded-lg border border-border bg-card/95 px-2 py-1 text-xs font-bold text-card-foreground shadow-sm"
+                    className="pointer-events-none absolute top-full mt-1 w-max max-w-[10rem] -translate-x-1/2 truncate rounded-lg border border-border bg-card/95 px-2 py-1 text-xs font-bold text-card-foreground shadow-sm"
+                    style={{ left: Math.max(92, Math.min(width - 92, position.left)) - position.left + 22 }}
                     title={station.name}
                   >{station.name}</span>}
                 </button>
