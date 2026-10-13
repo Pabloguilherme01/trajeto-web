@@ -207,6 +207,17 @@ export default function TileStationMap({
     if (pending) applyGesture(pending);
   };
 
+  // Explicit camera controls supersede any movement still queued by a touch.
+  const cancelGesture = () => {
+    if (gestureFrame.current !== null) window.cancelAnimationFrame(gestureFrame.current);
+    gestureFrame.current = null;
+    pendingGesture.current = null;
+    pointers.current.clear();
+    pinch.current = null;
+    dragRef.current = null;
+    setDragging(false);
+  };
+
   useEffect(() => {
     return () => {
       if (gestureFrame.current !== null)
@@ -496,16 +507,19 @@ export default function TileStationMap({
   };
 
   const recenter = () => {
+    cancelGesture();
     if (!userCoords && routePoints.length > 1) { fitStations(); return; }
     setFollowing(true);
     setCenter(userCoords ?? DEFAULT_CENTER);
   };
 
   const changeZoom = (delta: number) => {
+    flushGesture();
     setZoom(value => Math.max(8, Math.min(17, value + delta)));
   };
 
   const fitStations = () => {
+    cancelGesture();
     if (!drawable.length && !routePoints.length) return;
     const bounds = mapPointBounds(routePoints.length > 1 ? routePoints : drawable, userCoords);
     if (!bounds) return;
@@ -555,6 +569,7 @@ export default function TileStationMap({
     [drawable, routePoints.length]
   );
   const focusEndpoint = (point: (typeof drawable)[number]) => {
+    cancelGesture();
     setFollowing(false);
     setSelectedId(stationMapKey(point));
     setCenter({ lat: point.lat, lng: point.lng });
@@ -875,6 +890,7 @@ export default function TileStationMap({
               setSelectedId(id);
               onSelectStation?.(station);
               setFollowing(false);
+              cancelGesture();
               setCenter({ lat: station.lat, lng: station.lng });
               setZoom(value => Math.max(13, value));
             }} />

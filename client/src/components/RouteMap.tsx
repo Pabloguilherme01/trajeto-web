@@ -255,6 +255,8 @@ type RouteMapProps = {
   liveProgress?: LiveProgress | null;
   liveSpeedMps?: number | null;
   showRouteDetails?: boolean;
+  referencesVisible?: boolean;
+  showReferenceControl?: boolean;
 };
 
 export function OfflineRoutePreview({
@@ -269,6 +271,8 @@ export function OfflineRoutePreview({
   liveProgress,
   liveSpeedMps,
   showRouteDetails = true,
+  referencesVisible,
+  showReferenceControl = true,
 }: RouteMapProps) {
   // Do not download the business catalogue while no destination can be mapped.
   const businesses = useBusinessCatalog(isMapPoint(destination));
@@ -276,7 +280,8 @@ export function OfflineRoutePreview({
     () => nearbyBusinessReferences(businesses.items, destination),
     [businesses.items, destination?.lat, destination?.lng]
   );
-  const [showReferences, setShowReferences] = useState(true);
+  const [localReferences, setShowReferences] = useState(true);
+  const showReferences = referencesVisible ?? localReferences;
   const [zoom, setZoom] = useState(1);
   const [resetKey, setResetKey] = useState(0);
   const [selectedPoint, setSelectedPoint] = useState("");
@@ -302,7 +307,7 @@ export function OfflineRoutePreview({
   }, [hasLivePosition]);
   const validOrigin = isMapPoint(origin) ? origin : undefined;
   const validDestination = isMapPoint(destination) ? destination : undefined;
-  const validStops = stops.filter(isMapPoint);
+  const validStops = useMemo(() => stops.filter(isMapPoint), [stops]);
   const selected = routes.find(route => route.selected) ?? routes[0];
   const routePoints = useMemo(
     () => decodeMapPolyline(selected?.polyline ?? ""),
@@ -370,7 +375,7 @@ export function OfflineRoutePreview({
         list.findIndex(candidate => candidate.id === item.id) === index
     )
     .slice(0, 8);
-  const markers = [
+  const markers = useMemo(() => [
     ...nearbyBusinesses.map(point => ({ ...point, isReference: true })),
     ...routeReferences.map(point => ({
       ...point,
@@ -406,7 +411,12 @@ export function OfflineRoutePreview({
           },
         ]
       : []),
-  ];
+  ], [nearbyBusinesses, routeReferences, livePosition?.lat, livePosition?.lng,
+    validOrigin?.lat, validOrigin?.lng, validStops, validDestination?.lat, validDestination?.lng]);
+  const primaryMarkers = useMemo(
+    () => markers.filter(marker => !("isReference" in marker && marker.isReference)),
+    [markers],
+  );
   if (!markers.length && !routePoints.length)
     return (
       <div className="p-6 text-center text-foreground">
@@ -732,7 +742,7 @@ export function OfflineRoutePreview({
         controls={mapControls}
         initialDark={false}
         className="h-[min(62dvh,560px)] min-h-[320px]"
-        markers={showReferences ? markers : markers.filter(marker => !("isReference" in marker && marker.isReference))}
+        markers={showReferences ? markers : primaryMarkers}
         routePoints={routePoints}
         zoom={zoom}
         onZoom={setZoom}
@@ -756,7 +766,7 @@ export function OfflineRoutePreview({
         }}
       />
       <div className="route-map-actions flex flex-wrap gap-2 border-b border-border px-3 pb-3">
-        <button type="button" aria-pressed={showReferences} onClick={() => setShowReferences(value => !value)} className="min-h-11 rounded-xl border border-border bg-card px-3 text-xs font-bold">{showReferences ? "Ocultar referências" : "Mostrar referências"}</button>
+        {showReferenceControl && <button type="button" aria-pressed={showReferences} onClick={() => setShowReferences(value => !value)} className="min-h-11 rounded-xl border border-border bg-card px-3 text-xs font-bold">{showReferences ? "Ocultar referências" : "Mostrar referências"}</button>}
         {validOrigin && (
           <button
             type="button"
@@ -945,6 +955,7 @@ function RouteMapContent({
   const [mapReady, setMapReady] = useState(false);
   const [satellite, setSatellite] = useState(false);
   const [traffic, setTraffic] = useState(false);
+  const [showReferences, setShowReferences] = useState(true);
 
   const [is3D, setIs3D] = useState(false);
   const [heading, setHeading] = useState(0);
@@ -1135,6 +1146,15 @@ function RouteMapContent({
     origin?.lat, origin?.lng, destination?.lat, destination?.lng,
     selectedRoutePoints, businessReferences,
   ]);
+  const journeyPoints = useMemo(() => [
+    ...(isMapPoint(origin) ? [{ id: "origin", name: "Origem", address: "Início da viagem", ...origin }] : []),
+    ...(isMapPoint(destination) ? [{ id: "destination", name: "Destino", address: "Chegada da viagem", ...destination }] : []),
+    ...stops.filter(isMapPoint),
+  ], [origin?.lat, origin?.lng, destination?.lat, destination?.lng, stops]);
+  const journeyWithReferences = useMemo(
+    () => [...journeyPoints, ...nearbyReferences],
+    [journeyPoints, nearbyReferences],
+  );
   const trafficCounts = (selectedRoute?.trafficIntervals || []).reduce(
     (acc, item) => {
       if (item.speed === "SLOW") acc.slow += 1;
@@ -1223,34 +1243,18 @@ function RouteMapContent({
         aria-label="Mapa independente da viagem"
       >
         <RouteOverview route={selectedRoute} travelMode={travelMode} />
+        <div className="flex min-w-0 flex-wrap items-center justify-between gap-2 border-b border-border bg-card px-3 py-2">
+          <p className="text-xs font-semibold text-muted-foreground">Origem A · Destino B{stops.length ? ` · ${stops.length} parada(s)` : ""}</p>
+          <button type="button" aria-pressed={showReferences} onClick={() => setShowReferences(value => !value)}
+            className="min-h-11 rounded-xl border border-border bg-background px-3 text-xs font-bold focus-visible:outline-2 focus-visible:outline-ring">
+            {showReferences ? "Ocultar referências" : "Mostrar referências"}
+          </button>
+        </div>
         <TileStationMap
           selectionLabel="Escolher ponto da viagem"
           routePoints={points}
           travelMode={travelMode}
-          stations={[
-            ...(isMapPoint(origin)
-              ? [
-                  {
-                    id: "origin",
-                    name: "Origem",
-                    address: "Início da viagem",
-                    ...origin,
-                  },
-                ]
-              : []),
-            ...(isMapPoint(destination)
-              ? [
-                  {
-                    id: "destination",
-                    name: "Destino",
-                    address: "Chegada da viagem",
-                    ...destination,
-                  },
-                ]
-              : []),
-            ...stops,
-            ...nearbyReferences,
-          ]}
+          stations={showReferences ? journeyWithReferences : journeyPoints}
           fallback={
             <div className="relative">
               <OfflineRoutePreview
@@ -1260,6 +1264,8 @@ function RouteMapContent({
                 stops={stops}
                 travelMode={travelMode}
                 showRouteDetails={false}
+                referencesVisible={showReferences}
+                showReferenceControl={false}
               />
             </div>
           }
@@ -1290,7 +1296,7 @@ function RouteMapContent({
             referências próximas
           </span>
           <span>
-            {nearbyReferences.length} referência(s) verificada(s) no entorno
+            {showReferences ? nearbyReferences.length : 0} referência(s) exibida(s) no entorno
           </span>
         </div>
       </section>

@@ -721,3 +721,23 @@ it("uses a shared online/offline listener for two mounted maps", () => {
   expect(add.mock.calls.filter(([type]) => type === "online")).toHaveLength(1);
   expect(add.mock.calls.filter(([type]) => type === "offline")).toHaveLength(1);
 });
+
+it("keeps route framing after a queued drag and ignores its obsolete frame", () => {
+  let frame: FrameRequestCallback | null = null;
+  vi.spyOn(window, "requestAnimationFrame").mockImplementation(callback => { frame = callback; return 7; });
+  vi.spyOn(window, "cancelAnimationFrame").mockImplementation(() => {});
+  const route = [{ lat: -15.7545, lng: -48.2816 }, { lat: -15.76, lng: -48.29 }];
+  render(<TileStationMap stations={route.map((point, i) => ({ ...point, id: i ? "destination" : "origin", name: i ? "Destino" : "Origem", address: "Rua" }))} routePoints={route} />);
+  const map = screen.getByRole("region", { name: "Mapa dos postos" });
+  Object.assign(map, { setPointerCapture: vi.fn() });
+  const marker = screen.getByRole("button", { name: "Abrir Origem" });
+  sendPointer(map, "pointerdown", 1, 100);
+  sendPointer(map, "pointermove", 1, 120);
+  sendPointer(map, "pointermove", 1, 140);
+  fireEvent.click(screen.getByRole("button", { name: "Ver todos" }));
+  const framed = marker.style.left;
+  act(() => frame?.(16));
+  expect(marker.style.left).toBe(framed);
+  sendPointer(map, "pointermove", 1, 180);
+  expect(marker.style.left).toBe(framed);
+});
