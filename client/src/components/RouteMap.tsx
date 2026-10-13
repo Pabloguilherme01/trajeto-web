@@ -931,6 +931,13 @@ function RouteMapContent({
     () => nearbyBusinessReferences(businesses.items, destination),
     [businesses.items, destination?.lat, destination?.lng]
   );
+  // Only the active route contributes proximity references and route bounds.
+  // Share this decoded geometry across map effects and Pages renders.
+  const selectedRoute = routes.find(route => route.selected) ?? routes[0];
+  const selectedRoutePoints = useMemo(
+    () => decodeMapPolyline(selectedRoute?.polyline ?? ""),
+    [selectedRoute?.polyline],
+  );
   const mapRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
   const polylinesRef = useRef<google.maps.Polyline[]>([]);
@@ -1019,13 +1026,7 @@ function RouteMapContent({
 
     const bounds = new maps.LatLngBounds();
     [origin, destination, ...stops].forEach(point => bounds.extend(point));
-    routes
-      ?.filter(route => route.polyline && route === (routes.find(item => item.selected) ?? routes[0]))
-      .forEach(route =>
-        decodePolyline(route.polyline as string).forEach(point =>
-          bounds.extend(point)
-        )
-      );
+    selectedRoutePoints.forEach(point => bounds.extend(point));
     const makeMarker = (
       position: google.maps.LatLngLiteral,
       title: string,
@@ -1050,12 +1051,12 @@ function RouteMapContent({
     nearbyRouteReferences(
       origin,
       destination,
-      routes.flatMap(route => decodePolyline(route.polyline ?? ""))
+      selectedRoutePoints
     ).forEach(reference =>
       makeMarker(reference, "Referência · " + reference.name, "#3DE3FF")
     );
     map.fitBounds(bounds, 56);
-  }, [mapReady, origin, destination, stops, routes]);
+  }, [mapReady, origin, destination, stops, selectedRoutePoints]);
 
   useEffect(() => {
     if (!mapRef.current || !window.google || !mapReady) return;
@@ -1104,13 +1105,7 @@ function RouteMapContent({
     [origin, destination, ...stops].forEach(point =>
       bounds.extend(point)
     );
-    routes
-      .filter(route => route.polyline && route === (routes.find(item => item.selected) ?? routes[0]))
-      .forEach(route =>
-        decodePolyline(route.polyline as string).forEach(point =>
-          bounds.extend(point)
-        )
-      );
+    selectedRoutePoints.forEach(point => bounds.extend(point));
     const currentTilt = mapRef.current.getTilt?.() ?? 0;
     const currentHeading = mapRef.current.getHeading?.() ?? 0;
     mapRef.current.fitBounds(bounds, 56);
@@ -1124,13 +1119,7 @@ function RouteMapContent({
         0
       );
   };
-  const selectedRoute = routes.find(route => route.selected) || routes[0];
-  // Preserve route geometry between GPS updates, pan/zoom and control state changes.
-  const selectedRoutePoints = useMemo(
-    () => decodeMapPolyline(selectedRoute?.polyline ?? ""),
-    [selectedRoute?.polyline],
-  );
-  const destinationReference = destination
+   const destinationReference = destination
     ? atlasDestinationReference(destination)
     : undefined;
   const nearbyReferences = useMemo(() => [
@@ -1225,9 +1214,9 @@ function RouteMapContent({
   if (
     isGitHubPagesRuntime() &&
     (selectedRoute?.source === "mapbox" || selectedRoute?.source === "osrm") &&
-    decodeMapPolyline(selectedRoute?.polyline ?? "").length > 1
+    selectedRoutePoints.length > 1
   ) {
-    const points = decodeMapPolyline(selectedRoute?.polyline ?? "");
+    const points = selectedRoutePoints;
     return (
       <section
         className="overflow-hidden rounded-2xl border border-border"
