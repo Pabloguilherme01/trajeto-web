@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { BUNDLED_CITY_ATLAS, buildCityAtlas, filterCityAtlas, type CityAtlasItem } from "@/lib/cityAtlas";
 import { normalizeCatalogText } from "@/lib/catalogSearch";
+import { hasBusinessName } from "@/lib/businessCatalogState";
 
 import { useBusinessCatalog } from "@/hooks/useBusinessCatalog";
 import { LOCAL_GEOCODE_POINTS } from "@/lib/localGeocoding";
@@ -43,15 +44,50 @@ export function dedupePlannerLocationItems(items: CityAtlasItem[]) {
   return [...merged.values()];
 }
 
+// A single index is shared by origin and destination pickers. Both can be
+// mounted on the same Planner screen, but neither should decode/dedupe the
+// full company catalogue until someone searches for a business.
+const bundledPoints = dedupePlannerLocationItems(points);
+const combinedPoints = new WeakMap<CityAtlasItem[], CityAtlasItem[]>();
+
+export function plannerPickerItemsWithBusinesses(items: CityAtlasItem[]) {
+  if (!items.length) return bundledPoints;
+  let indexed = combinedPoints.get(items);
+  if (!indexed) {
+    indexed = dedupePlannerLocationItems([
+      ...points,
+      ...items.filter(item =>
+        hasBusinessName(item.name) &&
+        Number.isFinite(item.lat) && Number.isFinite(item.lng)
+      ),
+    ]);
+    combinedPoints.set(items, indexed);
+  }
+  return indexed;
+}
+
 export default function PlannerLocationPicker({ kind, value, onChoose }: {
   kind: "origem" | "destino";
   value: string;
   onChoose: (coordinate: string) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const businesses = useBusinessCatalog(open);
-  const allPoints = useMemo(() => open ? dedupePlannerLocationItems([...points, ...businesses.items.filter(item => Number.isFinite(item.lat) && Number.isFinite(item.lng))]) : [], [open, businesses.items]);
   const [query, setQuery] = useState("");
+  const [includeBusinesses, setIncludeBusinesses] = useState(false);
+  // Open with the small municipal catalogue only. A specific search with no
+  // local matches, or an explicit tap, unlocks the larger company directory.
+  const localMatches = useMemo(
+    () => open ? filterCityAtlas(bundledPoints, query, "todos") : [],
+    [open, query],
+  );
+  const commercialRequested = open && (
+    includeBusinesses || (query.trim().length >= 3 && localMatches.length === 0)
+  );
+  const businesses = useBusinessCatalog(commercialRequested);
+  const allPoints = useMemo(
+    () => commercialRequested ? plannerPickerItemsWithBusinesses(businesses.items) : bundledPoints,
+    [commercialRequested, businesses.items],
+  );
   const [visibleCount, setVisibleCount] = useState(8);
   const quickQueries = PLANNER_LOCATION_QUICK_FILTERS;
   useEffect(() => { setVisibleCount(8); }, [query, kind]);
@@ -59,7 +95,7 @@ export default function PlannerLocationPicker({ kind, value, onChoose }: {
   const matches = useMemo(() => {
     if (!open) return [];
     const normalizedQuery = normalizeCatalogText(query.trim());
-    const filtered = filterCityAtlas(allPoints, query, "todos");
+    const filtered = commercialRequested ? filterCityAtlas(allPoints, query, "todos") : localMatches;
     if (normalizedQuery) {
       const strongMatches = filtered
         .filter(item =>
@@ -88,7 +124,7 @@ export default function PlannerLocationPicker({ kind, value, onChoose }: {
       })
       .sort((a, b) => a.relevance - b.relevance || pickerItemScore(b.item) - pickerItemScore(a.item) || a.index - b.index)
       .map(entry => entry.item);
-  }, [allPoints, query, open]);
+  }, [allPoints, query, open, commercialRequested, localMatches]);
   const offlineReadyCount = useMemo(() => matches.filter(item => Number.isFinite(item.lat) && Number.isFinite(item.lng)).length, [matches]);
   return <div className="mt-2 min-w-0 max-w-full overflow-hidden">
     <button type="button" aria-expanded={open} onClick={() => setOpen(v => !v)} className="min-h-11 w-full rounded-xl border border-[#3DE3FF]/20 bg-[#3DE3FF]/[.04] px-3 text-left text-xs font-bold text-[#C9F7FF]">Escolher {kind} no catálogo local</button>
@@ -98,6 +134,10 @@ export default function PlannerLocationPicker({ kind, value, onChoose }: {
         <input value={query} onChange={event => setQuery(event.target.value)} onKeyDown={event => { if (event.key === "Enter") event.preventDefault(); }} placeholder="Nome, rua ou bairro" className="mt-2 min-h-11 w-full rounded-xl border border-white/15 bg-[#121B22] px-3 text-base text-white" autoComplete="off" enterKeyHint="search" />
       </label>
       <QuickFilterChips label={"Filtros rápidos para " + kind} options={quickQueries} value={query} onPick={value => { setQuery(value); setVisibleCount(8); }} className="mt-2" />
+      {!commercialRequested && <button type="button" onClick={() => setIncludeBusinesses(true)}
+        className="mt-2 min-h-11 w-full rounded-xl border border-[#3DE3FF]/20 px-3 text-left text-xs font-bold text-[#C9F7FF] focus-visible:outline-2 focus-visible:outline-[#3DE3FF]">
+        Incluir empresas cadastradas
+      </button>}
       <p className="mt-2 break-words text-xs text-white/55">{matches.length} lugares encontrados · {offlineReadyCount} com coordenadas para uso offline</p>
       {businesses.loading && <p role="status" className="mt-2 text-xs text-white/60">Carregando empresas locais…</p>}
       {businesses.error && <button type="button" onClick={businesses.retry} className="mt-2 min-h-11 text-xs text-[#FFD59B]">Tentar carregar empresas novamente</button>}
@@ -128,7 +168,7 @@ export default function PlannerLocationPicker({ kind, value, onChoose }: {
         </li>)}
       </ul>
       {matches.length > visibleCount && <button type="button" onClick={() => setVisibleCount(count => count + 8)} className="mt-2 min-h-11 w-full rounded-xl border border-white/15 px-3 text-xs font-bold text-white/75">Mostrar mais pontos ({visibleCount} de {matches.length})</button>}
-      {!matches.length && <p className="mt-2 break-words text-xs text-white/65">Nenhum lugar cadastrado. Use outro nome, uma rua/bairro diferente ou informe o destino no campo principal.</p>}
+      {!matches.length && !businesses.loading && <p className="mt-2 break-words text-xs text-white/65">Nenhum lugar cadastrado. Use outro nome, uma rua/bairro diferente ou informe o destino no campo principal.</p>}
     </div>}
   </div>;
 }
