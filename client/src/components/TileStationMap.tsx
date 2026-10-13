@@ -405,14 +405,20 @@ export default function TileStationMap({
     pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
     event.currentTarget.setPointerCapture(event.pointerId);
     if (pointers.current.size === 2) {
+      // Commit the last one-finger movement before anchoring the pinch.
+      // React's rendered camera may still be one animation frame behind.
+      flushGesture();
+      const activeCamera = cameraRef.current;
+      const activeBase = projectBase(activeCamera.center.lat, activeCamera.center.lng);
+      const activeScale = 2 ** activeCamera.zoom;
       setFollowing(false);
       setDragging(true);
       const [a, b] = [...pointers.current.values()];
       const rect = event.currentTarget.getBoundingClientRect();
       pinch.current = {
         distance: Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)),
-        zoom,
-        anchor: unproject(centerPx.x + (a.x + b.x) / 2 - rect.left - width / 2, centerPx.y + (a.y + b.y) / 2 - rect.top - height / 2, zoom),
+        zoom: activeCamera.zoom,
+        anchor: unproject(activeBase.x * activeScale + (a.x + b.x) / 2 - rect.left - width / 2, activeBase.y * activeScale + (a.y + b.y) / 2 - rect.top - height / 2, activeCamera.zoom),
       };
       dragRef.current = null;
       return;
