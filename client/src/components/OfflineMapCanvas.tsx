@@ -117,7 +117,40 @@ export default function OfflineMapCanvas({
   }, [dark]);
   const [showAllStreetNames, setShowAllStreetNames] = useState(false);
   const [expanded, setExpanded] = useState(false);
-  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [pan, updatePan] = useState({ x: 0, y: 0 });
+  const panFrame = useRef<number | null>(null);
+  const pendingPan = useRef({ x: 0, y: 0 });
+  const cancelPan = () => {
+    if (panFrame.current !== null) window.cancelAnimationFrame(panFrame.current);
+    panFrame.current = null;
+    pendingPan.current = { x: 0, y: 0 };
+  };
+  // Explicit camera changes supersede any movement queued by a drag.
+  const setPan = (next: React.SetStateAction<{ x: number; y: number }>) => {
+    cancelPan();
+    updatePan(next);
+  };
+  const schedulePan = (delta: { x: number; y: number }) => {
+    if (panFrame.current !== null) {
+      pendingPan.current.x += delta.x;
+      pendingPan.current.y += delta.y;
+      return;
+    }
+    updatePan(current => ({ x: current.x + delta.x, y: current.y + delta.y }));
+    panFrame.current = window.requestAnimationFrame(() => {
+      panFrame.current = null;
+      const pending = pendingPan.current;
+      pendingPan.current = { x: 0, y: 0 };
+      if (pending.x || pending.y) schedulePan(pending);
+    });
+  };
+  const flushPan = () => {
+    const pending = pendingPan.current;
+    cancelPan();
+    if (pending.x || pending.y)
+      updatePan(current => ({ x: current.x + pending.x, y: current.y + pending.y }));
+  };
+  useEffect(() => () => cancelPan(), []);
   const [size, setSize] = useState({ width: 320, height: 360 });
   const viewport = useRef<HTMLDivElement>(null);
   const gestureZoom = useRef(zoom);
@@ -391,6 +424,7 @@ export default function OfflineMapCanvas({
       ([id]) => id !== event.pointerId
     )?.[1];
     if (other) {
+      flushPan();
       const before = Math.hypot(previous.x - other.x, previous.y - other.y),
         after = Math.hypot(event.clientX - other.x, event.clientY - other.y);
       if (before > 10) {
@@ -413,16 +447,18 @@ export default function OfflineMapCanvas({
         onZoom(nextZoom);
       }
     } else
-      setPan(p => ({
-        x: p.x + event.clientX - previous.x,
-        y: p.y + event.clientY - previous.y,
-      }));
+      schedulePan({
+        x: event.clientX - previous.x,
+        y: event.clientY - previous.y,
+      });
     pointers.current.set(event.pointerId, {
       x: event.clientX,
       y: event.clientY,
     });
   };
   const end = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!pointers.current.has(event.pointerId)) return;
+    flushPan();
     pointers.current.delete(event.pointerId);
     if (!pointers.current.size) gestureStarted.current = false;
   };
@@ -478,6 +514,7 @@ export default function OfflineMapCanvas({
             y: event.clientY,
           });
           if (pointers.current.size === 2) {
+            flushPan();
             gestureStarted.current = true;
             onManualInteraction?.();
           }

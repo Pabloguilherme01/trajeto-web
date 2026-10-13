@@ -26,6 +26,7 @@ const pack = {
 beforeEach(() => { vi.resetModules(); localStorage.clear(); });
 afterEach(() => {
   cleanup();
+  vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
 async function setup() {
@@ -48,6 +49,54 @@ async function setup() {
   }
   return render(<Map />);
 }
+it("coalesces offline pan events and settles the final position on release", async () => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify(pack))));
+  let frame: FrameRequestCallback | undefined;
+  vi.spyOn(window, "requestAnimationFrame").mockImplementation(callback => { frame = callback; return 7; });
+  vi.spyOn(window, "cancelAnimationFrame").mockImplementation(() => {});
+  await setup();
+  await screen.findByText(/Ruas locais disponíveis/);
+  const map = screen.getByRole("region", { name: "Explorar mapa offline" });
+  const marker = screen.getByRole("button", { name: "Selecionar Origem" });
+  const initial = parseFloat(marker.style.left);
+  const pointer = (type: string, x: number) => {
+    const event = new MouseEvent(type, { bubbles: true, clientX: x, clientY: 100 });
+    Object.defineProperties(event, { pointerId: { value: 1 }, pointerType: { value: "touch" } });
+    fireEvent(map, event);
+  };
+  pointer("pointerdown", 100);
+  pointer("pointermove", 120);
+  expect(parseFloat(marker.style.left)).toBeCloseTo(initial + 20);
+  pointer("pointermove", 140);
+  pointer("pointermove", 160);
+  expect(parseFloat(marker.style.left)).toBeCloseTo(initial + 20);
+  act(() => frame?.(16));
+  expect(parseFloat(marker.style.left)).toBeCloseTo(initial + 60);
+  pointer("pointermove", 180);
+  pointer("pointerup", 180);
+  expect(parseFloat(marker.style.left)).toBeCloseTo(initial + 80);
+});
+
+it("discards queued pan when Home resets the offline camera", async () => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify(pack))));
+  let frame: FrameRequestCallback | undefined;
+  vi.spyOn(window, "requestAnimationFrame").mockImplementation(callback => { frame = callback; return 7; });
+  vi.spyOn(window, "cancelAnimationFrame").mockImplementation(() => {});
+  await setup();
+  await screen.findByText(/Ruas locais disponíveis/);
+  const map = screen.getByRole("region", { name: "Explorar mapa offline" });
+  const marker = screen.getByRole("button", { name: "Selecionar Origem" });
+  const initial = marker.style.left;
+  for (const [type, x] of [["pointerdown", 100], ["pointermove", 120], ["pointermove", 140]] as const) {
+    const event = new MouseEvent(type, { bubbles: true, clientX: x, clientY: 100 });
+    Object.defineProperties(event, { pointerId: { value: 1 }, pointerType: { value: "touch" } });
+    fireEvent(map, event);
+  }
+  fireEvent.keyDown(map, { key: "Home" });
+  act(() => frame?.(16));
+  expect(marker.style.left).toBe(initial);
+});
+
 it("uses semantic tokens for offline map controls and status chrome", async () => {
   vi.stubGlobal(
     "fetch",

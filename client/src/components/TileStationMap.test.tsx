@@ -524,6 +524,28 @@ it("coalesces repeated pan events to the latest position in the animation frame"
   sendPointer(map, "pointerup", 1, 140);
 });
 
+it("preserves the latest pending pan when a second finger starts pinch zoom", () => {
+  vi.spyOn(window, "requestAnimationFrame").mockReturnValue(7);
+  vi.spyOn(window, "cancelAnimationFrame").mockImplementation(() => {});
+  render(<TileStationMap stations={[
+    { id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 },
+  ]} />);
+  const map = screen.getByRole("region", { name: "Mapa dos postos" });
+  Object.assign(map, { setPointerCapture: vi.fn() });
+  const marker = screen.getByRole("button", { name: "Abrir Posto A" });
+  sendPointer(map, "pointerdown", 1, 100);
+  sendPointer(map, "pointermove", 1, 120);
+  sendPointer(map, "pointermove", 1, 140);
+  sendPointer(map, "pointerdown", 2, 240);
+  expect(parseFloat(marker.style.left)).toBeCloseTo(200);
+  sendPointer(map, "pointermove", 2, 240);
+  expect(parseFloat(marker.style.left)).toBeCloseTo(200);
+  sendPointer(map, "pointerup", 2, 240);
+  sendPointer(map, "pointermove", 1, 160);
+  sendPointer(map, "pointerup", 1, 160);
+  expect(parseFloat(marker.style.left)).toBeCloseTo(220);
+});
+
 it("keeps following after a tap but pauses after a real drag", () => {
   const stations = [{ id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 }];
   const view = render(<TileStationMap stations={stations} userCoords={{ lat: -15.7545, lng: -48.2816 }} />);
