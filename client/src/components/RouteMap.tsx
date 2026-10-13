@@ -1119,7 +1119,7 @@ function RouteMapContent({
         0
       );
   };
-   const destinationReference = destination
+  const destinationReference = destination
     ? atlasDestinationReference(destination)
     : undefined;
   const nearbyReferences = useMemo(() => [
