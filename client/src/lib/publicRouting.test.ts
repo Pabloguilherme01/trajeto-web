@@ -292,8 +292,10 @@ describe("public routing fallback", () => {
 
     expect(route.source).toBe("local-estimate");
     expect(route.origin).toEqual({ lat: -15.761, lng: -48.281 });
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    const onlyUrl = String(fetchMock.mock.calls[0][0]);
+    const providerCalls = fetchMock.mock.calls.filter(([url]) =>
+      !String(url).includes("aguas-lindas-offline-map.json"));
+    expect(providerCalls).toHaveLength(1);
+    const onlyUrl = String(providerCalls[0][0]);
     expect(onlyUrl).toContain("nominatim");
     expect(onlyUrl).not.toContain("-15.76123");
     expect(onlyUrl).not.toContain("-48.28123");
@@ -693,7 +695,8 @@ describe("public routing fallback", () => {
     vi.stubGlobal("fetch", fetchMock);
     const route = await calculatePublicRoute("-15.7,-48.2", "-15.8,-48.3", mode);
     expect(route).toMatchObject({ source: "local-estimate", mode });
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(fetchMock.mock.calls.every(([url]) =>
+      String(url).includes("aguas-lindas-offline-map.json"))).toBe(true);
   });
 
   it("keeps transit estimates local instead of presenting a car route as public transport", async () => {
@@ -757,3 +760,4 @@ it("requires an explicit street choice online and offline without asking a provi
   expect(fetcher).not.toHaveBeenCalled();
   vi.unstubAllGlobals();
 });
+

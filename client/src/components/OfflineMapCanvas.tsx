@@ -9,6 +9,7 @@ import MapPlaceIcon from "@/components/MapPlaceIcon";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { appUrl } from "@/lib/appUrl";
 import { isMapPoint, type MapPoint } from "@/lib/mapGeometry";
+import { fitOfflineMapCamera } from "@/lib/offlineMapCamera";
 
 export type OfflineMapMarker = MapPoint & {
   id: string;
@@ -245,21 +246,7 @@ export default function OfflineMapCanvas({
         : validMarkers
     ).map(world);
     if (!points.length) points.push(world({ lat: -15.7545, lng: -48.2816 }));
-    let minX = Infinity,
-      maxX = -Infinity,
-      minY = Infinity,
-      maxY = -Infinity;
-    for (const point of points) {
-      minX = Math.min(minX, point.x);
-      maxX = Math.max(maxX, point.x);
-      minY = Math.min(minY, point.y);
-      maxY = Math.max(maxY, point.y);
-    }
-    const scale = Math.min(
-      (size.width - 70) / Math.max(maxX - minX, 0.00004),
-      (size.height - 100) / Math.max(maxY - minY, 0.00004)
-    );
-    return { x: (minX + maxX) / 2, y: (minY + maxY) / 2, scale: scale * zoom };
+    return fitOfflineMapCamera(points, size.width, size.height, zoom);
   }, [fingerprint, size.width, size.height, zoom]);
   const lastFocusRequest = useRef<typeof focusRequest>(null);
   useEffect(() => {
@@ -815,3 +802,4 @@ export default function OfflineMapCanvas({
     </div>
   );
 }
+

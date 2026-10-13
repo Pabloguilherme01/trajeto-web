@@ -524,14 +524,14 @@ export function OfflineRoutePreview({
             : selected?.source === "offline-road"
               ? "Rota offline pelas ruas"
               : selected?.source === "local-estimate" || forceOffline
-                ? "Mapa local/offline"
+                ? selected?.source === "local-estimate" ? "Prévia aproximada" : "Mapa local/offline"
                 : "Rota pelas ruas"}
         </span>
         <span>
           {selected?.source === "offline-road"
             ? "Trajeto calculado na malha salva · sem trânsito ao vivo"
             : selected?.source === "local-estimate"
-              ? "Estimativa em linha reta · sem curvas confirmadas"
+              ? "Rota pelas ruas indisponível · linha reta apenas como referência"
               : routePoints.length
                 ? "Geometria da rota disponível"
                 : "Sem geometria viária confirmada"}
@@ -1533,3 +1533,4 @@ export function RouteMap(props: RouteMapProps) {
     </MapExplorerFrame>
   );
 }
+
