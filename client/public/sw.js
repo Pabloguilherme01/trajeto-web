@@ -122,6 +122,36 @@ self.addEventListener("activate", event => {
   );
 });
 
+// Concurrent tabs must share one offline preparation. Otherwise each tab
+// downloads the same chunks and competes for CacheStorage/network resources.
+let pendingOfflineRestore = null;
+let lastOfflineProgress = null;
+const offlineRestoreListeners = new Set();
+
+function restoreOfflineOnce(onProgress) {
+  if (onProgress) {
+    offlineRestoreListeners.add(onProgress);
+    // A second tab can join after downloads have started.
+    if (lastOfflineProgress) {
+      try { onProgress(lastOfflineProgress); } catch {}
+    }
+  }
+  if (!pendingOfflineRestore) {
+    pendingOfflineRestore = restoreOfflinePackage(progress => {
+      lastOfflineProgress = progress;
+      for (const notify of offlineRestoreListeners) {
+        // A tab can close while the shared preparation is running.
+        try { notify(progress); } catch {}
+      }
+    }).finally(() => {
+      pendingOfflineRestore = null;
+      lastOfflineProgress = null;
+      offlineRestoreListeners.clear();
+    });
+  }
+  return pendingOfflineRestore;
+}
+
 self.addEventListener("message", event => {
   if (event.data?.type === "SKIP_WAITING") self.skipWaiting();
   if (event.data?.type === "OFFLINE_STATUS" && event.ports?.[0]) {
@@ -133,7 +163,7 @@ self.addEventListener("message", event => {
     const notify = event.data.progress === true
       ? progress => port.postMessage({ type: "OFFLINE_PROGRESS", ...progress })
       : undefined;
-    event.waitUntil(restoreOfflinePackage(notify).then(status => port.postMessage(status)));
+    event.waitUntil(restoreOfflineOnce(notify).then(status => port.postMessage(status)));
   }
 });
 
