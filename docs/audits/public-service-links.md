@@ -16,7 +16,9 @@ Verifica IDs duplicados, esquemas inseguros, URLs inválidas e endereços locais
 npm run audit:service-links -- --live --limit=30 --json > service-links-review.json
 ```
 
-Consulta **somente** os primeiros 30 links públicos únicos com HEAD e fallback GET quando necessário, sequencialmente, timeout de 8 segundos por URL. Para conferir mais, aumente `--limit`; nenhuma consulta HTTP acontece sem `--live`.
+Consulta **somente** os primeiros 30 links públicos únicos com HEAD e fallback GET quando necessário, sequencialmente, timeout de 8 segundos por URL.
+
+Redirecionamentos são resolvidos manualmente, com máximo de cinco saltos e validação HTTPS de cada destino. A auditoria recusa destinos locais, IP literais, URLs com credenciais e qualquer redirecionamento que tente deixar o protocolo HTTPS; nesses casos o resultado é **não verificado**, nunca um link automaticamente removido. Para conferir mais, aumente `--limit`; nenhuma consulta HTTP acontece sem `--live`.
 
 O relatório JSON inclui horário da checagem, links, órgãos declarados, IDs de fichas, status HTTP, hostname final e classificação. `not-found` significa HTTP 404/410 e requer confirmação; `restricted` cobre bloqueios de acesso ou limitação (401, 403, 429); `unverified` cobre falhas e indisponibilidade de rede. Um redirecionamento não comprova que o conteúdo final continua correto.
 
