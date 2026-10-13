@@ -1,6 +1,6 @@
 import { expect, it } from "vitest";
 import { loadBusinessCatalog } from "./businessCatalog";
-import { businessesForMapLayer, searchBusinesses, partitionBusinessCatalog } from "./businessSearch";
+import { businessesForMapLayer, businessesForMapLayerByIdentity, searchBusinesses, partitionBusinessCatalog } from "./businessSearch";
 
 it("partitions identity results once without removing searchable CNPJ records", async () => {
   const items = await loadBusinessCatalog();
@@ -9,6 +9,24 @@ it("partitions identity results once without removing searchable CNPJ records", 
   expect(partitionBusinessCatalog(items)).toBe(groups);
   expect(searchBusinesses(items, "42.115.689/0001-40")).toHaveLength(1);
   expect(groups.named.find(item => item.business?.cnpj === "42.115.689/0001-40")?.name).toBe("AMAG");
+});
+
+it("reuses identity-safe category slices without showing CNPJ-only entries as named map destinations", () => {
+  const items = [
+    { id: "business-1", name: "Farmácia Aurora", category: "saude", destination: "Rua A", lat: -15.7, lng: -48.2 },
+    { id: "business-2", name: "CNPJ 12.345.678/0001-90", category: "saude", destination: "Rua B", lat: -15.7, lng: -48.2 },
+    { id: "business-3", name: "Mercado Central", category: "compras", destination: "Rua C" },
+    { id: "business-4", name: "CNPJ 98.765.432/0001-10", category: "compras", destination: "Rua D" },
+  ] as import("./cityAtlas").CityAtlasItem[];
+  const named = businessesForMapLayerByIdentity(items, "todos", "named");
+  const unnamed = businessesForMapLayerByIdentity(items, "todos", "unnamed");
+  expect(named.map(item => item.id)).toEqual(["business-1", "business-3"]);
+  expect(unnamed.map(item => item.id)).toEqual(["business-2", "business-4"]);
+  expect(businessesForMapLayerByIdentity(items, "todos", "named")).toBe(named);
+  expect(businessesForMapLayerByIdentity(items, "todos", "unnamed")).toBe(unnamed);
+  expect(businessesForMapLayerByIdentity(items, "saude", "named").map(item => item.id)).toEqual(["business-1"]);
+  expect(businessesForMapLayerByIdentity(items, "saude", "unnamed").map(item => item.id)).toEqual(["business-2"]);
+  expect(businessesForMapLayer(items, "todos")).toHaveLength(4);
 });
 
 it("opens the full imported food and shopping categories rather than only curated places", async () => {
