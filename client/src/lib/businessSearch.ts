@@ -112,6 +112,19 @@ export function partitionBusinessCatalog(items: CityAtlasItem[]) {
   }
   return partition;
 }
+/**
+ * Identity-aware map slices are cached against their immutable atlas layer.
+ * No second 21k-row partition is needed when switching map or CNPJ tabs.
+ * Keep the unfiltered catalogue available for registry-only consultation.
+ */
+export function businessesForMapLayerByIdentity(
+  items: CityAtlasItem[],
+  layer: "todos" | CityAtlasLayer,
+  identity: "named" | "unnamed",
+): CityAtlasItem[] {
+  return partitionBusinessCatalog(businessesForMapLayer(items, layer))[identity];
+}
+
 export function businessesForMapLayer(items: CityAtlasItem[], layer: "todos" | CityAtlasLayer): CityAtlasItem[] {
   let index = mapLayerIndexes.get(items);
   if (!index) {
