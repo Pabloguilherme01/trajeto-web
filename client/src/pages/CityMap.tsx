@@ -1,4 +1,4 @@
-import { businessesForMapLayer, searchBusinesses, partitionBusinessCatalog } from "@/lib/businessSearch";
+import { businessesForMapLayer, businessesForMapLayerByIdentity, searchBusinesses } from "@/lib/businessSearch";
 import { hasBusinessName, type BusinessCatalogMode } from "@/lib/businessCatalogState";
 import { filterCityAtlasStreets, filterCityAtlasAreas } from "@/lib/cityAtlasSearch";
 import { selectCityMapItems, cachedDestinationKey, type CityMapCandidate } from "@/lib/cityMapSelection";
@@ -279,13 +279,23 @@ export default function CityMap() {
   useEffect(() => { setVisibleCount(24); }, [query, category, referenceLayer, coordinateMode, selectedArea]);
   const atlasLayer = cityMapAtlasLayer(activeLayer);
   const companyMatches = useMemo(() => {
-    const matches = !needsBusinessCatalog ? [] : deferredQuery.trim()
-      ? searchBusinesses(businesses.items, deferredQuery).filter(item =>
-          (atlasLayer === "todos" || item.category === atlasLayer) && Boolean(item.destination ?? item.address ?? ""))
-      : businessesForMapLayer(businesses.items, atlasLayer);
-    return selectedArea ? matches.filter(item => mentionsDestinationArea(selectedArea, item.name, item.detail, item.address, item.destination)) : matches;
-  }, [businesses.items, needsBusinessCatalog, deferredQuery, atlasLayer, selectedArea]);
-  const companyIdentities = useMemo(() => partitionBusinessCatalog(companyMatches), [companyMatches]);
+    if (!needsBusinessCatalog) return [];
+    const searching = Boolean(deferredQuery.trim());
+    // On category changes, reuse indexed, name-verified subsets instead of
+    // allocating and re-partitioning the full imported CNPJ catalogue.
+    const matches = searching
+      ? searchBusinesses(businesses.items, deferredQuery)
+      : businessMode === "cnpj"
+        ? businessesForMapLayer(businesses.items, atlasLayer)
+        : businessesForMapLayerByIdentity(businesses.items, atlasLayer, businessMode === "unnamed" ? "unnamed" : "named");
+    if (!searching && !selectedArea) return matches;
+    return matches.filter(item => {
+      const identified = hasBusinessName(item.name);
+      if (businessMode === "unnamed" ? identified : businessMode !== "cnpj" && !identified) return false;
+      if ((atlasLayer !== "todos" && item.category !== atlasLayer) || !(item.destination ?? item.address ?? "")) return false;
+      return !selectedArea || mentionsDestinationArea(selectedArea, item.name, item.detail, item.address, item.destination);
+    });
+  }, [businesses.items, needsBusinessCatalog, deferredQuery, atlasLayer, selectedArea, businessMode]);
   const allAtlasDestinations = useMemo(() => {
     const routeKeys = new Set(
       categoryDestinations.map(item => normalizeCatalogText(item.destination))
@@ -300,10 +310,10 @@ export default function CityMap() {
       const key = cachedDestinationKey(item);
       return Boolean(target) && (item.id.startsWith("business-") || !key || !routeKeys.has(key));
     });
-    const companies = businessMode === "cnpj" ? companyMatches : businessMode === "unnamed" ? companyIdentities.unnamed : companyIdentities.named;
+    const companies = companyMatches;
     const publicInArea = selectedArea ? publicAtlas.filter(item => mentionsDestinationArea(selectedArea, item.name, item.detail, item.address, item.destination)) : publicAtlas;
     return [...publicInArea, ...companies];
-  }, [baseAtlas, atlasLayer, categoryDestinations, deferredQuery, referenceLayer, selectedArea, businessMode, companyMatches, companyIdentities]);
+  }, [baseAtlas, atlasLayer, categoryDestinations, deferredQuery, referenceLayer, selectedArea, businessMode, companyMatches]);
   const positionedAtlasDestinations = useMemo(() => registryMode ? [] : allAtlasDestinations.filter(item => isAguasLindasRoutePoint({ lat: item.lat!, lng: item.lng! })), [allAtlasDestinations, registryMode]);
   const atlasDestinations = registryMode ? allAtlasDestinations : coordinateMode === "coordinates" ? positionedAtlasDestinations : coordinateMode === "missing"
     ? allAtlasDestinations.filter(item => !isAguasLindasRoutePoint({ lat: item.lat!, lng: item.lng! })) : allAtlasDestinations;
