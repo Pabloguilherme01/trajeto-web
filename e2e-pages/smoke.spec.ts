@@ -102,9 +102,9 @@ test("Pages: modos de rota ficam disponíveis sem backend", async ({ page }) => 
   await expect(page.getByRole("button", { name: /Transporte/i })).toBeVisible();
   await page.getByRole("button", { name: /A pé/i }).click();
   await page.getByTestId("planner-primary-action").click();
-  // The configured OSRM graph is for cars; walking must use the local estimate.
-  await expect(page.getByText("Estimativa local", { exact: true }).first()).toBeVisible();
-  await expect(page.getByText(/não confirmam ruas ou caminhos adequados/)).toBeVisible();
+  // Walking uses its own verified local graph, never the configured OSRM car graph.
+  await expect(page.getByText("Rota viária offline", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText(/Rota calculada no mapa viário offline salvo neste aparelho/)).toBeVisible();
 });
 
 test("Pages: public filters survive category changes, reload and back navigation", async ({ page }) => {
