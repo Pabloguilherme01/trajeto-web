@@ -1,5 +1,6 @@
 import { Sun, Moon, Expand, Minimize, Map as MapIcon } from "lucide-react";
-import { groundMetresPerPixel, roadPriority } from "@/lib/mapPresentation";
+import { groundMetresPerPixel } from "@/lib/mapPresentation";
+import { prepareOfflineRoadIndex, ROAD_GRID, type PreparedRoadIndex } from "@/lib/offlineMapRoadIndex";
 import { mapMarkerGroups } from "@/lib/mapMarkerGroups";
 import { declutterMapReferences } from "@/lib/mapReferenceDeclutter";
 import { cullOffscreenMapReferences } from "@/lib/mapViewportReferences";
@@ -24,7 +25,7 @@ type Road = {
   points: [number, number][];
 };
 type MapPack = { schema: number; retrievedAt: string; roads: Road[] };
-const ROAD_GRID = 4096;
+const EMPTY_ROAD_INDEX: PreparedRoadIndex = { roads: [], roadGrid: new Map() };
 const EMPTY_ROUTE_POINTS: MapPoint[] = [];
 let packPromise: Promise<MapPack> | undefined;
 export function loadOfflineMapPack() {
@@ -315,49 +316,14 @@ export default function OfflineMapCanvas({
         .join(" "),
     [fingerprint]
   );
-  // Project and bound each road once per pack, rather than walking every
-  // coordinate on each gesture. Only visible roads become SVG paths.
-  const roads = useMemo(
-    () =>
-      pack?.roads.map(road => {
-        const points = road.points.map(([lat, lng]) => world({ lat, lng }));
-        const bounds = {
-          minX: Infinity,
-          maxX: -Infinity,
-          minY: Infinity,
-          maxY: -Infinity,
-        };
-        for (const point of points) {
-          bounds.minX = Math.min(bounds.minX, point.x);
-          bounds.maxX = Math.max(bounds.maxX, point.x);
-          bounds.minY = Math.min(bounds.minY, point.y);
-          bounds.maxY = Math.max(bounds.maxY, point.y);
-        }
-        const path = points
-          .map((point, index) => `${index ? "L" : "M"}${point.x.toFixed(8)} ${point.y.toFixed(8)}`)
-          .join(" ");
-        return { ...road, priority: roadPriority(road.kind), world: points, bounds, path };
-      }).sort((a, b) => a.priority - b.priority) ?? [],
+  // Reuse compiled Mercator roads, SVG paths and spatial buckets when
+  // opening map/planner views of the same validated offline snapshot.
+  // A replacement pack builds its own index without sharing old coordinates.
+  const preparedRoadIndex = useMemo(
+    () => pack ? prepareOfflineRoadIndex(pack) : EMPTY_ROAD_INDEX,
     [pack]
   );
-  const roadGrid = useMemo(() => {
-    const buckets = new Map<string, number[]>();
-    roads.forEach((road, index) => {
-      const minX = Math.floor(road.bounds.minX * ROAD_GRID);
-      const maxX = Math.floor(road.bounds.maxX * ROAD_GRID);
-      const minY = Math.floor(road.bounds.minY * ROAD_GRID);
-      const maxY = Math.floor(road.bounds.maxY * ROAD_GRID);
-      for (let x = minX; x <= maxX; x++) {
-        for (let y = minY; y <= maxY; y++) {
-          const key = `${x}:${y}`;
-          const bucket = buckets.get(key);
-          if (bucket) bucket.push(index);
-          else buckets.set(key, [index]);
-        }
-      }
-    });
-    return buckets;
-  }, [roads]);
+  const { roads, roadGrid } = preparedRoadIndex;
   const visible = useMemo(() => {
     const left = size.width / 2 - camera.x * camera.scale + pan.x;
     const top = size.height / 2 - camera.y * camera.scale + pan.y;
