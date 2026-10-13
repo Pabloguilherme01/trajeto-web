@@ -35,3 +35,14 @@ it("honors parent reference visibility without duplicating fallback controls", (
   expect(captures.markers.at(-1)!.length).toBeGreaterThan(2);
   expect(screen.queryByRole("button", { name: /referências/i })).toBeNull();
 });
+
+it("shows destination names on offline markers and refreshes names at unchanged coordinates", () => {
+  const trip = { origin: { lat: -15.7545, lng: -48.2816 }, destination: { lat: -15.77665, lng: -48.27935 }, stops: [] };
+  const view = render(<OfflineRoutePreview {...trip} originLabel="Prefeitura" destinationLabel="UPA Mansões Odisseia" />);
+  expect(captures.markers.at(-1)).toEqual(expect.arrayContaining([
+    expect.objectContaining({ id: "origin", name: "Prefeitura" }),
+    expect.objectContaining({ id: "destination", name: "UPA Mansões Odisseia" }),
+  ]));
+  view.rerender(<OfflineRoutePreview {...trip} originLabel="Prefeitura" destinationLabel="Entrada da UPA" />);
+  expect(captures.markers.at(-1)).toEqual(expect.arrayContaining([expect.objectContaining({ id: "destination", name: "Entrada da UPA" })]));
+});

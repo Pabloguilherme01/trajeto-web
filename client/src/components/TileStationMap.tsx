@@ -11,6 +11,7 @@ import {
 import type { StationMapItem } from "@/components/StationMap";
 
 import MapDestinationPicker from "@/components/MapDestinationPicker";
+import MapLocationPin from "@/components/MapLocationPin";
 import MapPlaceIcon, { mapPlaceSegment } from "@/components/MapPlaceIcon";
 import MapPlaceActions from "@/components/MapPlaceActions";
 import MapTileImage from "@/components/MapTileImage";
@@ -767,7 +768,7 @@ export default function TileStationMap({
                 <button
                   key={stationMapKey(station)}
                   type="button"
-                  className="pointer-events-auto absolute grid size-11 -translate-x-1/2 -translate-y-full place-items-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                  className="pointer-events-auto absolute grid h-[52px] w-11 -translate-x-1/2 -translate-y-full place-items-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                   style={{ left: position.left, top: position.top, zIndex: active ? 10 : 1 }}
                   onPointerDown={event => event.stopPropagation()}
                   onClick={() => {
@@ -778,24 +779,9 @@ export default function TileStationMap({
                   aria-pressed={active}
                   title={station.name + " · " + mapPlaceSegment(station).label}
                 >
-                  <span
-                    className={
-                      "grid size-9 place-items-center rounded-2xl border-2 border-background shadow-lg motion-safe:transition-transform " +
-                      (routePoints.length > 1 && station.id === "destination"
-                        ? "bg-foreground text-background"
-                        : routePoints.length > 1 && station.id === "origin"
-                          ? "bg-background text-foreground"
-                          : active
-                        ? "scale-110 bg-primary text-primary-foreground"
-                        : station.coordinateKind === "street-midpoint"
-                          ? "bg-warning text-foreground"
-                          : station.source === "ANP"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-accent text-accent-foreground")
-                    }
-                  >
-                    <span className="text-xs font-black">{routePoints.length > 1 && station.id === "origin" ? "A" : routePoints.length > 1 && station.id === "destination" ? "B" : <MapPlaceIcon item={station} />}</span>
-                  </span>
+                  <MapLocationPin tone={routePoints.length > 1 && station.id === "origin" ? "origin" : routePoints.length > 1 && station.id === "destination" ? "destination" : active || station.source === "ANP" ? "origin" : station.coordinateKind === "street-midpoint" ? "street" : "reference"}>
+                    {routePoints.length > 1 && station.id === "origin" ? "A" : routePoints.length > 1 && station.id === "destination" ? "B" : <MapPlaceIcon item={station} />}
+                  </MapLocationPin>
                   {active && <span
                     className="pointer-events-none absolute top-full mt-1 w-max max-w-[10rem] -translate-x-1/2 truncate rounded-lg border border-border bg-card/95 px-2 py-1 text-xs font-bold text-card-foreground shadow-sm"
                     style={{ left: Math.max(92, Math.min(width - 92, position.left)) - position.left + 22 }}
@@ -839,11 +825,11 @@ export default function TileStationMap({
             ))}
           </div>
         )}
-        <div role="group" aria-label="Controles do mapa" className="absolute right-3 top-20 z-20 flex w-11 flex-col gap-2">
+        <div role="group" aria-label="Controles do mapa" className="absolute right-3 top-20 z-20 flex w-11 flex-col divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card/95 shadow-lg backdrop-blur-md">
           <button
             type="button"
             onClick={() => changeZoom(1)}
-            className="grid size-11 place-items-center rounded-2xl border border-border bg-card/95 text-card-foreground shadow-[0_8px_24px_rgba(15,35,45,.18)] backdrop-blur-md disabled:opacity-40"
+            className="grid size-11 place-items-center bg-transparent text-card-foreground hover:bg-secondary focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring disabled:opacity-40"
             aria-label="Aumentar zoom"
             disabled={zoom >= 17}
           >
@@ -852,7 +838,7 @@ export default function TileStationMap({
           <button
             type="button"
             onClick={() => changeZoom(-1)}
-            className="grid size-11 place-items-center rounded-2xl border border-border bg-card/95 text-card-foreground shadow-[0_8px_24px_rgba(15,35,45,.18)] backdrop-blur-md disabled:opacity-40"
+            className="grid size-11 place-items-center bg-transparent text-card-foreground hover:bg-secondary focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring disabled:opacity-40"
             aria-label="Diminuir zoom"
             disabled={zoom <= 8}
           >
@@ -861,7 +847,7 @@ export default function TileStationMap({
           <button
             type="button"
             onClick={recenter}
-            className="grid size-11 place-items-center rounded-2xl border border-border bg-card/95 text-card-foreground shadow-[0_8px_24px_rgba(15,35,45,.18)] backdrop-blur-md"
+            className="grid size-11 place-items-center bg-transparent text-card-foreground hover:bg-secondary focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
             aria-label="Recentrar mapa"
             aria-pressed={following}
           >
@@ -870,7 +856,7 @@ export default function TileStationMap({
           <button
             type="button"
             onClick={fitStations}
-            className="grid size-11 place-items-center rounded-2xl border border-border bg-card/95 text-card-foreground shadow-[0_8px_24px_rgba(15,35,45,.18)] backdrop-blur-md"
+            className="grid size-11 place-items-center bg-transparent text-card-foreground hover:bg-secondary focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
             aria-label="Ver todos"
             title={routePoints.length > 1 ? "Enquadrar percurso" : "Ver todos os lugares"}
           >
@@ -879,7 +865,7 @@ export default function TileStationMap({
 
         </div>
 
-        {fallback && <button type="button" onClick={() => setLocalLayer(true)} aria-label="Abrir mapa local offline" title="Mapa local · claro ou escuro" className="absolute bottom-3 right-16 z-20 grid size-11 place-items-center rounded-2xl border border-border bg-card/95 text-card-foreground shadow-[0_8px_24px_rgba(15,35,45,.18)] backdrop-blur-md"><Layers className="size-4" /></button>}
+        {fallback && <button type="button" onClick={() => setLocalLayer(true)} aria-label="Abrir mapa local offline" title="Mapa local · claro ou escuro" className="absolute bottom-3 right-16 z-20 grid size-11 place-items-center bg-transparent text-card-foreground hover:bg-secondary focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"><Layers className="size-4" /></button>}
 
         {showDestinationPicker && <div className="absolute left-3 right-3 top-3 z-20 min-w-0">
           <MapDestinationPicker label={selectionLabel} value={selectedId}

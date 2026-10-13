@@ -140,25 +140,22 @@ function RouteOverview({
   return (
     <section
       aria-label="Resumo do percurso no mapa"
-      className="grid min-w-0 grid-cols-3 gap-2 border-b border-border bg-card px-3 py-3 text-card-foreground"
+      className="flex min-w-0 flex-wrap items-center justify-between gap-x-4 gap-y-3 border-b border-border bg-card px-4 py-3 text-card-foreground"
     >
-      <div className="min-w-0">
-        <p className="text-xs font-semibold text-muted-foreground">Distância</p>
-        <p className="mt-1 break-words text-base font-extrabold">
-          {compactDistance(route.distanceMeters)}
-        </p>
+      <div className="flex min-w-0 items-center gap-4">
+        <div className="min-w-0">
+          <p className="text-[0.65rem] font-semibold uppercase tracking-wider text-muted-foreground">Duração</p>
+          <p className="mt-0.5 break-words text-2xl font-extrabold tracking-tight text-primary">{compactDuration(route.durationSeconds)}</p>
+        </div>
+        <div className="min-w-0 border-l border-border pl-4">
+          <p className="text-[0.65rem] font-semibold uppercase tracking-wider text-muted-foreground">Distância</p>
+          <p className="mt-1 break-words text-base font-bold">{compactDistance(route.distanceMeters)}</p>
+        </div>
       </div>
-      <div className="min-w-0">
-        <p className="text-xs font-semibold text-muted-foreground">Duração</p>
-        <p className="mt-1 break-words text-base font-extrabold">
-          {compactDuration(route.durationSeconds)}
-        </p>
-      </div>
-      <div className="min-w-0">
-        <p className="text-xs font-semibold text-muted-foreground">Modo</p>
-        <p className="mt-1 break-words text-sm font-bold">
-          {travelModeLabels[travelMode]}
-        </p>
+      <div className="flex min-w-0 items-center gap-2 rounded-full border border-border bg-background px-3 py-2">
+        <Navigation2 className="size-4 shrink-0 text-primary" aria-hidden="true" />
+        <span className="sr-only">Modo</span>
+        <p className="break-words text-xs font-bold">{travelModeLabels[travelMode]}</p>
       </div>
     </section>
   );
@@ -246,6 +243,8 @@ type RouteMapProps = {
     timestamp?: number;
   };
   origin?: { lat: number; lng: number };
+  originLabel?: string;
+  destinationLabel?: string;
   travelMode?: "driving" | "walking" | "cycling" | "transit";
   destination?: { lat: number; lng: number };
   stops: Stop[];
@@ -262,6 +261,8 @@ type RouteMapProps = {
 export function OfflineRoutePreview({
   origin,
   destination,
+  originLabel = "Origem",
+  destinationLabel = "Destino",
   stops = [],
   routes = [],
   privateOrigin = false,
@@ -393,7 +394,7 @@ export function OfflineRoutePreview({
         ]
       : []),
     ...(validOrigin
-      ? [{ ...validOrigin, id: "origin", name: "Origem", label: "A" }]
+      ? [{ ...validOrigin, id: "origin", name: originLabel.trim() || "Origem", label: "A" }]
       : []),
     ...validStops.map((stop, i) => ({
       ...stop,
@@ -406,13 +407,13 @@ export function OfflineRoutePreview({
           {
             ...validDestination,
             id: "destination",
-            name: "Destino",
+            name: destinationLabel.trim() || "Destino",
             label: "B",
           },
         ]
       : []),
   ], [nearbyBusinesses, routeReferences, livePosition?.lat, livePosition?.lng,
-    validOrigin?.lat, validOrigin?.lng, validStops, validDestination?.lat, validDestination?.lng]);
+    validOrigin?.lat, validOrigin?.lng, validStops, validDestination?.lat, validDestination?.lng, originLabel, destinationLabel]);
   const primaryMarkers = useMemo(
     () => markers.filter(marker => !("isReference" in marker && marker.isReference)),
     [markers],
@@ -926,6 +927,8 @@ export function OfflineRoutePreview({
 function RouteMapContent({
   origin,
   destination,
+  originLabel = "Origem",
+  destinationLabel = "Destino",
   stops,
   routes = [],
   privateOrigin = false,
@@ -1056,8 +1059,8 @@ function RouteMapContent({
       });
       markersRef.current.push(marker);
     };
-    makeMarker(origin, "Origem", "#BA5B45");
-    makeMarker(destination, "Destino", "#FFC928");
+    makeMarker(origin, originLabel.trim() || "Origem", "#BA5B45");
+    makeMarker(destination, destinationLabel.trim() || "Destino", "#FFC928");
     stops.forEach(stop => makeMarker(stop, stop.name, "#E8EEE8"));
     nearbyRouteReferences(
       origin,
@@ -1067,7 +1070,7 @@ function RouteMapContent({
       makeMarker(reference, "Referência · " + reference.name, "#3DE3FF")
     );
     map.fitBounds(bounds, 56);
-  }, [mapReady, origin, destination, stops, selectedRoutePoints]);
+  }, [mapReady, origin, destination, stops, selectedRoutePoints, originLabel, destinationLabel]);
 
   useEffect(() => {
     if (!mapRef.current || !window.google || !mapReady) return;
@@ -1147,10 +1150,10 @@ function RouteMapContent({
     selectedRoutePoints, businessReferences,
   ]);
   const journeyPoints = useMemo(() => [
-    ...(isMapPoint(origin) ? [{ id: "origin", name: "Origem", address: "Início da viagem", ...origin }] : []),
-    ...(isMapPoint(destination) ? [{ id: "destination", name: "Destino", address: "Chegada da viagem", ...destination }] : []),
+    ...(isMapPoint(origin) ? [{ id: "origin", name: originLabel.trim() || "Origem", address: "Início da viagem", ...origin }] : []),
+    ...(isMapPoint(destination) ? [{ id: "destination", name: destinationLabel.trim() || "Destino", address: "Chegada da viagem", ...destination }] : []),
     ...stops.filter(isMapPoint),
-  ], [origin?.lat, origin?.lng, destination?.lat, destination?.lng, stops]);
+  ], [origin?.lat, origin?.lng, destination?.lat, destination?.lng, stops, originLabel, destinationLabel]);
   const journeyWithReferences = useMemo(
     () => [...journeyPoints, ...nearbyReferences],
     [journeyPoints, nearbyReferences],
@@ -1184,6 +1187,8 @@ function RouteMapContent({
       >
         <OfflineRoutePreview
           origin={origin}
+          originLabel={originLabel}
+          destinationLabel={destinationLabel}
           destination={destination}
           stops={stops}
           routes={routes}
@@ -1206,6 +1211,8 @@ function RouteMapContent({
       >
         <OfflineRoutePreview
           origin={origin}
+          originLabel={originLabel}
+          destinationLabel={destinationLabel}
           destination={destination}
           routes={routes}
           stops={stops}
@@ -1259,6 +1266,8 @@ function RouteMapContent({
             <div className="relative">
               <OfflineRoutePreview
                 origin={origin}
+                originLabel={originLabel}
+                destinationLabel={destinationLabel}
                 destination={destination}
                 routes={routes}
                 stops={stops}
@@ -1312,6 +1321,8 @@ function RouteMapContent({
         <div className="planner-map-shell">
           <OfflineRoutePreview
             origin={origin}
+          originLabel={originLabel}
+          destinationLabel={destinationLabel}
             destination={destination}
             routes={routes}
             stops={stops}
@@ -1334,6 +1345,8 @@ function RouteMapContent({
         fallback={
           <OfflineRoutePreview
             origin={origin}
+          originLabel={originLabel}
+          destinationLabel={destinationLabel}
             destination={destination}
             routes={routes}
             stops={stops}

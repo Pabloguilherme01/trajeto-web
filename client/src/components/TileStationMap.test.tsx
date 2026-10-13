@@ -142,7 +142,8 @@ it("keeps route endpoints in a single scrollable rail on narrow maps", () => {
   expect(origin.className).toContain("text-card-foreground");
   expect(origin.className).toContain("focus-visible:outline-ring");
   expect(destination.className).toContain("snap-start");
-  expect(screen.getByRole("button", { name: "Aumentar zoom" }).className).toContain("bg-card/95");
+  expect(screen.getByRole("group", { name: "Controles do mapa" }).className).toContain("bg-card/95");
+  expect(screen.getByRole("button", { name: "Aumentar zoom" }).className).toContain("focus-visible:outline-ring");
 });
 
 it("contains map layout and overscroll inside the interactive viewport", () => {

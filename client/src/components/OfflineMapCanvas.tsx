@@ -4,6 +4,7 @@ import { prepareOfflineRoadIndex, ROAD_GRID, type PreparedRoadIndex } from "@/li
 import { mapMarkerGroups } from "@/lib/mapMarkerGroups";
 import { declutterMapReferences } from "@/lib/mapReferenceDeclutter";
 import { cullOffscreenMapReferences } from "@/lib/mapViewportReferences";
+import MapLocationPin from "@/components/MapLocationPin";
 import MapPlaceIcon from "@/components/MapPlaceIcon";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { appUrl } from "@/lib/appUrl";
@@ -673,7 +674,7 @@ export default function OfflineMapCanvas({
               aria-pressed={selectedMarkerId === marker.id}
               onClick={() => onSelect?.(marker)}
               onPointerDown={e => e.stopPropagation()}
-              className="absolute grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full focus-visible:ring-4 focus-visible:ring-ring"
+              className={"absolute grid w-11 -translate-x-1/2 place-items-center rounded-full focus-visible:ring-4 focus-visible:ring-ring " + (marker.id === "live-position" ? "h-11 -translate-y-1/2" : "h-[52px] -translate-y-full")}
               style={{
                 left: p.x,
                 top: p.y,
@@ -690,39 +691,24 @@ export default function OfflineMapCanvas({
               {marker.id === "live-position" && (
                 <span className="pointer-events-none absolute size-10 rounded-full bg-accent/30 motion-safe:animate-ping" />
               )}
-              <span
-                className={
-                  "relative grid size-9 place-items-center rounded-2xl border-[3px] border-background text-xs font-black shadow-lg " +
-                  (selectedMarkerId === marker.id ? "ring-4 ring-primary " : "") +
-                  (marker.id === "destination"
-                    ? "bg-foreground text-background"
-                    : marker.id === "live-position"
-                      ? "bg-accent text-accent-foreground"
-                      : marker.id === "origin"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-secondary text-secondary-foreground")
-                }
-              >
-                {marker.id === "live-position" ? (
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="size-5"
-                    aria-hidden="true"
-                  >
-                    <path d="M12 3 21 21 12 17 3 21Z" fill="currentColor" />
-                  </svg>
-                ) : (
-                  marker.id === "origin" || marker.id === "destination" || marker.id === "device-location"
-                    ? marker.label : <MapPlaceIcon item={marker} />
-                )}
-              </span>
+              {marker.id === "live-position" ? (
+                <span className="grid size-9 place-items-center rounded-full border-[3px] border-background bg-accent text-accent-foreground shadow-lg">
+                  <svg viewBox="0 0 24 24" className="size-5" aria-hidden="true"><path d="M12 3 21 21 12 17 3 21Z" fill="currentColor" /></svg>
+                </span>
+              ) : (
+                <span className={selectedMarkerId === marker.id ? "rounded-full ring-4 ring-primary/40" : ""}>
+                  <MapLocationPin tone={marker.id === "origin" ? "origin" : marker.id === "destination" ? "destination" : "reference"}>
+                    {marker.id === "origin" || marker.id === "destination" || marker.id === "device-location" ? marker.label : <MapPlaceIcon item={marker} />}
+                  </MapLocationPin>
+                </span>
+              )}
               {(marker.id === "origin" ||
                 marker.id === "destination" ||
                 marker.id === "live-position" ||
                 selectedMarkerId === marker.id) && (
                 <span
                   className={
-                    "pointer-events-none absolute top-8 w-max max-w-[10rem] -translate-x-1/2 truncate rounded-lg border px-2 py-1 text-xs font-bold shadow-sm " +
+                    "pointer-events-none absolute top-full mt-1 w-max max-w-[10rem] -translate-x-1/2 truncate rounded-lg border px-2 py-1 text-xs font-bold shadow-sm " +
                     "border-border bg-card/95 text-card-foreground"
                   }
                   title={marker.name}
