@@ -3,7 +3,7 @@ import { runInNewContext } from "node:vm";
 import { describe, expect, it, vi } from "vitest";
 
 function loadWorker(cached?: Response) {
-  const cache = { match: vi.fn(async (_request: unknown, options?: CacheQueryOptions) => options?.ignoreVary ? cached : undefined), put: vi.fn(), keys: vi.fn(async () => []), delete: vi.fn() };
+  const cache = { match: vi.fn(async (_request: unknown, options?: CacheQueryOptions) => options?.ignoreVary ? cached : undefined), put: vi.fn(), keys: vi.fn(async (): Promise<Request[]> => []), delete: vi.fn() };
   const context: Record<string, any> = {
     self: { addEventListener: vi.fn(), registration: { scope: "https://example.com/trajeto-web/" }, location: new URL("https://example.com/trajeto-web/sw.js"), clients: { claim: vi.fn() }, skipWaiting: vi.fn() },
     Response, Request, URL, AbortController, setTimeout, clearTimeout,
@@ -28,6 +28,19 @@ function recoverableWorker(missing: string[]) {
     return new Response(key.endsWith(".js") ? "installed code" : '<script src="./assets/installed.js"></script>', { headers: { "Content-Type": key.endsWith(".js") ? "text/javascript" : "text/html" } });
   });
   worker.cache.put.mockImplementation(async (request: string | Request, response: Response) => { const key = path(request); saved.set(key, response.clone()); absent.delete(key); });
+  // Model CacheStorage.keys() as a snapshot of the committed static entries.
+  // Snapshot JSON validity is still checked separately through match().
+  worker.cache.keys.mockImplementation(async () => {
+    const staticFiles = [
+      "./", "./index.html", "./site.webmanifest", "./favicon.svg",
+      "./icon-192.png", "./icon-512.png", "./icon-512-maskable.png",
+      "./icon-1024.png", "./robots.txt", "./404.html",
+      "./assets/installed.js", "./assets/business.js",
+    ];
+    return [...new Set([...staticFiles, ...saved.keys()])]
+      .filter(asset => !absent.has(asset))
+      .map(asset => new Request(new URL(asset, worker.self.registration.scope)));
+  });
   return { worker, saved };
 }
 
@@ -45,6 +58,25 @@ describe("service worker", () => {
       expect(postMessage).toHaveBeenCalledWith(expect.objectContaining({ type: "OFFLINE_PROGRESS", completed: 1, total: 1 }));
     } else expect(postMessage).toHaveBeenCalledTimes(1);
   });
+  it("checks the static cache inventory once without reading each bundled Response", async () => {
+    const { worker } = recoverableWorker([]);
+    expect(await worker.offlineStatus()).toMatchObject({ ready: true, businessesReady: true });
+    expect(worker.cache.keys).toHaveBeenCalledTimes(1);
+    const individuallyReadStaticFiles = worker.cache.match.mock.calls.filter(([asset]) =>
+      asset === "./assets/installed.js" || asset === "./assets/business.js");
+    expect(individuallyReadStaticFiles).toHaveLength(0);
+  });
+
+  it("finds missing chunks from the inventory and verifies them after recovery", async () => {
+    const { worker, saved } = recoverableWorker(["./assets/installed.js"]);
+    expect(await worker.offlineStatus()).toMatchObject({ ready: false });
+    worker.fetch.mockResolvedValue(new Response("installed code", { headers: { "Content-Type": "text/javascript" } }));
+    expect(await worker.restoreOfflinePackage()).toMatchObject({ ready: true });
+    expect(worker.cache.keys).toHaveBeenCalledTimes(3); // before, restore, after
+    expect(saved.has("./assets/installed.js")).toBe(true);
+    expect(worker.fetch).toHaveBeenCalledTimes(1);
+  });
+
   it("bounds offline installation downloads and waits for every asset", async () => {
     const worker = loadWorker();
     let pending = 0;
