@@ -23,6 +23,19 @@ test('honors restricted access, reverse lanes and bicycle exceptions', () => {
   assert.equal(roadPermissions({highway:'footway'}).driving,'denied');
   assert.equal(roadPermissions({highway:'residential','motor_vehicle:conditional':'no @ (Mo-Fr)'}).driving,'denied');
   assert.equal(roadPermissions({highway:'residential','oneway:foot':'yes'}).walking,'forward');
+  assert.equal(roadPermissions({highway:'residential','oneway:vehicle':'yes'}).driving,'forward');
+  assert.equal(roadPermissions({highway:'residential','oneway:vehicle':'yes'}).cycling,'forward');
+});
+
+test('excludes ways through motorcar and vehicle access restrictions on nodes', () => {
+  for (const key of ['motorcar','vehicle']) {
+    const pack = buildRoadPack({elements:[
+      {type:'node',id:1,lat:-15.75,lon:-48.28,tags:{[key]:'no'}},
+      {type:'node',id:2,lat:-15.751,lon:-48.28},
+      {type:'way',id:10,nodes:[1,2],tags:{highway:'residential'}}
+    ]});
+    assert.equal(pack.roads[0].permissions.driving,'denied');
+  }
 });
 
 test('excludes restricted turns, barriers and incomplete geometry from navigation', () => {

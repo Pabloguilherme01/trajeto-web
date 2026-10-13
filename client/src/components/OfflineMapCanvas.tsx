@@ -246,7 +246,8 @@ export default function OfflineMapCanvas({
         : validMarkers
     ).map(world);
     if (!points.length) points.push(world({ lat: -15.7545, lng: -48.2816 }));
-    return fitOfflineMapCamera(points, size.width, size.height, zoom);
+    return fitOfflineMapCamera(points, size.width, size.height, zoom,
+      anchors.some(point => point.id === "origin" || point.id === "destination"));
   }, [fingerprint, size.width, size.height, zoom]);
   const lastFocusRequest = useRef<typeof focusRequest>(null);
   useEffect(() => {

@@ -14,3 +14,9 @@ for (const [width,height] of [[320,360],[640,520]]) test(`route endpoints remain
     assert.ok(y>=Math.min(160,height*.45)-1e-6 && y<=height-64+1e-6);
   }
 });
+test('city catalogue retains its centered viewport and cluster spacing', () => {
+  const camera = fitOfflineMapCamera([{x:1,y:2},{x:1.001,y:2.002}],320,360,1,false);
+  assert.equal(camera.x,1.0005);
+  assert.equal(camera.y,2.001);
+  assert.ok(Math.abs(camera.scale - 130000) < 1e-6);
+});

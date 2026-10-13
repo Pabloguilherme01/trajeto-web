@@ -12,7 +12,7 @@ export function roadPermissions(tags) {
     const kind = tags.highway;
     const disallowed = mode === 'driving' ? ['footway','pedestrian','path','cycleway','steps','bridleway'] : mode === 'cycling' ? ['motorway','motorway_link','trunk','trunk_link','steps','footway','bridleway'] : ['motorway','motorway_link','trunk','trunk_link','cycleway'];
     const access = keys.map(key=>tags[key]).find(value=>value != null);
-    const onewayKeys = mode === 'walking' ? ['oneway:foot'] : mode === 'cycling' ? ['oneway:bicycle','oneway'] : ['oneway:motorcar','oneway:motor_vehicle','oneway'];
+    const onewayKeys = mode === 'walking' ? ['oneway:foot'] : mode === 'cycling' ? ['oneway:bicycle','oneway:vehicle','oneway'] : ['oneway:motorcar','oneway:motor_vehicle','oneway:vehicle','oneway'];
     // Conditional and directional access need a richer router. Exclude these
     // ways rather than interpreting a condition as unconditional permission.
     const unsupported = Object.keys(tags).some(key=>
@@ -35,7 +35,7 @@ export function buildRoadPack(data, retrievedAt = new Date().toISOString()) {
     const permissions = roadPermissions(way.tags);
     // Existing offline A* does not model turn restrictions or barrier nodes.
     // Keep their geometry for display but exclude their ways from routing.
-    if (restrictedWays.has(way.id) || geometry.some(node=>node.tags?.barrier || node.tags?.access || node.tags?.motor_vehicle || node.tags?.foot || node.tags?.bicycle)) {
+    if (restrictedWays.has(way.id) || geometry.some(node=>node.tags?.barrier || node.tags?.access || node.tags?.motorcar || node.tags?.motor_vehicle || node.tags?.vehicle || node.tags?.foot || node.tags?.bicycle)) {
       for (const mode of MODES) permissions[mode] = 'denied';
     }
     roads.push({id:way.id,kind:way.tags.highway,name:way.tags.name ?? way.tags.ref ?? '',points:geometry.map(node=>[node.lat,node.lon]),nodeIds:way.nodes,permissions});
