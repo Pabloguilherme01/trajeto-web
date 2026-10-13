@@ -304,6 +304,18 @@ async function networkFirst(request, cacheName) {
 
 
 
+// A single failed request during an explicit offline download should not
+// discard an otherwise healthy package. Retry network errors once, but never
+// retry HTTP errors or unexpected HTML/asset content (which may mean that the
+// installed build has been removed from Pages).
+async function fetchOfflineAsset(request) {
+  try {
+    return await fetchWithTimeout(request);
+  } catch {
+    return await fetchWithTimeout(request);
+  }
+}
+
 async function fetchWithTimeout(request) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), NETWORK_TIMEOUT_MS);
@@ -385,7 +397,7 @@ async function restoreOfflinePackage(onProgress = () => {}) {
       await Promise.all(missing.slice(index, index + 6).map(async ({ cache: target, asset }) => {
         const url = new URL(asset, self.registration.scope);
         if (url.origin !== self.location.origin || !url.href.startsWith(self.registration.scope) || url.pathname.includes("/api/")) throw new Error("update");
-        const response = await fetchWithTimeout(new Request(url, { cache: "reload" }));
+        const response = await fetchOfflineAsset(new Request(url, { cache: "reload" }));
         const type = response.headers.get("Content-Type") || "";
         if (!response.ok ||
           (/\.js$/.test(url.pathname) && !/(?:javascript|ecmascript)/i.test(type)) ||

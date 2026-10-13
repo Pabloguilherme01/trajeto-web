@@ -110,10 +110,20 @@ describe("service worker", () => {
       return postMessage;
     };
     worker.fetch.mockRejectedValueOnce(new Error("temporary connection"));
+    worker.fetch.mockRejectedValueOnce(new Error("connection still unavailable"));
     expect((await send()).mock.lastCall?.[0]).toMatchObject({ ready: false, reason: "connection" });
     worker.fetch.mockResolvedValueOnce(new Response("installed code", { headers: { "Content-Type": "text/javascript" } }));
     expect((await send()).mock.lastCall?.[0]).toMatchObject({ ready: true });
+    expect(worker.fetch).toHaveBeenCalledTimes(3);
+  });
+
+  it("retries a transient offline asset failure once and commits only a valid response", async () => {
+    const { worker, saved } = recoverableWorker(["./assets/installed.js"]);
+    worker.fetch.mockRejectedValueOnce(new Error("network stalled"));
+    worker.fetch.mockResolvedValueOnce(new Response("installed code", { headers: { "Content-Type": "text/javascript" } }));
+    expect(await worker.restoreOfflinePackage()).toMatchObject({ ready: true });
     expect(worker.fetch).toHaveBeenCalledTimes(2);
+    expect(await saved.get("./assets/installed.js")!.text()).toBe("installed code");
   });
 
   it("checks the static cache inventory once without reading each bundled Response", async () => {
@@ -285,6 +295,7 @@ describe("service worker", () => {
     worker.fetch.mockResolvedValue(new Response("new HTML", { headers: { "Content-Type": "text/html" } }));
     expect(await worker.restoreOfflinePackage()).toEqual({ ready: false, reason: "update" });
     expect(saved.has("./assets/installed.js")).toBe(false);
+    expect(worker.fetch).toHaveBeenCalledTimes(1); // Never retry a removed build's HTML fallback.
   });
   it("never fetches a newer manifest into the installed package", async () => {
     const { worker } = recoverableWorker(["./offline-assets.json"]);
