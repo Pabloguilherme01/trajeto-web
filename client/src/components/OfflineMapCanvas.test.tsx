@@ -495,6 +495,24 @@ it("keeps every road geometry while bounding SVG nodes by road style", async () 
   expect(screen.getByRole("img").textContent).toContain("BR-070");
 });
 
+it("keeps a selected overlapping reference visible and updates decluttering when selection changes", async () => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify(pack))));
+  const { default: Canvas } = await import("./OfflineMapCanvas");
+  const origin = { id: "origin", name: "Origem", label: "A", lat: -15.75, lng: -48.29 };
+  const destination = { id: "destination", name: "Destino", label: "B", lat: -15.76, lng: -48.27 };
+  const reference = { ...origin, id: "reference", name: "Escola próxima", isReference: true };
+  const markers = [origin, destination, reference];
+  const onZoom = vi.fn();
+  const view = render(<Canvas markers={markers} selectedMarkerId="origin" zoom={1} onZoom={onZoom} />);
+  await screen.findByText(/Ruas locais disponíveis/);
+  expect(screen.queryByRole("button", { name: "Selecionar Escola próxima" })).toBeNull();
+  view.rerender(<Canvas markers={markers} selectedMarkerId="reference" zoom={1} onZoom={onZoom} />);
+  expect(screen.getByRole("button", { name: "Selecionar Escola próxima" }).getAttribute("aria-pressed")).toBe("true");
+  expect(screen.getByRole("button", { name: "Selecionar Origem" })).toBeTruthy();
+  view.rerender(<Canvas markers={markers} selectedMarkerId="origin" zoom={1} onZoom={onZoom} />);
+  expect(screen.queryByRole("button", { name: "Selecionar Escola próxima" })).toBeNull();
+});
+
 it("only mounts nearby map references while keeping route pins and selected distant places", async () => {
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify(pack))));
   const { default: Canvas } = await import("./OfflineMapCanvas");

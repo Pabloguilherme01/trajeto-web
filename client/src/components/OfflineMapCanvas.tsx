@@ -281,8 +281,9 @@ export default function OfflineMapCanvas({
   // Route endpoints and GPS always take priority. The same 44px declutter grid
   // now only touches references that could be visible after panning.
   const displayedMarkers = useMemo(
-    () => declutterMapReferences(viewportMarkers, baseProject, marker => Boolean(marker.isReference)),
-    [viewportMarkers, markerWorld, camera.x, camera.y, camera.scale, size.width, size.height]
+    () => declutterMapReferences(viewportMarkers, baseProject,
+      marker => Boolean(marker.isReference) && marker.id !== selectedMarkerId),
+    [viewportMarkers, markerWorld, camera.x, camera.y, camera.scale, size.width, size.height, selectedMarkerId]
   );
   const markerGroups = useMemo(
     () =>
@@ -684,10 +685,11 @@ export default function OfflineMapCanvas({
                 selectedMarkerId === marker.id) && (
                 <span
                   className={
-                    "pointer-events-none absolute left-1/2 top-8 max-w-[10rem] -translate-x-1/2 truncate rounded-lg border px-2 py-1 text-xs font-bold shadow-sm " +
+                    "pointer-events-none absolute top-8 w-max max-w-[10rem] -translate-x-1/2 truncate rounded-lg border px-2 py-1 text-xs font-bold shadow-sm " +
                     "border-border bg-card/95 text-card-foreground"
                   }
                   title={marker.name}
+                  style={{ left: Math.max(92, Math.min(size.width - 92, p.x)) - p.x + 22 }}
                 >
                   {marker.name}
                 </span>

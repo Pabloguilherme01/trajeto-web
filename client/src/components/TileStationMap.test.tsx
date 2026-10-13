@@ -24,6 +24,35 @@ it("offers the official Organic Maps install link beside navigation", () => {
   expect(organic.textContent).toContain("Organic Maps");
 });
 
+it("shows the selected place name directly on its marker and moves the label on selection", () => {
+  render(<TileStationMap stations={[
+    { id: "a", name: "Escola Municipal", address: "Rua A", lat: -15.7545, lng: -48.2816 },
+    { id: "b", name: "Centro de Saúde", address: "Rua B", lat: -15.7545, lng: -48.2816 },
+  ]} />);
+  const school = screen.getByRole("button", { name: "Abrir Escola Municipal" });
+  const health = screen.getByRole("button", { name: "Abrir Centro de Saúde" });
+  expect(school.textContent).toContain("Escola Municipal");
+  expect(health.textContent).not.toContain("Centro de Saúde");
+  fireEvent.click(health);
+  expect(health.textContent).toContain("Centro de Saúde");
+  expect(school.textContent).not.toContain("Escola Municipal");
+});
+
+it("limits SVG route coordinate precision to hundredths of a pixel while preserving every point", () => {
+  const route = [
+    { lat: -15.75451234, lng: -48.28161234 },
+    { lat: -15.75459876, lng: -48.28169876 },
+    { lat: -15.75512345, lng: -48.28212345 },
+  ];
+  render(<TileStationMap stations={route.map((point, i) => ({ ...point, id: String(i), name: String(i), address: "Rua" }))} routePoints={route} />);
+  const points = screen.getByRole("img", { name: "Trajeto pelas ruas" }).querySelector("polyline")!.getAttribute("points")!.split(" ");
+  expect(points).toHaveLength(route.length);
+  for (const point of points) for (const coordinate of point.split(",")) {
+    expect(Number.isFinite(Number(coordinate))).toBe(true);
+    expect((coordinate.split(".")[1] ?? "").length).toBeLessThanOrEqual(2);
+  }
+});
+
 it("keeps the selected marker above coincident catalogue points", () => {
   render(<TileStationMap stations={[
     { id: "a", name: "Posto A", address: "Rua A", lat: -15.7545, lng: -48.2816 },
@@ -583,8 +612,8 @@ it("identifica os pontos A/B e centraliza o destino sem alterar a rota", () => {
   ];
   render(<TileStationMap stations={stations} selectionLabel="Escolher ponto da viagem" routePoints={stations} />);
   const framedOrigin = screen.getByRole("button", { name: "Abrir Origem" }).style.left;
-  expect(screen.getByRole("button", { name: "Abrir Origem" }).textContent).toBe("A");
-  expect(screen.getByRole("button", { name: "Abrir Destino" }).textContent).toBe("B");
+  expect(screen.getByRole("button", { name: "Abrir Origem" }).firstElementChild?.textContent).toBe("A");
+  expect(screen.getByRole("button", { name: "Abrir Destino" }).firstElementChild?.textContent).toBe("B");
   fireEvent.click(screen.getByRole("button", { name: "Ver destino: Destino" }));
   expect(screen.getByRole("button", { name: "Abrir Destino" }).style.left).toBe("160px");
   expect(screen.getByRole("button", { name: "Abrir Destino" }).getAttribute("aria-pressed")).toBe("true");
