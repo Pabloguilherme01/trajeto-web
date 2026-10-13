@@ -1,0 +1,25 @@
+name: Verified offline road pack
+on:
+  pull_request:
+    paths:
+      - 'scripts/offline-road-pack*'
+      - '.github/workflows/road-pack.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - run: node --test scripts/offline-road-pack.test.mjs
+      - run: node scripts/offline-road-pack.mjs
+      - uses: actions/upload-artifact@v7
+        with:
+          name: verified-offline-road-pack
+          path: client/public/data/aguas-lindas-offline-map.json
+          retention-days: 7
