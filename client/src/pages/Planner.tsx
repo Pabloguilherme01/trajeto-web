@@ -1383,7 +1383,7 @@ export default function Planner() {
 
                 </div>
                 <div className="min-h-[430px] max-w-full">
-                  <RouteMap origin={planned.route.origin} destination={planned.route.destination} stops={planned.stops} routes={routeForMap} privateOrigin={routeOriginIsPrivate} forceOffline={offlineMode || !online || liveTrip.active} travelMode={mode} livePosition={liveTrip.point ?? undefined} liveProgress={liveTrip.progress} liveSpeedMps={liveTrip.speed} />
+                  <RouteMap originLabel={routeOriginIsPrivate ? PRIVATE_LOCATION_LABEL : origin} destinationLabel={destination} origin={planned.route.origin} destination={planned.route.destination} stops={planned.stops} routes={routeForMap} privateOrigin={routeOriginIsPrivate} forceOffline={offlineMode || !online || liveTrip.active} travelMode={mode} livePosition={liveTrip.point ?? undefined} liveProgress={liveTrip.progress} liveSpeedMps={liveTrip.speed} />
                 </div>
               </section>
             )}

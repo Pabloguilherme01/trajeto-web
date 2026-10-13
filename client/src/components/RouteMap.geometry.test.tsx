@@ -76,3 +76,19 @@ it("reuses journey markers across travel mode changes and lets references be hid
   fireEvent.click(screen.getByRole("button", { name: "Mostrar referências" }));
   expect(captures.stations.at(-1)).toBe(original);
 });
+
+it("identifies journey endpoints by name in the published map and refreshes same-point labels", () => {
+  const trip = { origin: { lat: -15.7545, lng: -48.2816 }, destination: { lat: -15.77665, lng: -48.27935 }, stops: [], routes: [{ id: "road", source: "osrm" as const, polyline: "r`d_B~~teHbwFg_mA" }] };
+  const view = render(<RouteMap {...trip} originLabel="Prefeitura" destinationLabel="UPA Mansões Odisseia" />);
+  expect(captures.stations.at(-1)).toEqual(expect.arrayContaining([expect.objectContaining({ id: "destination", name: "UPA Mansões Odisseia" })]));
+  view.rerender(<RouteMap {...trip} originLabel="Prefeitura" destinationLabel="Entrada da UPA" />);
+  expect(captures.stations.at(-1)).toEqual(expect.arrayContaining([expect.objectContaining({ id: "destination", name: "Entrada da UPA" })]));
+});
+
+it("keeps coordinate-only journey points searchable by their endpoint role", () => {
+  render(<RouteMap origin={{ lat: -15.7545, lng: -48.2816 }} destination={{ lat: -15.77665, lng: -48.27935 }} originLabel="-15.7545,-48.2816" destinationLabel="-15.77665,-48.27935" stops={[]} routes={[{ id: "road", source: "osrm", polyline: "r`d_B~~teHbwFg_mA" }]} />);
+  expect(captures.stations.at(-1)).toEqual(expect.arrayContaining([
+    expect.objectContaining({ id: "origin", name: "Origem" }),
+    expect.objectContaining({ id: "destination", name: "Destino" }),
+  ]));
+});
