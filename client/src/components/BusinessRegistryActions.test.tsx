@@ -27,3 +27,9 @@ it("offers a manual copy fallback without adding a route for an unnamed record",
   await waitFor(() => expect(screen.getByRole("status").textContent).toContain("copie o CNPJ manualmente"));
   expect(screen.queryByRole("link")).toBeNull();
 });
+
+it("explains that a named business cannot be routed without a verified point", () => {
+  render(<BusinessRegistryActions cnpj="12345678000190" identified />);
+  expect(screen.getByText(/Empresa identificada, mas sem ponto de chegada confirmado/)).toBeTruthy();
+  expect(screen.queryByRole("link", { name: "Ver empresa no mapa" })).toBeNull();
+});

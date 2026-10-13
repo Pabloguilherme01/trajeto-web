@@ -1,4 +1,4 @@
-import { businessesForMapLayer, businessesForMapLayerByIdentity, searchBusinesses } from "@/lib/businessSearch";
+import { businessesForRegistryLayer, businessesForMapLayerByIdentity, partitionBusinessCatalog, searchBusinesses } from "@/lib/businessSearch";
 import { hasBusinessName, type BusinessCatalogMode } from "@/lib/businessCatalogState";
 import { filterCityAtlasStreets, filterCityAtlasAreas } from "@/lib/cityAtlasSearch";
 import { selectCityMapItems, cachedDestinationKey, type CityMapCandidate } from "@/lib/cityMapSelection";
@@ -286,21 +286,26 @@ export default function CityMap() {
     const matches = searching
       ? searchBusinesses(businesses.items, deferredQuery)
       : businessMode === "cnpj"
-        ? businessesForMapLayer(businesses.items, atlasLayer)
-        : businessesForMapLayerByIdentity(businesses.items, atlasLayer, businessMode === "unnamed" ? "unnamed" : "named");
+        ? businessesForRegistryLayer(businesses.items, atlasLayer)
+        : businessMode === "unnamed"
+          ? partitionBusinessCatalog(businessesForRegistryLayer(businesses.items, atlasLayer)).unnamed
+          : businessesForMapLayerByIdentity(businesses.items, atlasLayer, "named");
     if (!searching && !selectedArea) return matches;
     return matches.filter(item => {
       const identified = hasBusinessName(item.name);
       if (businessMode === "unnamed" ? identified : businessMode !== "cnpj" && !identified) return false;
-      if ((atlasLayer !== "todos" && item.category !== atlasLayer) || !(item.destination ?? item.address ?? "")) return false;
+      if ((atlasLayer !== "todos" && item.category !== atlasLayer) || (!registryMode && !(item.destination ?? item.address ?? ""))) return false;
       return !selectedArea || mentionsDestinationArea(selectedArea, item.name, item.detail, item.address, item.destination);
     });
-  }, [businesses.items, needsBusinessCatalog, deferredQuery, atlasLayer, selectedArea, businessMode]);
+  }, [businesses.items, needsBusinessCatalog, deferredQuery, atlasLayer, selectedArea, businessMode, registryMode]);
   const allAtlasDestinations = useMemo(() => {
+    // Company-only tabs have no public atlas points to combine with the
+    // registry. Reuse the indexed array instead of copying up to 21k rows.
+    if (businessMode !== "all") return companyMatches;
     const routeKeys = new Set(
       categoryDestinations.map(item => normalizeCatalogText(item.destination))
     );
-    const publicAtlas = businessMode !== "all" ? [] : (referenceLayer === "ruas"
+    const publicAtlas = (referenceLayer === "ruas"
       ? filterCityAtlasStreets(baseAtlas, deferredQuery)
       : referenceLayer === "bairros"
         ? filterCityAtlasAreas(baseAtlas, deferredQuery)
@@ -723,7 +728,10 @@ export default function CityMap() {
                   <div className="mt-3">
                     {item.business && registryMode ? (
                       <BusinessRegistryActions cnpj={item.business.cnpj}
-                        mapUrl={hasBusinessName(item.name) ? cityMapLayerUrl(item.business.cnpj, activeLayer, "all", selectedArea, "named") : undefined} />
+                        identified={hasBusinessName(item.name)}
+                        mapUrl={hasBusinessName(item.name) && Boolean(target) && typeof item.lat === "number" && typeof item.lng === "number" && isAguasLindasRoutePoint({ lat: item.lat, lng: item.lng })
+                          ? cityMapLayerUrl(item.business.cnpj, activeLayer, "all", selectedArea, "named")
+                          : undefined} />
                     ) : item.id.startsWith("atlas-bairro-") ? (
                       <Link href={buildDestinationPlannerUrl(target ?? item.name)}
                         className="flex min-h-11 items-center justify-center rounded-xl border border-primary/25 bg-primary/[.06] px-3 text-xs font-bold text-primary">

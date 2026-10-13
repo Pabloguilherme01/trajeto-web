@@ -113,9 +113,20 @@ export function partitionBusinessCatalog(items: CityAtlasItem[]) {
   return partition;
 }
 /**
- * Identity-aware map slices are cached against their immutable atlas layer.
- * No second 21k-row partition is needed when switching map or CNPJ tabs.
- * Keep the unfiltered catalogue available for registry-only consultation.
+ * The CNPJ directory is not a map layer: keep addressless companies
+ * consultable, including records that cannot safely become map markers.
+ * Category indexes are shared with the existing search, built lazily.
+ */
+export function businessesForRegistryLayer(
+  items: CityAtlasItem[],
+  layer: "todos" | CityAtlasLayer,
+): CityAtlasItem[] {
+  return layer === "todos" ? items : categoryItems(items, layer);
+}
+
+/**
+ * Cache identity-aware map slices by immutable catalogue layer so switching
+ * filters never reclassifies thousands of business rows unnecessarily.
  */
 export function businessesForMapLayerByIdentity(
   items: CityAtlasItem[],
