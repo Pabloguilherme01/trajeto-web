@@ -1,5 +1,6 @@
 import type { CityAtlasItem } from "@/lib/cityAtlas";
 import { isMapPoint } from "@/lib/mapGeometry";
+import { hasBusinessName } from "@/lib/businessCatalogState";
 import { LOCAL_GEOCODE_POINTS } from "@/lib/localGeocoding";
 
 export type RouteStep = {
@@ -81,29 +82,32 @@ export function nearbyBusinessReferences(
   destination?: { lat: number; lng: number },
 ) {
   if (!isMapPoint(destination)) return [];
-  return items
-    .filter(
-      item =>
-        typeof item.lat === "number" &&
-        typeof item.lng === "number" &&
-        Math.abs(item.lat - destination.lat) < 0.01 &&
-        Math.abs(item.lng - destination.lng) < 0.01,
-    )
-    .map(item => ({
-      item,
-      distance: distanceMeters(destination, { lat: item.lat!, lng: item.lng! }),
-    }))
-    .filter(entry => entry.distance <= 800)
-    .sort((a, b) => a.distance - b.distance)
-    .slice(0, 6)
-    .map(({ item }) => ({
-      id: item.id,
-      name: item.name,
-      lat: item.lat!,
-      lng: item.lng!,
-      label: "R",
-      precision: item.coordinateLabel,
-    }));
+  // The route map only needs six nearby named companies. Retain the nearest
+  // candidates as we scan rather than materializing and sorting thousands of
+  // catalog records on each destination change. Equal distances keep catalog
+  // order, just as the previous stable sort did.
+  const closest: Array<{ item: CityAtlasItem; distance: number }> = [];
+  for (const item of items) {
+    if (!hasBusinessName(item.name) ||
+      !Number.isFinite(item.lat) || !Number.isFinite(item.lng) ||
+      Math.abs(item.lat! - destination.lat) >= 0.01 ||
+      Math.abs(item.lng! - destination.lng) >= 0.01) continue;
+    const distance = distanceMeters(destination, { lat: item.lat!, lng: item.lng! });
+    if (distance > 800) continue;
+    let insertAt = closest.findIndex(candidate => candidate.distance > distance);
+    if (insertAt < 0) insertAt = closest.length;
+    if (insertAt >= 6) continue;
+    closest.splice(insertAt, 0, { item, distance });
+    if (closest.length > 6) closest.pop();
+  }
+  return closest.map(({ item }) => ({
+    id: item.id,
+    name: item.name,
+    lat: item.lat!,
+    lng: item.lng!,
+    label: "R",
+    precision: item.coordinateLabel,
+  }));
 }
 
 export function currentRouteGuidance(
