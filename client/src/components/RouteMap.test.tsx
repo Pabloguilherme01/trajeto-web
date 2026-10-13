@@ -581,7 +581,7 @@ it("mostra resumo e guia completo no mapa online do Pages sem duplicar no fallba
 
 it("lets the user declutter offline references and labels straight-line estimates explicitly", () => {
   render(<OfflineRoutePreview origin={{ lat: -15.7545, lng: -48.2816 }} destination={{ lat: -15.74637, lng: -48.27584 }} stops={[]} forceOffline routes={[{ id: "estimate", source: "local-estimate", polyline: "r`d_B~~teHbwFg_mA" }]} />);
-  expect(screen.getByText("Rota pelas ruas indisponível · linha reta apenas como referência")).toBeTruthy();
+  expect(screen.getByText("Estimativa em linha reta · rota pelas ruas indisponível")).toBeTruthy();
   const button = screen.getByRole("button", { name: "Ocultar referências" });
   expect(button.getAttribute("aria-pressed")).toBe("true");
   fireEvent.click(button);

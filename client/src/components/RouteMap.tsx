@@ -531,7 +531,7 @@ export function OfflineRoutePreview({
           {selected?.source === "offline-road"
             ? "Trajeto calculado na malha salva · sem trânsito ao vivo"
             : selected?.source === "local-estimate"
-              ? "Rota pelas ruas indisponível · linha reta apenas como referência"
+              ? "Estimativa em linha reta · rota pelas ruas indisponível"
               : routePoints.length
                 ? "Geometria da rota disponível"
                 : "Sem geometria viária confirmada"}
