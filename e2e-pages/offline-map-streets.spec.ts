@@ -163,7 +163,10 @@ test("Pages: imported companies reload offline and plan all modes from their act
     // controlled, just as the other Pages offline preparation test does.
     // This tests package recovery instead of racing the first installation.
     await page.evaluate(async () => { await navigator.serviceWorker.ready; });
-    await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller)), { timeout: 60000 }).toBe(true);
+    if (!(await page.evaluate(() => Boolean(navigator.serviceWorker.controller)))) {
+      await page.reload({ waitUntil: "domcontentloaded" });
+    }
+    await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller)), { timeout: 20000 }).toBe(true);
     await page.getByRole("button", { name: "Preparar acesso offline", exact: true }).click();
     await expect(page.getByText("Pronto para usar sem internet neste aparelho.")).toBeVisible({ timeout: 65000 });
   });
