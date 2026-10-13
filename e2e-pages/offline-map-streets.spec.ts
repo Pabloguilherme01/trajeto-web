@@ -12,10 +12,12 @@ test.afterEach(async ({ page }, testInfo) => {
         const dataCache = await caches.open(dataCacheName);
         mapPrepared = Boolean(await dataCache.match("/trajeto-web/data/aguas-lindas-city-atlas.json"));
       }
+      const readinessText = document.querySelector('[aria-labelledby="offline-readiness-title"] [role="status"]')?.textContent?.trim();
       return {
         serviceWorkerControlled: Boolean(navigator.serviceWorker.controller),
         registrationReady: Boolean((await navigator.serviceWorker.getRegistration())?.active),
         offlineReadyLabelVisible: Boolean(document.body?.textContent?.includes("Pronto para usar sem internet neste aparelho.")),
+        offlineStatusLabel: readinessText ?? null, // App status only; no coordinates or searches.
         cacheCount: keys.length,
         mapPrepared,
       };
@@ -157,6 +159,11 @@ test("Pages: imported companies reload offline and plan all modes from their act
   await page.setViewportSize({ width: 320, height: 640 });
   await test.step("prepare offline package and confirm ready on Pages", async () => {
     await page.goto("ajuda");
+    // The installation is asynchronous. Prepare only after this page is
+    // controlled, just as the other Pages offline preparation test does.
+    // This tests package recovery instead of racing the first installation.
+    await page.evaluate(async () => { await navigator.serviceWorker.ready; });
+    await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller)), { timeout: 60000 }).toBe(true);
     await page.getByRole("button", { name: "Preparar acesso offline", exact: true }).click();
     await expect(page.getByText("Pronto para usar sem internet neste aparelho.")).toBeVisible({ timeout: 65000 });
   });
