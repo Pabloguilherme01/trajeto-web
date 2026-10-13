@@ -20,3 +20,15 @@ test('city catalogue retains its centered viewport and cluster spacing', () => {
   assert.equal(camera.y,2.001);
   assert.ok(Math.abs(camera.scale - 130000) < 1e-6);
 });
+for (const [dx,dy] of [[0.0000055,0],[0,0.0000055],[0.0000055,0.0000055]]) {
+  test(`short trip separates endpoint pins (${dx}, ${dy})`, () => {
+    const points = [{x:0.366,y:0.544},{x:0.366+dx,y:0.544+dy}];
+    const camera = fitOfflineMapCamera(points,320,360,1);
+    assert.ok(Math.hypot(dx,dy)*camera.scale >= 110, 'nearby pins need readable space');
+  });
+}
+test('coincident endpoints have a finite, bounded neighbourhood view', () => {
+  const camera = fitOfflineMapCamera([{x:0.366,y:0.544},{x:0.366,y:0.544}],320,360,1);
+  assert.ok(Number.isFinite(camera.x) && Number.isFinite(camera.y));
+  assert.ok(camera.scale > 0 && camera.scale <= 40_000_000);
+});

@@ -18,9 +18,12 @@ export function fitOfflineMapCamera(points: readonly WorldPoint[], width: number
     };
   }
   const left = 44, right = 80, top = Math.min(160, height * 0.45), bottom = 64;
+  // About 240 m at the equator: keep short trips readable without an
+  // unbounded zoom when the endpoints coincide. Catalogue fitting stays wider.
+  const minimumTripSpan = 0.000006;
   const baseScale = Math.min(
-    Math.max(1, width - left - right) / Math.max(maxX - minX, 0.00004),
-    Math.max(1, height - top - bottom) / Math.max(maxY - minY, 0.00004),
+    Math.max(1, width - left - right) / Math.max(maxX - minX, minimumTripSpan),
+    Math.max(1, height - top - bottom) / Math.max(maxY - minY, minimumTripSpan),
   );
   return {
     x: (minX + maxX) / 2 - (left - right) / (2 * baseScale),

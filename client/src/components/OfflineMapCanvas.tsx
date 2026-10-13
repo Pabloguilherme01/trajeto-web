@@ -597,6 +597,7 @@ export default function OfflineMapCanvas({
                 road.name &&
                 (showAllStreetNames ||
                   zoom >= 2 ||
+                  metresPerPixel <= 3 ||
                   road.priority >= 2)
             )
             .map(road => {
