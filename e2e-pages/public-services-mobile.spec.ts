@@ -60,14 +60,14 @@ test("Central shortcuts restore ready routes after a search at 320px", async ({ 
   await page.setViewportSize({ width: 320, height: 844 });
   await page.goto("servicos?q=anatel&categoria=telecom&recurso=online", { waitUntil: "domcontentloaded" });
   await expect(page.locator("#ready-routes")).toHaveCount(0);
-  await page.getByRole("button", { name: "Usar offline", exact: true }).click();
+  await page.getByRole("button", { name: "Localizar offline", exact: true }).click();
   await expect(page).toHaveURL(/\/servicos$/);
   await expect(page.locator("#ready-routes")).toBeFocused();
-  await expect(page.getByRole("button", { name: /Mostrar somente destinos offline/ })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("button", { name: /Mostrar somente locais offline/ })).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("searchbox", { name: "Buscar rota pronta" }).fill("xxxxxxxx");
   await page.getByRole("button", { name: "Rotas prontas", exact: true }).click();
   await expect(page.getByRole("searchbox", { name: "Buscar rota pronta" })).toHaveValue("");
-  await expect(page.getByRole("button", { name: /Mostrar somente destinos offline/ })).toHaveAttribute("aria-pressed", "false");
+  await expect(page.getByRole("button", { name: /Mostrar somente locais offline/ })).toHaveAttribute("aria-pressed", "false");
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
 

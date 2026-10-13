@@ -534,13 +534,13 @@ export default function PublicServices() {
               type="button"
               onClick={() => openReadyRoutesFromSummary(true)}
               className="min-w-0 rounded-2xl border border-border/10 bg-background/55 p-3 text-left transition hover:border-accent/30 focus-visible:outline-2 focus-visible:outline-ring sm:min-w-0"
-              aria-label={offlineRoutesChecked ? `Mostrar ${offlineReadyRouteIds.size} destinos offline` : "Verificar destinos offline"}
+              aria-label={offlineRoutesChecked ? `Mostrar ${offlineReadyRouteIds.size} locais offline` : "Verificar locais offline"}
             >
               <span className="block text-xl font-black tracking-tight text-foreground">
                 {offlineRoutesChecked ? offlineReadyRouteIds.size : "…"}
               </span>
               <span className="mt-0.5 block text-xs font-bold text-muted-foreground">
-                destinos offline
+                locais offline
               </span>
             </button>
           </div>
@@ -626,7 +626,7 @@ export default function PublicServices() {
             className="premium-card inline-flex min-h-14 min-w-0 items-center gap-2 rounded-2xl border border-border/15 bg-card px-3 text-left text-sm font-black transition hover:border-accent/35 focus-visible:outline-2 focus-visible:outline-ring"
           >
             <WifiOff className="size-4 shrink-0 text-accent" />
-            <span className="min-w-0">Usar offline</span>
+            <span className="min-w-0">Localizar offline</span>
           </button>
         </nav>
 
@@ -1139,9 +1139,10 @@ export default function PublicServices() {
                     type="button"
                     disabled={!offlineRoutesChecked}
                     aria-label={offlineRoutesChecked
-                      ? `Mostrar somente destinos offline · ${offlineReadyRouteIds.size} destinos`
-                      : "Verificando destinos offline"}
+                      ? `Mostrar somente locais offline · ${offlineReadyRouteIds.size} destinos`
+                      : "Verificando locais offline"}
                     aria-pressed={readyRouteOfflineOnly}
+                    aria-describedby="service-offline-location-note"
                     onClick={() => setReadyRouteOfflineOnly(value => !value)}
                     className={
                       "inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-3 text-xs font-black " +
@@ -1180,6 +1181,11 @@ export default function PublicServices() {
                     );
                   })}
                 </div>
+                <p id="service-offline-location-note" className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                  Localizável offline significa que o destino está identificado no atlas do aparelho.
+                  Não garante que o percurso por ruas esteja salvo. Para navegar sem internet,
+                  prepare o trajeto no Planejador antes de sair.
+                </p>
                 <div aria-busy={readyRouteSearchUpdating} className="mobile-scroll-x mt-3 flex snap-x snap-mandatory gap-2 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-5">
                   {displayedReadyRoutes.map(route => (
                     <article
@@ -1207,7 +1213,7 @@ export default function PublicServices() {
                           ) : offlineReadyRouteIds.has(route.id) ? (
                             <>
                               <WifiOff className="size-3 shrink-0" />
-                              Destino offline
+                              Localizável offline
                             </>
                           ) : (
                             <>

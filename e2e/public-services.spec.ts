@@ -67,7 +67,7 @@ test("busca de rotas prontas filtra destinos sem overflow em 320 px", async ({ p
 
   await search.fill("UPA");
   const upaCard = routes.locator("article").filter({ hasText: "UPA" }).first();
-  await expect(upaCard.locator('[data-route-readiness="offline"]')).toHaveText(/Destino offline/);
+  await expect(upaCard.locator('[data-route-readiness="offline"]')).toHaveText(/Localizável offline/);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
 
@@ -126,9 +126,11 @@ test("filtro Offline mostra apenas rotas resolvidas localmente em 320 px", async
   await page.setViewportSize({ width: 320, height: 720 });
   await page.goto("/servicos", { waitUntil: "domcontentloaded" });
   const routes = page.locator('section[aria-labelledby="ready-routes-title"]');
-  const offline = routes.getByRole("button", { name: /Mostrar somente destinos offline/ });
+  const offline = routes.getByRole("button", { name: /Mostrar somente locais offline/ });
   await offline.click();
   await expect(offline).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByText(/Não garante que o percurso por ruas esteja salvo/)).toBeVisible();
+  await expect(offline).toHaveAttribute("aria-describedby", "service-offline-location-note");
   await expect(routes.locator('[data-route-readiness="online"]')).toHaveCount(0);
   await routes.getByRole("searchbox", { name: "Buscar rota pronta" }).fill("UPA");
   await expect(routes.locator('[data-route-readiness="offline"]').first()).toBeVisible();
@@ -143,13 +145,13 @@ test("ações principais ficam acessíveis e sem overflow em 320 px", async ({ p
   await expect(actions.getByRole("button", { name: "Buscar serviço" })).toBeVisible();
   await expect(actions.getByRole("button", { name: "Mapa da cidade" })).toBeVisible();
   await expect(actions.getByRole("button", { name: "Rotas prontas" })).toBeVisible();
-  await expect(actions.getByRole("button", { name: "Usar offline" })).toBeVisible();
+  await expect(actions.getByRole("button", { name: "Localizar offline" })).toBeVisible();
 
   await actions.getByRole("button", { name: "Buscar serviço" }).click();
   await expect(page.getByRole("textbox", { name: "Buscar serviços públicos" })).toBeFocused();
 
-  await actions.getByRole("button", { name: "Usar offline" }).click();
-  await expect(page.getByRole("button", { name: /Mostrar somente destinos offline/ })).toHaveAttribute("aria-pressed", "true");
+  await actions.getByRole("button", { name: "Localizar offline" }).click();
+  await expect(page.getByRole("button", { name: /Mostrar somente locais offline/ })).toHaveAttribute("aria-pressed", "true");
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
 
@@ -161,8 +163,8 @@ test("resumo da Central abre filtros e rotas offline em 320 px", async ({ page }
   await summary.getByRole("button", { name: /Abrir \d+ categorias de serviços/ }).click();
   await expect(page.locator("#service-filters details")).toHaveJSProperty("open", true);
 
-  await summary.getByRole("button", { name: /Mostrar \d+ destinos offline/ }).click();
-  const offline = page.getByRole("button", { name: /Mostrar somente destinos offline/ });
+  await summary.getByRole("button", { name: /Mostrar \d+ locais offline/ }).click();
+  const offline = page.getByRole("button", { name: /Mostrar somente locais offline/ });
   await expect(offline).toHaveAttribute("aria-pressed", "true");
   await expect(page.locator("#ready-routes")).toBeVisible();
 
@@ -178,7 +180,7 @@ test("resumo da Central fica visível e sem overflow em 320 px", async ({ page }
   await expect(summary.getByText("serviços oficiais", { exact: true })).toBeVisible();
   await expect(summary.getByText("categorias", { exact: true })).toBeVisible();
   await expect(summary.getByText("rotas prontas", { exact: true })).toBeVisible();
-  await expect(summary.getByText("destinos offline", { exact: true })).toBeVisible();
+  await expect(summary.getByText("locais offline", { exact: true })).toBeVisible();
 
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
