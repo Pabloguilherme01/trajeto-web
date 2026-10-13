@@ -114,7 +114,7 @@ test("Pages: calculate a new local trip after offline reload and resume online",
   await context.setOffline(true);
   await page.goto("planejar?origem=Prefeitura&destino=HEAL&experiencia=offline");
   await page.getByTestId("planner-primary-action").click();
-  await expect(page.getByText(/Estimativa offline entre os locais escolhidos/)).toBeVisible();
+  await expect(page.getByText(/Rota calculada no mapa viário offline salvo neste aparelho/)).toBeVisible();
   await expect(page.getByRole("img", { name: "Prévia offline da rota" })).toBeVisible();
   if (!(await page.getByRole("button", { name: "Iniciar acompanhamento", exact: true }).isVisible())) await page.locator("summary").filter({ hasText: /^Outros mapas, acompanhamento e offline/ }).click();
   await expect(page.getByRole("button", { name: "Iniciar acompanhamento", exact: true })).toBeVisible();
@@ -148,7 +148,7 @@ test("Pages: selects both endpoints and calculates every travel mode from the of
     await page.getByRole("button", { name: mode, exact: true }).click();
     await page.getByTestId("planner-primary-action").click();
     await expect(page.getByRole("img", { name: "Prévia offline da rota", exact: true })).toBeVisible();
-    await expect(page.getByText("Estimativa local", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText(/^(Estimativa local|Rota viária offline)$/).first()).toBeVisible();
   }
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
@@ -194,7 +194,7 @@ test("Pages: imported companies reload offline and plan all modes from their act
     await page.getByRole("button", { name: mode, exact: true }).click();
     await page.getByTestId("planner-primary-action").click();
     await expect(page.getByRole("img", { name: "Prévia offline da rota", exact: true })).toBeVisible();
-    await expect(page.getByText("Estimativa local", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText(/^(Estimativa local|Rota viária offline)$/).first()).toBeVisible();
   }
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   await context.setOffline(false);

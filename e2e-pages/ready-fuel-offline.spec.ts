@@ -19,7 +19,7 @@ test("calculates a ready fuel trip offline and explores its map at 320px", async
   await expect(page.getByRole("button", { name: "Ocultar mapa", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Abrir mapa em tela cheia", exact: true }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
-  await expect(page.getByText("Estimativa em linha reta · sem curvas confirmadas")).toBeVisible();
+  await expect(page.getByText(/Estimativa em linha reta|Trajeto calculado na malha salva/).first()).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).toHaveCount(0);

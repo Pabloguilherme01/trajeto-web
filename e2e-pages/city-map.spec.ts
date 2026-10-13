@@ -108,7 +108,7 @@ test("street atlas: filters references and calculates a bundled destination offl
   await expect(page.getByTestId("planner-primary-action")).toBeVisible();
   await context.setOffline(true);
   await page.getByTestId("planner-primary-action").click();
-  await expect(page.getByText(/Estimativa local/).first()).toBeVisible();
+  await expect(page.getByText("Rota viária offline", { exact: true }).first()).toBeVisible();
 });
 
 test("live trip: updates the local map without storing GPS and stops explicitly", async ({ page }) => {
@@ -126,14 +126,14 @@ test("live trip: updates the local map without storing GPS and stops explicitly"
   await expect(page.getByRole("button", { name: "Iniciar acompanhamento", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Iniciar acompanhamento", exact: true }).click();
   await page.evaluate(() => {
-    (window as unknown as { liveGps: PositionCallback }).liveGps({ coords: { latitude: -15.7431234, longitude: -48.2816, accuracy: 20 }, timestamp: Date.now() } as GeolocationPosition);
+    (window as unknown as { liveGps: PositionCallback }).liveGps({ coords: { latitude: -15.7544885, longitude: -48.2569453, accuracy: 20 }, timestamp: Date.now() } as GeolocationPosition);
   });
   await expect(page.getByText("Distância restante", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Selecionar Você agora", exact: true })).toBeVisible();
   for (let sample = 0; sample < 3; sample++) {
     await page.evaluate(async () => {
       await new Promise(resolve => setTimeout(resolve, 10));
-      (window as unknown as { liveGps: PositionCallback }).liveGps({ coords: { latitude: -15.7431234, longitude: -48.2816, accuracy: 20, speed: 3 }, timestamp: Date.now() } as GeolocationPosition);
+      (window as unknown as { liveGps: PositionCallback }).liveGps({ coords: { latitude: -15.7544885, longitude: -48.2569453, accuracy: 20, speed: 3 }, timestamp: Date.now() } as GeolocationPosition);
     });
   }
   await expect(page.getByText(/chegada estimada pela velocidade atual/)).toBeVisible();
@@ -161,7 +161,7 @@ test("live trip: updates the local map without storing GPS and stops explicitly"
   await page.getByRole("button", { name: "Ampliar mapa", exact: true }).click();
   await expect(page.getByRole("button", { name: "Reduzir mapa", exact: true })).toHaveAttribute("aria-pressed", "true");
   const stored = await page.evaluate(() => JSON.stringify({ local: { ...localStorage }, session: { ...sessionStorage }, url: location.href }));
-  for (const latitude of ["-15.7431234", "-15.7401234", "-15.7391234"]) expect(stored).not.toContain(latitude);
+  for (const latitude of ["-15.7544885", "-15.7401234", "-15.7391234"]) expect(stored).not.toContain(latitude);
   await page.getByRole("button", { name: "Parar acompanhamento", exact: true }).click();
   await expect(page.getByRole("button", { name: "Selecionar Você agora", exact: true })).toHaveCount(0);
   expect(await page.evaluate(() => (window as unknown as { stopped: number }).stopped)).toBe(44);

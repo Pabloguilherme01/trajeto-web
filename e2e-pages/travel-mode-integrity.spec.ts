@@ -45,7 +45,7 @@ for (const mode of ["A pé", "Bicicleta", "Transporte"]) {
     if (!await page.getByRole("button", { name: mode, exact: true }).isVisible()) await page.locator("summary").filter({ hasText: "Alterar viagem" }).click();
     await page.getByRole("button", { name: mode, exact: true }).click();
     await page.getByTestId("planner-primary-action").click();
-    await expect(page.getByText("Estimativa local", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText(mode === "Transporte" ? "Estimativa local" : "Rota viária offline", { exact: true }).first()).toBeVisible();
     if (mode === "Transporte") await expect(page.getByText(/sem linhas, horários, espera ou conexões confirmados/)).toBeVisible();
     expect(providerRequests).toEqual([]);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);

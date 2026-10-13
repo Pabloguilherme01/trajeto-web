@@ -904,7 +904,8 @@ export async function calculatePrivateLocationRoute(
 
   // Deliberately do not call OSRM here. Only the destination may need
   // geocoding; the user's current location never leaves the device.
-  return buildLocalEstimate(origin, destination, mode);
+  const offlineRoad = await buildOfflineRoadResult(origin, destination, mode);
+  return offlineRoad ?? buildLocalEstimate(origin, destination, mode);
 }
 
 export async function calculatePublicRoute(
@@ -958,7 +959,8 @@ export async function calculatePublicRoute(
 
   if (
     cachedMatches &&
-    (cached.source === "mapbox" || cached.source === "osrm" || offline)
+    (cached.source === "mapbox" || cached.source === "osrm" ||
+      (offline && cached.source === "offline-road"))
   )
     return cached;
   if (offline) {
@@ -997,14 +999,18 @@ export async function calculatePublicRoute(
 
     // OSRM profiles are fixed when its graph is prepared. Changing the URL to
     // foot/bike cannot turn the configured car graph into a walking/cycle graph.
-    // Mapbox above has explicit profiles; otherwise keep these modes estimated.
-    if (mode !== "driving")
-      return buildLocalEstimate(origin, destination, mode);
+    // Mapbox above has explicit profiles. The local graph also has verified
+    // permissions by mode; never reuse the OSRM car graph for foot/bicycle.
+    if (mode !== "driving") {
+      const offlineRoad = await buildOfflineRoadResult(origin, destination, mode);
+      return offlineRoad ?? buildLocalEstimate(origin, destination, mode);
+    }
 
     const now = Date.now();
     if (getRouterUnavailableUntil() > now) {
-      if (cachedMatches) return cached;
-      const estimated = buildLocalEstimate(origin, destination, mode);
+      if (cachedMatches && cached.source !== "local-estimate") return cached;
+      const estimated = await buildOfflineRoadResult(origin, destination, mode) ??
+        buildLocalEstimate(origin, destination, mode);
       cacheSet(cacheKey, estimated);
       return estimated;
     }
@@ -1082,7 +1088,8 @@ export async function calculatePublicRoute(
       setRouterUnavailableUntil(Date.now() + ROUTER_FAILURE_COOLDOWN_MS);
     }
 
-    const estimated = buildLocalEstimate(origin, destination, mode);
+    const estimated = await buildOfflineRoadResult(origin, destination, mode) ??
+      buildLocalEstimate(origin, destination, mode);
     cacheSet(cacheKey, estimated);
     return estimated;
   })();
@@ -1172,3 +1179,4 @@ export function buildPublicRoutePayload(result: PublicRoute) {
     },
   };
 }
+
