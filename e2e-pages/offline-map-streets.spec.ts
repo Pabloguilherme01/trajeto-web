@@ -1,5 +1,42 @@
 import { expect, test, type Page } from "@playwright/test";
 
+ // Diagnostics only for failed tests. Never record GPS, query strings or URL parameters.
+test.afterEach(async ({ page }, testInfo) => {
+  if (testInfo.status === testInfo.expectedStatus) return;
+  const state = await Promise.race([
+    page.evaluate(async () => {
+      const keys = await caches.keys();
+      const dataCacheName = keys.find(key => key.endsWith("-data"));
+      let mapPrepared = false;
+      if (dataCacheName) {
+        const dataCache = await caches.open(dataCacheName);
+        mapPrepared = Boolean(await dataCache.match("/trajeto-web/data/aguas-lindas-city-atlas.json"));
+      }
+      return {
+        serviceWorkerControlled: Boolean(navigator.serviceWorker.controller),
+        registrationReady: Boolean((await navigator.serviceWorker.getRegistration())?.active),
+        offlineReadyLabelVisible: Boolean(document.body?.textContent?.includes("Pronto para usar sem internet neste aparelho.")),
+        cacheCount: keys.length,
+        mapPrepared,
+      };
+    }).catch(() => null),
+    new Promise<null>(resolve => setTimeout(() => resolve(null), 1500)),
+  ]);
+  const snapshot = {
+    test: testInfo.title,
+    project: testInfo.project.name,
+    pathname: new URL(page.url()).pathname,
+    browserClosed: page.isClosed(),
+    ...(state ?? { browserStateUnavailable: true }),
+  };
+  console.log("[pages-offline-diagnostic]", JSON.stringify(snapshot));
+  await testInfo.attach("offline-failure-state", {
+    body: JSON.stringify(snapshot),
+    contentType: "application/json",
+  });
+});
+
+
 async function waitForMapPackage(page: Page) {
   await expect.poll(() => page.evaluate(async () => {
     const key = (await caches.keys()).find(key => key.endsWith("-data"));
@@ -118,9 +155,11 @@ test("Pages: imported companies reload offline and plan all modes from their act
   // Complete preparation may take 65 seconds, followed by offline route checks.
   test.setTimeout(120_000);
   await page.setViewportSize({ width: 320, height: 640 });
-  await page.goto("ajuda");
-  await page.getByRole("button", { name: "Preparar acesso offline", exact: true }).click();
-  await expect(page.getByText("Pronto para usar sem internet neste aparelho.")).toBeVisible({ timeout: 65000 });
+  await test.step("prepare offline package and confirm ready on Pages", async () => {
+    await page.goto("ajuda");
+    await page.getByRole("button", { name: "Preparar acesso offline", exact: true }).click();
+    await expect(page.getByText("Pronto para usar sem internet neste aparelho.")).toBeVisible({ timeout: 65000 });
+  });
   await page.goto("mapa");
   await page.getByRole("button", { name: "Explorar empresas", exact: true }).click();
   await expect(page.getByText(/21\.486 empresas do arquivo/)).toBeVisible();
