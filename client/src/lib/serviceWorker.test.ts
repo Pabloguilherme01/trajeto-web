@@ -58,6 +58,64 @@ describe("service worker", () => {
       expect(postMessage).toHaveBeenCalledWith(expect.objectContaining({ type: "OFFLINE_PROGRESS", completed: 1, total: 1 }));
     } else expect(postMessage).toHaveBeenCalledTimes(1);
   });
+  it("shares one download across simultaneous tabs and sends each final status", async () => {
+    const { worker } = recoverableWorker(["./assets/installed.js"]);
+    let releaseDownload!: (response: Response) => void;
+    worker.fetch.mockImplementation(() => new Promise<Response>(resolve => {
+      releaseDownload = resolve;
+    }));
+    const receive = worker.self.addEventListener.mock.calls.find((call: any[]) => call[0] === "message")[1];
+    const runTab = () => {
+      const postMessage = vi.fn();
+      let complete!: Promise<unknown>;
+      receive({
+        data: { type: "RESTORE_OFFLINE", progress: true },
+        ports: [{ postMessage }],
+        waitUntil: (task: Promise<unknown>) => { complete = task; },
+      });
+      return { complete, postMessage };
+    };
+
+    const first = runTab();
+    await vi.waitFor(() => expect(worker.fetch).toHaveBeenCalledTimes(1));
+    const second = runTab();
+    // The later subscriber receives the latest progress without starting a
+    // second download. Each tab keeps its own terminal response.
+    expect(worker.fetch).toHaveBeenCalledTimes(1);
+    expect(second.postMessage).toHaveBeenCalledWith(expect.objectContaining({
+      type: "OFFLINE_PROGRESS", stage: "downloading", total: 1,
+    }));
+    releaseDownload(new Response("installed code", { headers: { "Content-Type": "text/javascript" } }));
+    await Promise.all([first.complete, second.complete]);
+    for (const tab of [first, second]) {
+      expect(tab.postMessage).toHaveBeenLastCalledWith(expect.objectContaining({
+        ready: true, businessesReady: true,
+      }));
+    }
+    expect(worker.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("releases the shared restore after failure so a later attempt can retry", async () => {
+    const { worker } = recoverableWorker(["./assets/installed.js"]);
+    const receive = worker.self.addEventListener.mock.calls.find((call: any[]) => call[0] === "message")[1];
+    const send = async () => {
+      const postMessage = vi.fn();
+      let complete!: Promise<unknown>;
+      receive({
+        data: { type: "RESTORE_OFFLINE" },
+        ports: [{ postMessage }],
+        waitUntil: (task: Promise<unknown>) => { complete = task; },
+      });
+      await complete;
+      return postMessage;
+    };
+    worker.fetch.mockRejectedValueOnce(new Error("temporary connection"));
+    expect((await send()).mock.lastCall?.[0]).toMatchObject({ ready: false, reason: "connection" });
+    worker.fetch.mockResolvedValueOnce(new Response("installed code", { headers: { "Content-Type": "text/javascript" } }));
+    expect((await send()).mock.lastCall?.[0]).toMatchObject({ ready: true });
+    expect(worker.fetch).toHaveBeenCalledTimes(2);
+  });
+
   it("checks the static cache inventory once without reading each bundled Response", async () => {
     const { worker } = recoverableWorker([]);
     expect(await worker.offlineStatus()).toMatchObject({ ready: true, businessesReady: true });
