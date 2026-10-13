@@ -196,7 +196,7 @@ afterEach(() => {
 
 it.each([
   ["Rotas prontas", false],
-  ["Usar offline", true],
+  ["Localizar offline", true],
 ])("opens %s from filtered services and focuses the destination section", async (label, offlineOnly) => {
   window.history.replaceState({}, "", "/servicos?q=anatel&categoria=telecom&recurso=online");
   render(<PublicServices />);
@@ -204,7 +204,7 @@ it.each([
   fireEvent.click(screen.getByRole("button", { name: label }));
   await waitFor(() => expect(window.location.search).toBe(""));
   await waitFor(() => expect(document.activeElement?.id).toBe("ready-routes"));
-  expect(screen.getByRole("button", { name: /(?:Mostrar somente|Verificando) destinos offline/ }).getAttribute("aria-pressed")).toBe(String(offlineOnly));
+  expect(screen.getByRole("button", { name: /(?:Mostrar somente|Verificando) locais offline/ }).getAttribute("aria-pressed")).toBe(String(offlineOnly));
   expect((screen.getByRole("searchbox", { name: "Buscar rota pronta" }) as HTMLInputElement).value).toBe("");
 }, 15000);
 
@@ -277,7 +277,7 @@ it("renders the service directory before optionally checking local route readine
   window.history.replaceState({}, "", "/servicos");
   render(<PublicServices />);
   expect(document.querySelectorAll("#service-results article")).toHaveLength(18);
-  const filter = screen.getByRole("button", { name: "Verificando destinos offline" });
+  const filter = screen.getByRole("button", { name: "Verificando locais offline" });
   expect((filter as HTMLButtonElement).disabled).toBe(true);
   expect(screen.getAllByText("Verificando rota").length).toBeGreaterThan(0);
 });
@@ -286,7 +286,7 @@ it("does not start the offline route engine when the user only opens a filtered 
   window.history.replaceState({}, "", "/servicos?categoria=telecom");
   render(<PublicServices />);
   expect(document.querySelectorAll("#service-results article").length).toBeGreaterThan(0);
-  expect(screen.queryByRole("button", { name: "Verificando destinos offline" })).toBeNull();
+  expect(screen.queryByRole("button", { name: "Verificando locais offline" })).toBeNull();
 });
 
 it("clears an advanced category directly without losing the search or Premium resource mode", async () => {

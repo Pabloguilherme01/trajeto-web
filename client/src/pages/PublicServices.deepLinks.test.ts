@@ -101,10 +101,12 @@ describe("PublicServices deep links", () => {
     expect(source).toContain('data-route-readiness={!offlineRoutesChecked ? "checking" : offlineReadyRouteIds.has(route.id) ? "offline" : "online"}');
     expect(source).toContain('import("@/lib/publicRouting")');
     expect(source).not.toContain('import { resolveOfflineRoutePoint } from "@/lib/publicRouting"');
-    expect(source).toContain("Destino offline");
+    expect(source).toContain("Localizável offline");
+    expect(source).toContain("Não garante que o percurso por ruas esteja salvo.");
+    expect(source).toContain('aria-describedby="service-offline-location-note"');
     expect(source).toContain("Localizar online");
     expect(source).toContain("readyRouteOfflineOnly");
-    expect(source).toContain("Mostrar somente destinos offline");
+    expect(source).toContain("Mostrar somente locais offline");
     expect(source).toContain("availabilityRoutes");
     expect(source).toContain('aria-label="Resumo da Central"');
     expect(source).toContain("showAllServicesFromSummary");
@@ -113,8 +115,8 @@ describe("PublicServices deep links", () => {
     expect(source).toContain('id="ready-routes"');
     expect(source).toContain('id="service-results"');
     expect(source).toContain("Ir para ${READY_SERVICE_ROUTES.length} rotas prontas");
-    expect(source).toContain("Mostrar ${offlineReadyRouteIds.size} destinos offline");
-    expect(source).toContain("Verificar destinos offline");
+    expect(source).toContain("Mostrar ${offlineReadyRouteIds.size} locais offline");
+    expect(source).toContain("Verificar locais offline");
     expect(source).toContain('{offlineRoutesChecked ? offlineReadyRouteIds.size : "…"}');
   });
 
