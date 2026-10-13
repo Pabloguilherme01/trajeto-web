@@ -1,6 +1,6 @@
 import type { CityAtlasItem } from "@/lib/cityAtlas";
 import { isMapPoint } from "@/lib/mapGeometry";
-import { hasBusinessName } from "@/lib/businessCatalogState";
+import { readableBusinessName } from "@/lib/businessCatalogState";
 import { LOCAL_GEOCODE_POINTS } from "@/lib/localGeocoding";
 
 export type RouteStep = {
@@ -88,12 +88,12 @@ export function nearbyBusinessReferences(
   // order, just as the previous stable sort did.
   const closest: Array<{ item: CityAtlasItem; distance: number }> = [];
   for (const item of items) {
-    if (!hasBusinessName(item.name) ||
-      !Number.isFinite(item.lat) || !Number.isFinite(item.lng) ||
+    if (!Number.isFinite(item.lat) ||
+      !Number.isFinite(item.lng) ||
       Math.abs(item.lat! - destination.lat) >= 0.01 ||
       Math.abs(item.lng! - destination.lng) >= 0.01) continue;
     const distance = distanceMeters(destination, { lat: item.lat!, lng: item.lng! });
-    if (distance > 800) continue;
+    if (distance > 800 || !readableBusinessName(item.name)) continue;
     let insertAt = closest.findIndex(candidate => candidate.distance > distance);
     if (insertAt < 0) insertAt = closest.length;
     if (insertAt >= 6) continue;
@@ -102,7 +102,7 @@ export function nearbyBusinessReferences(
   }
   return closest.map(({ item }) => ({
     id: item.id,
-    name: item.name,
+    name: readableBusinessName(item.name),
     lat: item.lat!,
     lng: item.lng!,
     label: "R",
