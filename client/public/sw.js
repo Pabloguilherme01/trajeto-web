@@ -292,21 +292,31 @@ function isCachedJsonSnapshot(response) {
   ));
 }
 
+// CacheStorage.keys() lists the committed Request URLs once instead of
+// opening a Response object for every static chunk. The former individual
+// match() calls only checked existence, not body validity. JSON snapshots
+// remain separately checked for a usable content type.
+async function cachedStaticUrls(cache) {
+  return new Set((await cache.keys()).map(request => request.url));
+}
+
+function hasCachedStaticAsset(urls, asset) {
+  return urls.has(new URL(asset, self.registration.scope).href);
+}
+
 async function offlineStatus() {
   try {
     const cache = await caches.open(STATIC_CACHE);
     const response = await cache.match("./offline-assets.json", { ignoreVary: true });
     if (!response) return { ready: false };
     const manifest = await response.json();
-    const assets = [...STATIC_SHELL, ...collectManifestAssets(manifest)];
-    const saved = await Promise.all(assets.map(asset => cache.match(asset, { ignoreVary: true })));
+    const assets = [...new Set([...STATIC_SHELL, ...collectManifestAssets(manifest)])];
+    const savedUrls = await cachedStaticUrls(cache);
     const data = await caches.open(DATA_CACHE);
     const snapshots = await Promise.all(LOCAL_SNAPSHOTS.map(asset => data.match(asset, { ignoreVary: true })));
-    // The first cache.match pass already inspected every asset. Reuse those
-    // results instead of performing the same storage reads a second time.
     const coreAssets = new Set([...STATIC_SHELL, ...collectManifestAssets(manifest, false)]);
-    const businessesReady = assets.every((asset, i) => coreAssets.has(asset) || Boolean(saved[i]));
-    return { ready: saved.every(Boolean) && snapshots.every(isCachedJsonSnapshot), businessesReady, version: VERSION };
+    const businessesReady = assets.every(asset => coreAssets.has(asset) || hasCachedStaticAsset(savedUrls, asset));
+    return { ready: assets.every(asset => hasCachedStaticAsset(savedUrls, asset)) && snapshots.every(isCachedJsonSnapshot), businessesReady, version: VERSION };
   } catch {
     return { ready: false };
   }
@@ -327,14 +337,11 @@ async function restoreOfflinePackage(onProgress = () => {}) {
     }
     const assets = [...new Set([...STATIC_SHELL, ...collectManifestAssets(await manifest.json())])];
     const missing = [];
-    // Inspect independent CacheStorage entries in bounded parallel batches.
-    // Preserve manifest order, progress totals and the later download limit.
-    for (let offset = 0; offset < assets.length; offset += 8) {
-      const batch = assets.slice(offset, offset + 8);
-      const present = await Promise.all(batch.map(asset => cache.match(asset, { ignoreVary: true })));
-      for (let i = 0; i < batch.length; i++) {
-        if (!present[i]) missing.push({ cache, asset: batch[i] });
-      }
+    // Check the static inventory once; retain manifest order, bounded
+    // download batches and the separate JSON validation below.
+    const savedUrls = await cachedStaticUrls(cache);
+    for (const asset of assets) {
+      if (!hasCachedStaticAsset(savedUrls, asset)) missing.push({ cache, asset });
     }
     const data = await caches.open(DATA_CACHE);
     for (const asset of LOCAL_SNAPSHOTS) {
