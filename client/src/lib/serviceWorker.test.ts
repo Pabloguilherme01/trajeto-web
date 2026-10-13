@@ -3,7 +3,7 @@ import { runInNewContext } from "node:vm";
 import { describe, expect, it, vi } from "vitest";
 
 function loadWorker(cached?: Response) {
-  const cache = { match: vi.fn(async (_request: unknown, options?: CacheQueryOptions) => options?.ignoreVary ? cached : undefined), put: vi.fn(), keys: vi.fn(async () => []), delete: vi.fn() };
+  const cache = { match: vi.fn(async (_request: unknown, options?: CacheQueryOptions) => options?.ignoreVary ? cached : undefined), put: vi.fn(), keys: vi.fn(async (): Promise<Request[]> => []), delete: vi.fn() };
   const context: Record<string, any> = {
     self: { addEventListener: vi.fn(), registration: { scope: "https://example.com/trajeto-web/" }, location: new URL("https://example.com/trajeto-web/sw.js"), clients: { claim: vi.fn() }, skipWaiting: vi.fn() },
     Response, Request, URL, AbortController, setTimeout, clearTimeout,
@@ -62,7 +62,7 @@ describe("service worker", () => {
     const { worker } = recoverableWorker([]);
     expect(await worker.offlineStatus()).toMatchObject({ ready: true, businessesReady: true });
     expect(worker.cache.keys).toHaveBeenCalledTimes(1);
-    const individuallyReadStaticFiles = worker.cache.match.mock.calls.filter(([asset]: [string]) =>
+    const individuallyReadStaticFiles = worker.cache.match.mock.calls.filter(([asset]) =>
       asset === "./assets/installed.js" || asset === "./assets/business.js");
     expect(individuallyReadStaticFiles).toHaveLength(0);
   });
