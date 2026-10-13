@@ -46,3 +46,14 @@ it("shows destination names on offline markers and refreshes names at unchanged 
   view.rerender(<OfflineRoutePreview {...trip} originLabel="Prefeitura" destinationLabel="Entrada da UPA" />);
   expect(captures.markers.at(-1)).toEqual(expect.arrayContaining([expect.objectContaining({ id: "destination", name: "Entrada da UPA" })]));
 });
+
+it("keeps endpoint names readable when only coordinate text is supplied", () => {
+  const trip = { origin: { lat: -15.7545, lng: -48.2816 }, destination: { lat: -15.77665, lng: -48.27935 }, stops: [] };
+  const view = render(<OfflineRoutePreview {...trip} originLabel="-15.7545,-48.2816" destinationLabel="-15.77665,-48.27935" />);
+  expect(captures.markers.at(-1)).toEqual(expect.arrayContaining([
+    expect.objectContaining({ id: "origin", name: "Origem" }),
+    expect.objectContaining({ id: "destination", name: "Destino" }),
+  ]));
+  view.rerender(<OfflineRoutePreview {...trip} originLabel="Minha localização" destinationLabel="UPA Mansões Odisseia" privateOrigin />);
+  expect(captures.markers.at(-1)).toEqual(expect.arrayContaining([expect.objectContaining({ id: "origin", name: "Minha localização" })]));
+});

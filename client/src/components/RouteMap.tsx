@@ -5,6 +5,7 @@ import MapExplorerFrame from "@/components/MapExplorerFrame";
 import OfflineMapCanvas from "@/components/OfflineMapCanvas";
 import TileStationMap from "@/components/TileStationMap";
 import { MapView } from "@/components/Map";
+import { parseCoordinateText } from "@/lib/locationPrivacy";
 import { decodeMapPolyline, isMapPoint } from "@/lib/mapGeometry";
 import { currentRouteGuidance, maneuverSymbol, nearbyBusinessReferences, nearbyRouteReferences } from "@/lib/routeMapLogic";
 import type { RouteStep } from "@/lib/routeMapLogic";
@@ -128,6 +129,11 @@ const travelModeLabels = {
   cycling: "Bicicleta",
   transit: "Transporte público",
 };
+
+/** Coordinates locate a pin; they are not a human-readable place name. */
+function endpointLabel(value: string, fallback: "Origem" | "Destino") {
+  return parseCoordinateText(value) ? fallback : value.trim() || fallback;
+}
 
 function RouteOverview({
   route,
@@ -261,8 +267,8 @@ type RouteMapProps = {
 export function OfflineRoutePreview({
   origin,
   destination,
-  originLabel = "Origem",
-  destinationLabel = "Destino",
+  originLabel: suppliedOriginLabel = "Origem",
+  destinationLabel: suppliedDestinationLabel = "Destino",
   stops = [],
   routes = [],
   privateOrigin = false,
@@ -275,6 +281,8 @@ export function OfflineRoutePreview({
   referencesVisible,
   showReferenceControl = true,
 }: RouteMapProps) {
+  const originLabel = endpointLabel(suppliedOriginLabel, "Origem");
+  const destinationLabel = endpointLabel(suppliedDestinationLabel, "Destino");
   // Do not download the business catalogue while no destination can be mapped.
   const businesses = useBusinessCatalog(isMapPoint(destination));
   const nearbyBusinesses = useMemo(
@@ -927,8 +935,8 @@ export function OfflineRoutePreview({
 function RouteMapContent({
   origin,
   destination,
-  originLabel = "Origem",
-  destinationLabel = "Destino",
+  originLabel: suppliedOriginLabel = "Origem",
+  destinationLabel: suppliedDestinationLabel = "Destino",
   stops,
   routes = [],
   privateOrigin = false,
@@ -938,6 +946,8 @@ function RouteMapContent({
   liveProgress,
   liveSpeedMps,
 }: RouteMapProps) {
+  const originLabel = endpointLabel(suppliedOriginLabel, "Origem");
+  const destinationLabel = endpointLabel(suppliedDestinationLabel, "Destino");
   // Do not download the business catalogue while no destination can be mapped.
   const businesses = useBusinessCatalog(isMapPoint(destination));
   const businessReferences = useMemo(

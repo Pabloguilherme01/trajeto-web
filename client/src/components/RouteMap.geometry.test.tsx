@@ -84,3 +84,11 @@ it("identifies journey endpoints by name in the published map and refreshes same
   view.rerender(<RouteMap {...trip} originLabel="Prefeitura" destinationLabel="Entrada da UPA" />);
   expect(captures.stations.at(-1)).toEqual(expect.arrayContaining([expect.objectContaining({ id: "destination", name: "Entrada da UPA" })]));
 });
+
+it("keeps coordinate-only journey points searchable by their endpoint role", () => {
+  render(<RouteMap origin={{ lat: -15.7545, lng: -48.2816 }} destination={{ lat: -15.77665, lng: -48.27935 }} originLabel="-15.7545,-48.2816" destinationLabel="-15.77665,-48.27935" stops={[]} routes={[{ id: "road", source: "osrm", polyline: "r`d_B~~teHbwFg_mA" }]} />);
+  expect(captures.stations.at(-1)).toEqual(expect.arrayContaining([
+    expect.objectContaining({ id: "origin", name: "Origem" }),
+    expect.objectContaining({ id: "destination", name: "Destino" }),
+  ]));
+});
