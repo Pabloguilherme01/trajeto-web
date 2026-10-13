@@ -494,3 +494,18 @@ it("keeps every road geometry while bounding SVG nodes by road style", async () 
   fireEvent.click(screen.getByRole("button", { name: "Mostrar nomes de todas as ruas" }));
   expect(screen.getByRole("img").textContent).toContain("BR-070");
 });
+
+it("only mounts nearby map references while keeping route pins and selected distant places", async () => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify(pack))));
+  const { default: Canvas } = await import("./OfflineMapCanvas");
+  const origin = { id: "origin", name: "Origem", label: "O", lat: -15.75, lng: -48.29 };
+  const destination = { id: "destination", name: "Destino", label: "D", lat: -15.76, lng: -48.27 };
+  const far = { id: "far", name: "Referência distante", label: "F", lat: -16.05, lng: -48.6, isReference: true };
+  const view = render(<Canvas markers={[origin, destination, far]} routePoints={[origin, destination]} zoom={4} onZoom={() => {}} />);
+  await screen.findByText(/Ruas locais disponíveis/);
+  expect(screen.getByRole("button", { name: "Selecionar Origem" })).toBeTruthy();
+  expect(screen.getByRole("button", { name: "Selecionar Destino" })).toBeTruthy();
+  expect(screen.queryByRole("button", { name: "Selecionar Referência distante" })).toBeNull();
+  view.rerender(<Canvas markers={[origin, destination, far]} routePoints={[origin, destination]} selectedMarkerId="far" zoom={4} onZoom={() => {}} />);
+  expect(screen.getByRole("button", { name: "Selecionar Referência distante" })).toBeTruthy();
+});

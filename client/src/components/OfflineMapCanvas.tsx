@@ -2,6 +2,7 @@ import { Sun, Moon, Expand, Minimize, Map as MapIcon } from "lucide-react";
 import { groundMetresPerPixel, roadPriority } from "@/lib/mapPresentation";
 import { mapMarkerGroups } from "@/lib/mapMarkerGroups";
 import { declutterMapReferences } from "@/lib/mapReferenceDeclutter";
+import { cullOffscreenMapReferences } from "@/lib/mapViewportReferences";
 import MapPlaceIcon from "@/components/MapPlaceIcon";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { appUrl } from "@/lib/appUrl";
@@ -264,11 +265,23 @@ export default function OfflineMapCanvas({
       y: size.height / 2 + (p.y - camera.y) * camera.scale + pan.y,
     };
   };
-  // Route endpoints and GPS always take priority. A 44px spatial grid
-  // avoids scanning every previously accepted marker for each reference.
+  // Distant supplementary references were previously decluttered, grouped and
+  // mounted at every pan/zoom. Keep only those near the camera, while retaining
+  // every primary pin and the selected reference even beyond the viewport.
+  const viewportMarkers = useMemo(
+    () => cullOffscreenMapReferences(
+      validMarkers, baseProject,
+      marker => Boolean(marker.isReference),
+      marker => marker.id === selectedMarkerId,
+      size, pan,
+    ),
+    [validMarkers, markerWorld, camera.x, camera.y, camera.scale, size.width, size.height, pan.x, pan.y, selectedMarkerId]
+  );
+  // Route endpoints and GPS always take priority. The same 44px declutter grid
+  // now only touches references that could be visible after panning.
   const displayedMarkers = useMemo(
-    () => declutterMapReferences(validMarkers, baseProject, marker => Boolean(marker.isReference)),
-    [validMarkers, markerWorld, camera.x, camera.y, camera.scale, size.width, size.height]
+    () => declutterMapReferences(viewportMarkers, baseProject, marker => Boolean(marker.isReference)),
+    [viewportMarkers, markerWorld, camera.x, camera.y, camera.scale, size.width, size.height]
   );
   const markerGroups = useMemo(
     () =>
@@ -284,7 +297,7 @@ export default function OfflineMapCanvas({
   );
   const markerCollisionPoints = useMemo(
     () =>
-      validMarkers.flatMap(marker => {
+      viewportMarkers.flatMap(marker => {
         const point = markerWorld.get(marker.id);
         if (!point) return [];
         return [{
@@ -292,7 +305,7 @@ export default function OfflineMapCanvas({
           y: size.height / 2 + (point.y - camera.y) * camera.scale,
         }];
       }),
-    [validMarkers, markerWorld, camera.x, camera.y, camera.scale, size.width, size.height]
+    [viewportMarkers, markerWorld, camera.x, camera.y, camera.scale, size.width, size.height]
   );
   const geometryPath = useMemo(
     () =>
