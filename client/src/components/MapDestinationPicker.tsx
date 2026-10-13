@@ -8,6 +8,46 @@ import QuickFilterChips from "@/components/QuickFilterChips";
 import { COMMON_DESTINATION_QUICK_FILTERS } from "@/lib/quickFilterPresets";
 
 type Place = { id: string; name: string; address: string; category?: string; source?: string; coordinateKind?: string };
+type IndexedPlace = {
+  item: Place;
+  category: string;
+  search: ReturnType<typeof createCatalogSearchIndex>;
+};
+
+// Catalogue arrays are treated as immutable in the map. Reopening a picker
+// must not renormalize every item or rescan its shortcut presets. WeakMap
+// allows an old catalogue to be collected when new map results replace it.
+const mapPickerCatalogCache = new WeakMap<Place[], {
+  rows: IndexedPlace[];
+  byCategory: Map<string, IndexedPlace[]>;
+  categories: string[];
+  quickQueries: ReturnType<typeof availableMapPickerQuickFilters>;
+}>();
+
+export function prepareMapPickerCatalog(items: Place[]) {
+  let catalog = mapPickerCatalogCache.get(items);
+  if (!catalog) {
+    const rows: IndexedPlace[] = [];
+    const byCategory = new Map<string, IndexedPlace[]>();
+    for (const item of items) {
+      const category = mapPlaceSegment(item).label;
+      const row = { item, category, search: createCatalogSearchIndex([item.name, item.address]) };
+      rows.push(row);
+      const categoryRows = byCategory.get(category);
+      if (categoryRows) categoryRows.push(row);
+      else byCategory.set(category, [row]);
+    }
+    catalog = {
+      rows,
+      byCategory,
+      categories: [...byCategory.keys()].sort(),
+      quickQueries: availableMapPickerQuickFilters(rows, COMMON_DESTINATION_QUICK_FILTERS),
+    };
+    mapPickerCatalogCache.set(items, catalog);
+  }
+  return catalog;
+}
+
 function MapDestinationPicker({ items, value, label, onSelect }: {
   items: Place[]; value: string | null; label: string; onSelect: (id: string) => void;
 }) {
@@ -18,20 +58,14 @@ function MapDestinationPicker({ items, value, label, onSelect }: {
   const [limit, setLimit] = useState(40);
   const [active, setActive] = useState(0);
   const [category, setCategory] = useState("Todos");
-  // The closed picker should do no catalog search work while the map is panning.
-  const indexedItems = useMemo(() => open ? items.map(item => ({
-    item, category: mapPlaceSegment(item).label,
-    search: createCatalogSearchIndex([item.name, item.address]),
-  })) : [], [items, open]);
-  const categories = useMemo(() => {
-    const labels = new Set<string>();
-    for (const row of indexedItems) labels.add(row.category);
-    return [...labels].sort();
-  }, [indexedItems]);
-  const quickQueries = useMemo(
-    () => availableMapPickerQuickFilters(indexedItems, COMMON_DESTINATION_QUICK_FILTERS),
-    [indexedItems]
+  // Remain idle while closed; reopening or switching between map pickers
+  // reuses the same immutable catalogue index and category groups.
+  const catalog = useMemo(
+    () => open ? prepareMapPickerCatalog(items) : null,
+    [items, open],
   );
+  const categories = catalog?.categories ?? [];
+  const quickQueries = catalog?.quickQueries ?? [];
   // Keyboard input changes the picker state, not its selected place. Avoid
   // rescanning a large destination list on each keystroke or category click.
   const selected = useMemo(() => items.find(item => item.id === value), [items, value]);
@@ -40,12 +74,14 @@ function MapDestinationPicker({ items, value, label, onSelect }: {
     // A single result pass avoids building an intermediate array of index
     // entries for every keystroke in large catalogues.
     const found: Place[] = [];
-    for (const row of indexedItems) {
-      if ((category === "Todos" || row.category === category) &&
-        matchesCatalogTerms(terms, row.search)) found.push(row.item);
+    const candidates = category === "Todos"
+      ? catalog?.rows
+      : catalog?.byCategory.get(category);
+    for (const row of candidates ?? []) {
+      if (matchesCatalogTerms(terms, row.search)) found.push(row.item);
     }
     return found;
-  }, [indexedItems, query, category]);
+  }, [catalog, query, category]);
   const visible = matches.slice(0, limit);
   const choose = (id: string) => { onSelect(id); setOpen(false); };
   return <Popover open={open} onOpenChange={next => { setOpen(next); if (next) { setQuery(""); setCategory("Todos"); setLimit(40); setActive(0); } }}>
