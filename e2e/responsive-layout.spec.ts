@@ -15,7 +15,9 @@ for (const width of [280, 320, 360, 390, 768]) {
       await expect(page.locator("main")).toBeVisible();
       await page.evaluate(() => document.fonts.ready);
       for (const position of [0, 700, 1400, 2500, 5000, 0]) {
-        await page.evaluate(y => window.scrollTo(0, y), position);
+        await test.step(`scroll ${path} at ${width}px to y=${position}`, async () => {
+          await page.evaluate(y => window.scrollTo(0, y), position);
+        });
         const layout = await page.evaluate(() => {
           const overflowing =
             Math.max(
