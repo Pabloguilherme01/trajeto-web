@@ -89,23 +89,45 @@ export async function probePublicServiceLink(
 ): Promise<HttpLinkEvidence> {
   const checkedAt = new Date().toISOString();
   let method: "HEAD" | "GET" = "HEAD";
+  // Validate every hop ourselves. fetch(..., redirect: "follow") could follow
+  // an otherwise public official URL into an internal HTTP/local endpoint.
+  if (!checkedHost(url)) {
+    return { url, checkedAt, status: null, finalHostname: null, classification: "unverified", method };
+  }
+  let current = url;
+  let redirects = 0;
+  const signal = AbortSignal.timeout(8000);
   try {
-    let response = await fetchLink(url, { method, redirect: "follow", signal: AbortSignal.timeout(8000) });
-    if (response.status === 405 || response.status === 501) {
-      method = "GET";
-      response = await fetchLink(url, { method, redirect: "follow", signal: AbortSignal.timeout(8000) });
+    while (true) {
+      const response = await fetchLink(current, { method, redirect: "manual", signal });
+      void response.body?.cancel().catch(() => undefined);
+      const status = response.status;
+      if ([301, 302, 303, 307, 308].includes(status)) {
+        const location = response.headers.get("location");
+        if (!location || redirects >= 5) {
+          return { url, checkedAt, status, finalHostname: null, classification: "unverified", method };
+        }
+        const next = new URL(location, current).toString();
+        if (!checkedHost(next)) {
+          return { url, checkedAt, status, finalHostname: null, classification: "unverified", method };
+        }
+        current = next;
+        redirects += 1;
+        continue;
+      }
+      if (method === "HEAD" && (status === 405 || status === 501)) {
+        method = "GET";
+        continue;
+      }
+      const classification = status === 404 || status === 410
+        ? "not-found"
+        : status === 401 || status === 403 || status === 429
+          ? "restricted"
+          : status >= 200 && status < 300
+            ? redirects > 0 ? "redirect" : "reachable"
+            : "unverified";
+      return { url, checkedAt, status, finalHostname: checkedHost(current), classification, method };
     }
-    void response.body?.cancel().catch(() => undefined);
-    const finalHostname = checkedHost(response.url);
-    const status = response.status;
-    const classification = (status === 404 || status === 410)
-      ? "not-found"
-      : (status === 401 || status === 403 || status === 429)
-        ? "restricted"
-        : (status >= 200 && status < 400)
-          ? (response.url !== url ? "redirect" : "reachable")
-          : "unverified";
-    return { url, checkedAt, status, finalHostname, classification, method };
   } catch {
     return { url, checkedAt, status: null, finalHostname: null, classification: "unverified", method };
   }

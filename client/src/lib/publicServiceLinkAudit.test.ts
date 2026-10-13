@@ -41,12 +41,61 @@ describe("auditoria de links públicos sem acessar a rede", () => {
   });
 
   it("records status, redirection and restricted URLs without claiming a transient failure is broken", async () => {
-    const redirect = vi.fn(async () => ({ status: 200, url: "https://gov.br/new", body: null } as Response));
-    expect((await probePublicServiceLink("https://gov.br/old", redirect)).classification).toBe("redirect");
+    const redirect = vi.fn(async (url: RequestInfo | URL) => ({
+      status: String(url).endsWith("/old") ? 302 : 200,
+      headers: { get: () => "/new" },
+      body: null,
+    } as unknown as Response));
+    expect((await probePublicServiceLink("https://gov.br/old", redirect))).toMatchObject({
+      classification: "redirect", finalHostname: "gov.br", status: 200,
+    });
+    expect(redirect).toHaveBeenCalledTimes(2);
+    expect(redirect.mock.calls[0][1]).toMatchObject({ redirect: "manual" });
     const restricted = vi.fn(async () => ({ status: 429, url: "https://gov.br/throttle", body: null } as Response));
     expect((await probePublicServiceLink("https://gov.br/throttle", restricted)).classification).toBe("restricted");
     const unavailable = vi.fn(async () => { throw new Error("offline"); });
     expect((await probePublicServiceLink("https://gov.br/s", unavailable)).classification).toBe("unverified");
+  });
+
+
+  it("refuses redirects to local or unencrypted targets without contacting them", async () => {
+    for (const location of [
+      "http://gov.br/insecure", "http://127.0.0.1/internal",
+      "https://localhost/private", "https://10.0.0.1/private",
+      "https://user:password@gov.br/private", "file:///etc/passwd",
+    ]) {
+      const fetchLink = vi.fn(async () => ({
+        status: 302, headers: { get: () => location }, body: null,
+      } as unknown as Response));
+      const result = await probePublicServiceLink("https://gov.br/start", fetchLink);
+      expect(result.classification).toBe("unverified");
+      expect(result.finalHostname).toBeNull();
+      expect(fetchLink).toHaveBeenCalledTimes(1);
+      expect(fetchLink.mock.calls[0][1]).toMatchObject({ redirect: "manual" });
+    }
+  });
+
+  it("handles relative redirects, multi-hop chains and a bounded maximum", async () => {
+    const urls: string[] = [];
+    const fetchLink = vi.fn(async (url: RequestInfo | URL) => {
+      urls.push(String(url));
+      const index = urls.length;
+      return {
+        status: index <= 8 ? 301 : 200,
+        headers: { get: () => "/hop-" + index },
+        body: null,
+      } as unknown as Response;
+    });
+    const result = await probePublicServiceLink("https://gov.br/start", fetchLink);
+    expect(result).toMatchObject({ classification: "unverified", status: 301, finalHostname: null });
+    expect(urls).toHaveLength(6);
+  });
+
+  it("does not contact the network for invalid starting targets", async () => {
+    const fetchLink = vi.fn();
+    const result = await probePublicServiceLink("http://127.0.0.1/internal", fetchLink);
+    expect(result).toMatchObject({ classification: "unverified", status: null });
+    expect(fetchLink).not.toHaveBeenCalled();
   });
 
   it("falls back from HEAD to GET for servers rejecting HEAD", async () => {
