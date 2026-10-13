@@ -26,6 +26,7 @@
     "sync:anp:precos:aguas-lindas": "node scripts/sync-anp-prices-aguas-lindas.mjs",
     "test:e2e:pages": "playwright test --config=playwright.pages.config.ts",
     "check:zero-cost": "node scripts/check-zero-cost-core.mjs",
+    "audit:service-links": "tsx scripts/audit-public-service-links.ts",
     "test:anp-source": "node --test scripts/anp-price-source.test.mjs"
   },
   "dependencies": {

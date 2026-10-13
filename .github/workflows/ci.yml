@@ -57,6 +57,9 @@ jobs:
       - name: Client library tests
         run: npm run test:client-lib
 
+      - name: Validate official service URL inventory without network calls
+        run: npm run audit:service-links
+
       - name: Client component tests
         run: npm run test:client-components
 
