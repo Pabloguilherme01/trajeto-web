@@ -36,3 +36,22 @@ it("keeps persistence refusal from becoming an unhandled action error", async ()
   vi.stubGlobal("navigator", { storage: { persist: vi.fn().mockRejectedValue(new Error("SecurityError")) } });
   expect(await requestOfflineStoragePersistence()).toBe(false);
 });
+
+it("checks quota and persistence without making one wait for the other", async () => {
+  let finishEstimate!: (value: StorageEstimate) => void;
+  let finishPersistence!: (value: boolean) => void;
+  const estimate = vi.fn(() => new Promise<StorageEstimate>(resolve => { finishEstimate = resolve; }));
+  const persisted = vi.fn(() => new Promise<boolean>(resolve => { finishPersistence = resolve; }));
+  vi.stubGlobal("navigator", { storage: { estimate, persisted } });
+
+  const pending = getOfflineStorageStatus();
+  await vi.waitFor(() => {
+    expect(estimate).toHaveBeenCalledOnce();
+    expect(persisted).toHaveBeenCalledOnce();
+  });
+  finishEstimate({ usage: 20, quota: 100 });
+  finishPersistence(true);
+  const result = await pending;
+  expect(result.usageRatio).toBe(0.2);
+  expect(result.persisted).toBe(true);
+});
