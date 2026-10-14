@@ -13,6 +13,7 @@ export function declutterMapReferences<T>(
   const buckets = new Map<string, Array<{ x: number; y: number }>>();
   const cell = (value: number) => Math.floor(value / minDistance);
   const add = (point: { x: number; y: number }) => {
+    if (!Number.isFinite(point.x) || !Number.isFinite(point.y)) return;
     const key = cell(point.x) + ":" + cell(point.y);
     const bucket = buckets.get(key);
     if (bucket) bucket.push(point);
@@ -30,6 +31,9 @@ export function declutterMapReferences<T>(
       continue;
     }
     const point = project(item);
+    // Never mount a supplemental reference without finite screen coordinates.
+    // Primary route/GPS pins are kept, even when their camera is not ready.
+    if (!Number.isFinite(point.x) || !Number.isFinite(point.y)) continue;
     const gx = cell(point.x);
     const gy = cell(point.y);
     let overlaps = false;
