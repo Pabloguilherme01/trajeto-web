@@ -1,3 +1,5 @@
+import { MapNeighborhoodLabels, MapNeighborhoodPanel } from "@/components/MapNeighborhoods";
+import { LOCATED_NEIGHBORHOODS, layoutNeighborhoodLabels, type CityNeighborhood } from "@/lib/cityNeighborhoods";
 import { Apple, LocateFixed, Navigation, Minus, Plus, Layers, Scan } from "lucide-react";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -142,6 +144,8 @@ export default function TileStationMap({
     drawable[0] ? stationMapKey(drawable[0]) : null
   );
   const [size, setSize] = useState({ width: 320, height: 520 });
+  const [showNeighborhoods, setShowNeighborhoods] = useState(true);
+  const [focusedNeighborhoodId, setFocusedNeighborhoodId] = useState<string | null>(null);
   const [tileErrors, setTileErrors] = useState(0);
   const [tileRetryGeneration, setTileRetryGeneration] = useState(0);
   const reportTileError = useCallback((key: string) => {
@@ -623,6 +627,21 @@ export default function TileStationMap({
     );
   }
 
+  const neighborhoodLabels = showNeighborhoods ? layoutNeighborhoodLabels(LOCATED_NEIGHBORHOODS, point => {
+    const p = projectBase(point.lat, point.lng);
+    return { x: width / 2 + p.x * zoomScale - centerPx.x, y: height / 2 + p.y * zoomScale - centerPx.y };
+  }, width, height, focusedNeighborhoodId) : [];
+  const focusNeighborhood = (item: CityNeighborhood & { lat: number; lng: number }) => {
+    cancelGesture();
+    setFollowing(false);
+    setShowNeighborhoods(true);
+    setFocusedNeighborhoodId(item.id);
+    setCenter({ lat: item.lat, lng: item.lng });
+    setZoom(value => Math.max(14, value));
+    viewport.current?.focus({ preventScroll: true });
+    viewport.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  };
+
   return (
     <div className="min-w-0 max-w-full overflow-hidden rounded-[1.6rem] border border-border/70 bg-muted shadow-xl">
       {groupItems.length > 0 && <section aria-label="Lugares do grupo selecionado" className="relative z-20 border-b border-border bg-card p-3">
@@ -739,6 +758,7 @@ export default function TileStationMap({
               </g>
             </svg>
           )}
+          {showNeighborhoods && <MapNeighborhoodLabels labels={neighborhoodLabels} />}
           <div className="pointer-events-none absolute inset-0">
             {markerGroups.groups.map(group => {
               const worldX = group.x * clusterToCurrentScale;
@@ -883,6 +903,7 @@ export default function TileStationMap({
         </div>}
       </div>
 
+      <MapNeighborhoodPanel visible={showNeighborhoods} onToggle={() => setShowNeighborhoods(value => !value)} onFocus={focusNeighborhood} />
       <div className="relative min-w-0 border-t border-border bg-card p-3.5 text-card-foreground sm:p-4">
         {routePoints.length > 1 && <div className="mb-3 rounded-xl border border-border bg-muted/40 p-3">
           <div className="flex flex-wrap items-center justify-between gap-2">

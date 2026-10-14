@@ -1,0 +1,44 @@
+import React, { useMemo, useState } from "react";
+import { CITY_NEIGHBORHOODS, LOCATED_NEIGHBORHOODS, layoutNeighborhoodLabels, neighborhoodSearchKey, type CityNeighborhood } from "@/lib/cityNeighborhoods";
+
+export function MapNeighborhoodLabels({ labels, dark = false }: {
+  labels: ReturnType<typeof layoutNeighborhoodLabels>; dark?: boolean;
+}) {
+  return <div className="pointer-events-none absolute inset-0 overflow-hidden" role="group" aria-label="Nomes dos bairros no mapa">
+    {labels.map(item=><span key={item.id} data-map-neighborhood={item.id}
+      className="absolute -translate-x-1/2 -translate-y-1/2 text-center text-xs font-black uppercase tracking-wide"
+      style={{left:item.x,top:item.y,width:item.width,color:dark?"#dbe7e8":"#405c65",textShadow:dark?"0 0 5px #18272d, 0 1px 3px #18272d":"0 0 5px #eef2eb, 0 1px 3px #eef2eb"}}
+      title={item.name+" · "+item.precision+" · referência aproximada"}>{item.name}</span>)}
+  </div>;
+}
+
+export function MapNeighborhoodPanel({ visible, onToggle, onFocus }: {
+  visible: boolean; onToggle: () => void;
+  onFocus: (item: CityNeighborhood & {lat:number;lng:number}) => void;
+}) {
+  const [query,setQuery]=useState("");
+  const matches=useMemo(()=>{const key=neighborhoodSearchKey(query);return CITY_NEIGHBORHOODS.filter(item=>neighborhoodSearchKey(item.name).includes(key));},[query]);
+  return <section aria-label="Bairros e setores do mapa" className="min-w-0 border-t border-border bg-card px-3 py-2.5 text-card-foreground">
+    <div className="flex flex-wrap items-center justify-between gap-2">
+      <button type="button" onClick={onToggle} aria-pressed={visible} aria-label={visible?"Ocultar nomes dos bairros":"Mostrar nomes dos bairros"}
+        className="min-h-11 rounded-xl border border-border bg-secondary px-3 text-xs font-bold text-secondary-foreground">Bairros {visible?"visíveis":"ocultos"}</button>
+      <span className="text-xs text-muted-foreground">{CITY_NEIGHBORHOODS.length} nomes · {LOCATED_NEIGHBORHOODS.length} referências no mapa</span>
+    </div>
+    <details className="mt-1 min-w-0">
+      <summary className="min-h-11 cursor-pointer py-3 text-sm font-bold">Encontrar bairro ou setor</summary>
+      <label className="block text-xs font-bold">Buscar bairro no mapa
+        <input type="search" value={query} onChange={event=>setQuery(event.target.value)} placeholder="Ex.: Jardim Brasília"
+          className="mt-1 min-h-11 w-full min-w-0 rounded-xl border border-input bg-background px-3 text-base text-foreground" />
+      </label>
+      <p className="my-2 text-xs leading-relaxed text-muted-foreground">Referências aproximadas de endereços do arquivo fornecido. Não indicam limites oficiais nem uma entrada. Os nomes sem posição confirmada permanecem na lista.</p>
+      <ul aria-label="Bairros e setores disponíveis" className="max-h-64 space-y-1 overflow-y-auto overscroll-contain">
+        {matches.map(item=><li key={item.id} className="min-w-0 rounded-xl border border-border">
+          {typeof item.lat==="number"&&typeof item.lng==="number"?<button type="button" className="min-h-11 w-full break-words p-3 text-left text-sm font-bold hover:bg-secondary focus-visible:outline-2 focus-visible:outline-ring"
+            aria-label={"Ver bairro "+item.name+" no mapa"} onClick={()=>onFocus(item as CityNeighborhood & {lat:number;lng:number})}>{item.name}<span className="mt-1 block text-xs font-normal text-muted-foreground">{item.precision}</span></button>
+            :<div className="break-words p-3 text-sm font-bold">{item.name}<span className="mt-1 block text-xs font-normal text-muted-foreground">Localização ainda não confirmada</span></div>}
+        </li>)}
+      </ul>
+      {!matches.length&&<p role="status" className="py-3 text-sm text-muted-foreground">Nenhum bairro encontrado com esse nome.</p>}
+    </details>
+  </section>;
+}
