@@ -39,7 +39,10 @@ describe("city mobility corridor source and address coverage", () => {
   });
   it("links only published stop names to individual municipal lines, not GPS routes", () => {
     const jkStops = publishedStopsForCorridor("avenida-jk");
-    expect(jkStops.map(item => item.line)).toEqual(["102", "103", "105"]);
+    expect(jkStops.map(item => item.line)).toEqual(["100", "102", "103", "104", "105"]);
+    expect(publishedStopsForCorridor("avenida-goiania").map(item => item.line)).toEqual(["104"]);
+    expect(publishedStopsForCorridor("avenida-4").map(item => item.line)).toEqual(["100", "104"]);
+    expect(publishedStopsForCorridor("avenida-aguas-lindas").map(item => item.line)).toEqual(["100", "104"]);
     expect(jkStops.every(item => item.stopLabel.toLowerCase().includes("jk"))).toBe(true);
     expect(publishedStopsForCorridor("avenida-central").map(item => item.line)).toEqual(["100"]);
     expect(publishedStopsForCorridor("avenida-1")).toEqual([]);
