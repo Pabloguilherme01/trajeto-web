@@ -21,6 +21,7 @@ export function MapNeighborhoodPanel({ visible, onToggle, onFocus, inViewport }:
   const [showAll,setShowAll]=useState(false);
   // Do not mount dozens of offscreen controls while this disclosure is closed.
   const [viewportOpen,setViewportOpen]=useState(false);
+  const [searchOpen,setSearchOpen]=useState(false);
   const searchKey=useMemo(()=>neighborhoodSearchKey(query),[query]);
   const matches=useMemo(()=>searchCityNeighborhoods(searchKey),[searchKey]);
   // Avoid mounting a long list of hidden results on low-memory phones.
@@ -53,8 +54,12 @@ export function MapNeighborhoodPanel({ visible, onToggle, onFocus, inViewport }:
         <p className="py-2 text-sm text-muted-foreground">Nenhum bairro com localização aproximada neste recorte. Mova ou reduza o zoom para explorar outras áreas.</p>
       ))}
     </details>
-    <details className="mt-1 min-w-0">
+    <details className="mt-1 min-w-0" data-neighborhood-search onToggle={event=>setSearchOpen(event.currentTarget.open)}>
       <summary className="min-h-11 cursor-pointer py-3 text-sm font-bold">Encontrar bairro ou setor</summary>
+      {/* Preserve the query while closed, but unmount the hidden search input
+          and list. A previously expanded 100-name directory costs no DOM
+          work during map pan/zoom on low-end phones. */}
+      {searchOpen && <>
       <label className="block text-xs font-bold">Buscar bairro no mapa
         <input type="search" value={query} onChange={event=>setQuery(event.target.value)} placeholder="Ex.: Jardim Brasília"
           className="mt-1 min-h-11 w-full min-w-0 rounded-xl border border-input bg-background px-3 text-base text-foreground" />
@@ -73,6 +78,7 @@ export function MapNeighborhoodPanel({ visible, onToggle, onFocus, inViewport }:
         Ver todos os {matches.length} bairros e setores
       </button>}
       {!matches.length&&<p role="status" className="py-3 text-sm text-muted-foreground">Nenhum bairro encontrado com esse nome.</p>}
+      </>}
     </details>
   </section>;
 }
