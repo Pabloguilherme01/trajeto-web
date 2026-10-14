@@ -44,8 +44,13 @@ export default function OfflineReadiness() {
     const request = ++statusRequest.current;
     setChecking(true);
     try {
-      const status = await getOfflinePackageStatus();
-      const storage = await getOfflineStorageStatus();
+      // Cache verification and local storage accounting are independent.
+      // Run them together so slower IndexedDB/quota queries do not add to
+      // Service Worker status latency on low-powered phones.
+      const [status, storage] = await Promise.all([
+        getOfflinePackageStatus(),
+        getOfflineStorageStatus(),
+      ]);
       if (request !== statusRequest.current || preparingRef.current) return;
       setReady(status.ready);
       setBusinessesReady(status.businessesReady === true);
