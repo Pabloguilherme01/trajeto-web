@@ -1,5 +1,7 @@
 /** Screen-space groups keep dense catalogues readable without changing coordinates. */
 export function mapMarkerGroups<T>(items: T[], project: (item: T) => { x: number; y: number }, keep: (item: T) => boolean, cell = 64) {
+  // Invalid grid dimensions must never create NaN buckets or phantom clusters.
+  if (!Number.isFinite(cell) || cell <= 0) return { singles: [...items], groups: [] as Array<{ key: string; items: T[]; x: number; y: number }> };
   const singles: T[] = [];
   const buckets = new Map<string, { items: T[]; sumX: number; sumY: number }>();
   for (const item of items) {
@@ -8,6 +10,9 @@ export function mapMarkerGroups<T>(items: T[], project: (item: T) => { x: number
       continue;
     }
     const point = project(item);
+    // Transient camera projections may be nonfinite while zoom/pan settles.
+    // Do not form unrenderable clusters; the source item remains untouched.
+    if (!Number.isFinite(point.x) || !Number.isFinite(point.y)) continue;
     const key = Math.floor(point.x / cell) + ":" + Math.floor(point.y / cell);
     const bucket = buckets.get(key);
     if (bucket) {
