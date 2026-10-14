@@ -6,13 +6,24 @@ import { buildCityNeighborhoods, neighborhoodKey } from './city-neighborhoods.mj
 
 const dataset=JSON.parse(await readFile(new URL('../client/public/data/aguas-lindas-neighborhoods.json',import.meta.url),'utf8'));
 const code=(await readFile(new URL('../client/src/lib/cityNeighborhoods.ts',import.meta.url),'utf8')).replace(/import snapshot from .*?;/,'const snapshot='+JSON.stringify(dataset)+';');
-const {layoutNeighborhoodLabels}=await import('data:text/javascript;base64,'+Buffer.from(stripTypeScriptTypes(code)).toString('base64'));
+const {layoutNeighborhoodLabels,neighborhoodSearchKey,searchCityNeighborhoods}=await import('data:text/javascript;base64,'+Buffer.from(stripTypeScriptTypes(code)).toString('base64'));
 function part(rows){const strings=[];return{strings,rows:rows.map(([name,lat,lng,precision])=>{const row=Array(17).fill(0);row[7]=strings.push('QUADRA 1, 2, '+name+', CEP 72910001, Águas Lindas de Goiás - GO')-1;row[8]=lat;row[9]=lng;row[10]=strings.push(precision)-1;return row;})};}
 const atlas={items:[{id:'bairro-jardim-brasilia',name:'Jardim Brasília'},{id:'bairro-royal-parque',name:'Royal Parque'}]};
 test('normalizes spelling and sectors without merging different numbered areas',()=>{
   assert.equal(neighborhoodKey('Jardim da Barragem II'),neighborhoodKey('JARDIM BARRAGEM 02'));
   assert.equal(neighborhoodKey('Parque da Barragem Setor 02'),neighborhoodKey('Setor 2'));
   assert.notEqual(neighborhoodKey('Jardim América I'),neighborhoodKey('Jardim América II'));
+});
+test('browser search finds accentless and abbreviated names without mixing numbered areas',()=>{
+  assert.equal(neighborhoodSearchKey('Jd. América 02'),neighborhoodSearchKey('Jardim América II'));
+  assert.equal(neighborhoodSearchKey('Pq Águas Bonitas 01'),neighborhoodSearchKey('Parque Águas Bonitas I'));
+  assert.notEqual(neighborhoodSearchKey('Jardim América I'),neighborhoodSearchKey('Jardim América II'));
+  const found=searchCityNeighborhoods('jd. america 02');
+  assert.ok(found.some(item=>item.name==='Jardim América II'));
+  assert.ok(!found.some(item=>item.name==='Jardim América I'));
+  assert.ok(searchCityNeighborhoods('pq aguas bonitas 1').some(item=>item.name==='Parque Águas Bonitas I'));
+  assert.equal(searchCityNeighborhoods('').length,dataset.items.length);
+  assert.equal(searchCityNeighborhoods('bairro inexistente').length,0);
 });
 test('a city CEP and missing coordinates never create a mapped neighbourhood',()=>{
   const result=buildCityNeighborhoods(atlas,[part([['Jardim Brasília',-15.75,-48.28,'CEP (CNEFE)'],['Royal Parque',null,null,'Bairro (CNEFE)']])]);

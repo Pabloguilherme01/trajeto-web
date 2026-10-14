@@ -396,16 +396,34 @@ export default function OfflineMapCanvas({
     }
     return [...layers].map(([priority, paths]) => ({ priority, path: paths.join(" ") }));
   }, [visible]);
-  const namedRoads = [...visible].reverse();
+  // Preserve the visible road order and avoid rebuilding it when unrelated UI state changes.
+  const namedRoads = useMemo(() => [...visible].reverse(), [visible]);
   const labels = new Set<string>();
   const labelBoxes: { x: number; y: number; width: number }[] = [];
-  const majorRoadLabelPoints = namedRoads.filter(road => road.name && road.priority >= 4).map(road => {
-    const point = road.world[Math.floor(road.world.length / 2)];
-    return { x: size.width / 2 + (point.x - camera.x) * camera.scale + pan.x,
-      y: size.height / 2 + (point.y - camera.y) * camera.scale + pan.y };
-  });
-  const neighborhoodLabels = showNeighborhoods ? layoutNeighborhoodLabels(LOCATED_NEIGHBORHOODS, project, size.width, size.height, focusedNeighborhoodId,
-    [...markerCollisionPoints.map(point => ({ x: point.x + pan.x, y: point.y + pan.y })), ...majorRoadLabelPoints]) : [];
+  const majorRoadLabelPoints = useMemo(() => {
+    if (!showNeighborhoods) return [];
+    return namedRoads.filter(road => road.name && road.priority >= 4).map(road => {
+      const point = road.world[Math.floor(road.world.length / 2)];
+      return {
+        x: size.width / 2 + (point.x - camera.x) * camera.scale + pan.x,
+        y: size.height / 2 + (point.y - camera.y) * camera.scale + pan.y,
+      };
+    });
+  }, [namedRoads, showNeighborhoods, size.width, size.height, camera.x, camera.y, camera.scale, pan.x, pan.y]);
+  // Recalculate the labels only when their positions or obstacles change,
+  // not on theme/panel state updates. Road and marker layers remain independent.
+  const neighborhoodLabels = useMemo(() => {
+    if (!showNeighborhoods) return [];
+    return layoutNeighborhoodLabels(LOCATED_NEIGHBORHOODS, point => {
+      const p = world(point);
+      return {
+        x: size.width / 2 + (p.x - camera.x) * camera.scale + pan.x,
+        y: size.height / 2 + (p.y - camera.y) * camera.scale + pan.y,
+      };
+    }, size.width, size.height, focusedNeighborhoodId,
+    [...markerCollisionPoints.map(point => ({ x: point.x + pan.x, y: point.y + pan.y })), ...majorRoadLabelPoints]);
+  }, [showNeighborhoods, focusedNeighborhoodId, size.width, size.height, camera.x, camera.y,
+    camera.scale, pan.x, pan.y, markerCollisionPoints, majorRoadLabelPoints]);
   const focusNeighborhood = (item: CityNeighborhood & { lat: number; lng: number }) => {
     const point = world(item);
     onManualInteraction?.();

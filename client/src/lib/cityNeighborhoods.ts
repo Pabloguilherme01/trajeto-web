@@ -9,8 +9,39 @@ export const LOCATED_NEIGHBORHOODS = CITY_NEIGHBORHOODS.filter(
   (item): item is CityNeighborhood & { lat: number; lng: number } =>
     typeof item.lat === "number" && Number.isFinite(item.lat) && typeof item.lng === "number" && Number.isFinite(item.lng)
 );
+const ROMAN_NUMBERS: Readonly<Record<string, string>> = {
+  i: "1", ii: "2", iii: "3", iv: "4", v: "5",
+  vi: "6", vii: "7", viii: "8", ix: "9", x: "10",
+};
+
 export function neighborhoodSearchKey(value: string) {
-  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR").trim().replace(/\s+/g, " ").replace(/\b0+(\d+)\b/g, "$1");
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\bjd\b/g, "jardim")
+    .replace(/\bpq\b/g, "parque")
+    .replace(/\b(?:da|de|do|das|dos)\b/g, " ")
+    .replace(/\b0+(\d+)\b/g, "$1")
+    .replace(/\b(?:i|ii|iii|iv|v|vi|vii|viii|ix|x)\b/g, word => ROMAN_NUMBERS[word])
+    .trim()
+    .replace(/\s+/g, " ");
+}
+
+// Name normalization is done once when loading the small static index,
+// rather than again for every result on each keystroke.
+const SEARCHABLE_NEIGHBORHOODS = CITY_NEIGHBORHOODS.map(item => ({
+  item,
+  key: neighborhoodSearchKey(item.name),
+}));
+
+export function searchCityNeighborhoods(query: string): readonly CityNeighborhood[] {
+  const key = neighborhoodSearchKey(query);
+  if (!key) return CITY_NEIGHBORHOODS;
+  return SEARCHABLE_NEIGHBORHOODS
+    .filter(entry => entry.key.includes(key))
+    .map(entry => entry.item);
 }
 type ScreenPoint = { x: number; y: number };
 export function layoutNeighborhoodLabels(

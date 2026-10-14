@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { CITY_NEIGHBORHOODS, LOCATED_NEIGHBORHOODS, layoutNeighborhoodLabels, neighborhoodSearchKey, type CityNeighborhood } from "@/lib/cityNeighborhoods";
+import { CITY_NEIGHBORHOODS, LOCATED_NEIGHBORHOODS, layoutNeighborhoodLabels, neighborhoodSearchKey, searchCityNeighborhoods, type CityNeighborhood } from "@/lib/cityNeighborhoods";
 
 export function MapNeighborhoodLabels({ labels, dark = false }: {
   labels: ReturnType<typeof layoutNeighborhoodLabels>; dark?: boolean;
@@ -19,7 +19,7 @@ export function MapNeighborhoodPanel({ visible, onToggle, onFocus }: {
   const [query,setQuery]=useState("");
   const [showAll,setShowAll]=useState(false);
   const searchKey=useMemo(()=>neighborhoodSearchKey(query),[query]);
-  const matches=useMemo(()=>CITY_NEIGHBORHOODS.filter(item=>neighborhoodSearchKey(item.name).includes(searchKey)),[searchKey]);
+  const matches=useMemo(()=>searchCityNeighborhoods(searchKey),[searchKey]);
   // Avoid mounting a long list of hidden results on low-memory phones.
   // Searching still finds every name; the complete list is one tap away.
   const visibleMatches=searchKey||showAll?matches:matches.slice(0,12);
