@@ -399,8 +399,13 @@ export default function OfflineMapCanvas({
   const namedRoads = [...visible].reverse();
   const labels = new Set<string>();
   const labelBoxes: { x: number; y: number; width: number }[] = [];
+  const majorRoadLabelPoints = namedRoads.filter(road => road.name && road.priority >= 4).map(road => {
+    const point = road.world[Math.floor(road.world.length / 2)];
+    return { x: size.width / 2 + (point.x - camera.x) * camera.scale + pan.x,
+      y: size.height / 2 + (point.y - camera.y) * camera.scale + pan.y };
+  });
   const neighborhoodLabels = showNeighborhoods ? layoutNeighborhoodLabels(LOCATED_NEIGHBORHOODS, project, size.width, size.height, focusedNeighborhoodId,
-    markerCollisionPoints.map(point => ({ x: point.x + pan.x, y: point.y + pan.y }))) : [];
+    [...markerCollisionPoints.map(point => ({ x: point.x + pan.x, y: point.y + pan.y })), ...majorRoadLabelPoints]) : [];
   const focusNeighborhood = (item: CityNeighborhood & { lat: number; lng: number }) => {
     const point = world(item);
     onManualInteraction?.();
@@ -633,7 +638,7 @@ export default function OfflineMapCanvas({
                 x > size.width - width / 2 - 8 ||
                 y < 50 ||
                 y > size.height - 40 ||
-                neighborhoodLabels.some(label => Math.abs(label.y - y) < 34 && Math.abs(label.x - x) < (label.width + width) / 2 + 6) ||
+                (road.priority < 4 && !showAllStreetNames && neighborhoodLabels.some(label => Math.abs(label.y - y) < 34 && Math.abs(label.x - x) < (label.width + width) / 2 + 6)) ||
                 labelBoxes.some(
                   box =>
                     Math.abs(box.y - baseY) < 22 &&
