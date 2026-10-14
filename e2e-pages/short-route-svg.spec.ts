@@ -16,14 +16,26 @@ for (const width of [320, 1360]) {
         const matrix = line.getScreenCTM();
         if (!matrix) return Infinity;
         const ends = [line.getPointAtLength(0), line.getPointAtLength(line.getTotalLength())];
+        const routeBox = line.getBoundingClientRect();
         return Math.max(...["Origem", "Destino"].map((name, index) => {
           const pin = document.querySelector(`[role="dialog"] button[aria-label="Selecionar ${name}"]`);
           if (!pin) return Infinity;
           const box = pin.getBoundingClientRect();
           const point = ends[index].matrixTransform(matrix);
-          return Math.hypot(point.x - (box.left + box.width / 2), point.y - box.bottom);
+          const x = box.left + box.width / 2, y = box.bottom;
+          return Math.max(Math.hypot(point.x - x, point.y - y),
+            routeBox.left - x, x - routeBox.right, routeBox.top - y, y - routeBox.bottom);
         }));
       })).toBeLessThan(8);
+      await expect.poll(() => dialog.locator("[data-offline-road-layer]").evaluateAll(layers => {
+        const map = document.querySelector('[role="dialog"] [aria-label="Explorar mapa offline"]')?.getBoundingClientRect();
+        if (!map) return false;
+        return layers.some(layer => {
+          const road = layer.getBoundingClientRect();
+          return road.width > 0 && road.height > 0 && road.right >= map.left &&
+            road.left <= map.right && road.bottom >= map.top && road.top <= map.bottom;
+        });
+      })).toBe(true);
     }
     await checkPinAlignment();
     for (let step = 0; step < 10; step++) {
