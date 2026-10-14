@@ -12,6 +12,7 @@ import { Link, useLocation, useSearch } from "wouter";
 import { ChevronDown, Database, MapPin, Search, ShieldCheck, X } from "lucide-react";
 import type { StationMapItem } from "@/components/StationMap";
 import CityMapSurface from "@/components/CityMapSurface";
+import CityCorridorExplorer from "@/components/CityCorridorExplorer";
 import { DestinationActions } from "@/components/DestinationActions";
 import QuickFilterChips from "@/components/QuickFilterChips";
 import DestinationResourceModes from "@/components/DestinationResourceModes";
@@ -482,6 +483,12 @@ export default function CityMap() {
           </button>
         ))}
       </div>
+      {!registryMode && (activeLayer === "transporte" || activeLayer === "ruas") && (
+        <CityCorridorExplorer
+          businesses={businesses.items}
+          commercialCatalogLoaded={needsBusinessCatalog && !businesses.loading && !businesses.error && businesses.items.length > 0}
+        />
+      )}
       {referenceLayer === "bairros" && (
         <p className="mt-2 text-xs leading-relaxed text-foreground/70" role="status">
           Estas são referências por nome citadas em documento municipal. Não há ponto de chegada, quadra ou entrada
