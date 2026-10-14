@@ -51,6 +51,50 @@ export const ANTT_SEMIURBAN_LINKS = [
   { destination: "Taguatinga", source: ANTT_TARIFF_SOURCE, publishedFare: "R$ 7,65" },
 ] as const;
 
+/**
+ * Stop-name evidence from an individual published Moovit direction page.
+ * A stop named "Avenida X" is NOT a GPS stop coordinate, a certified GTFS
+ * shape, or proof that a line uses all segments of the road.
+ *
+ * The operator page contains conflicting total-route counts. We list only
+ * named routes that have a linked direction page and a visible stop label.
+ */
+export const MUNICIPAL_TAG_LINES_SOURCE = "https://moovitapp.com/index/pt-br/transporte_p%C3%BAblico-lines-Brasilia-1702-2190941";
+export type PublishedStopEvidence = {
+  corridorId: string;
+  line: string;
+  stopLabel: string;
+  directionSource: string;
+  checkedAt: string;
+};
+const LINE_100 = "https://moovitapp.com/index/pt-br/transporte_p%C3%BAblico-line-100-Brasilia-1702-2190941-82705269-1";
+const LINE_102 = "https://moovitapp.com/index/pt-br/transporte_p%C3%BAblico-line-102-Brasilia-1702-2190941-79764567-0";
+const LINE_103 = "https://moovitapp.com/index/pt-br/transporte_p%C3%BAblico-line-103-Brasilia-1702-2190941-82705271-0";
+const LINE_104 = "https://moovitapp.com/index/pt-br/transporte_p%C3%BAblico-line-104-Brasilia-1702-2190941-79764568-1";
+const LINE_105 = "https://moovitapp.com/index/pt-br/transporte_p%C3%BAblico-line-105-Brasilia-1702-2190941-79764569-0";
+export const PUBLISHED_MUNICIPAL_STOPS: readonly PublishedStopEvidence[] = [
+  { corridorId: "rua-pau-brasil", line: "100", stopLabel: "Rua Pau Brasil, 22", directionSource: LINE_100, checkedAt: "2026-10-14" },
+  { corridorId: "rua-pau-brasil", line: "103", stopLabel: "Rua Pau-Brasil, 889-971", directionSource: LINE_103, checkedAt: "2026-10-14" },
+  { corridorId: "rua-pau-brasil", line: "104", stopLabel: "Rua Pau-Brasil, 889-971", directionSource: LINE_104, checkedAt: "2026-10-14" },
+  { corridorId: "rua-pau-brasil", line: "105", stopLabel: "Rua Pau-Brasil, 889-971", directionSource: LINE_105, checkedAt: "2026-10-14" },
+  { corridorId: "avenida-central", line: "100", stopLabel: "Avenida Central, 810", directionSource: LINE_100, checkedAt: "2026-10-14" },
+  { corridorId: "avenida-brasilia", line: "100", stopLabel: "Avenida Brasília, 1048-1198", directionSource: LINE_100, checkedAt: "2026-10-14" },
+  { corridorId: "avenida-brasilia", line: "104", stopLabel: "Avenida Brasília, 817", directionSource: LINE_104, checkedAt: "2026-10-14" },
+  { corridorId: "avenida-jk", line: "102", stopLabel: "Avenida Jk, 26", directionSource: LINE_102, checkedAt: "2026-10-14" },
+  { corridorId: "avenida-jk", line: "103", stopLabel: "Avenida Jk, 978", directionSource: LINE_103, checkedAt: "2026-10-14" },
+  { corridorId: "avenida-jk", line: "105", stopLabel: "Avenida Jk, 978", directionSource: LINE_105, checkedAt: "2026-10-14" },
+  { corridorId: "avenida-porto-velho", line: "100", stopLabel: "Avenida Pôrto Velho, 696", directionSource: LINE_100, checkedAt: "2026-10-14" },
+  { corridorId: "avenida-porto-velho", line: "102", stopLabel: "Avenida Pôrto Velho, 838-892", directionSource: LINE_102, checkedAt: "2026-10-14" },
+  { corridorId: "avenida-porto-velho", line: "103", stopLabel: "Avenida Pôrto Velho, 838-892", directionSource: LINE_103, checkedAt: "2026-10-14" },
+  { corridorId: "br-070", line: "100", stopLabel: "Br-070, 2", directionSource: LINE_100, checkedAt: "2026-10-14" },
+  { corridorId: "br-070", line: "102", stopLabel: "Marginal Br 070 - Posto Ipiranga E Viaduto", directionSource: LINE_102, checkedAt: "2026-10-14" },
+  { corridorId: "br-070", line: "103", stopLabel: "Marginal Br 070 - Posto Ipiranga E Viaduto", directionSource: LINE_103, checkedAt: "2026-10-14" },
+  { corridorId: "br-070", line: "105", stopLabel: "Marginal Br 070 - Posto Ipiranga E Viaduto", directionSource: LINE_105, checkedAt: "2026-10-14" },
+];
+export function publishedStopsForCorridor(id: string): readonly PublishedStopEvidence[] {
+  return PUBLISHED_MUNICIPAL_STOPS.filter(item => item.corridorId === id);
+}
+
 /** Normalization is for address text, never used to derive geographic points. */
 function streetKey(input: string): string {
   return input.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
