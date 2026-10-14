@@ -61,3 +61,17 @@ test('viewport directory preserves overlapping neighborhood names without invent
   assert.deepEqual(neighborhoodsInViewport(items,project,0,360),[]);
   assert.deepEqual(neighborhoodsInViewport(items,()=>({x:NaN,y:180}),320,360),[]);
 });
+
+test('invalid viewport/projection never creates nonfinite bairro labels',()=>{
+  const items=[
+    {id:'valid',name:'Jardim Brasília',lat:-15.75,lng:-48.28},
+    {id:'invalid',name:'Setor sem projeção',lat:-15.74,lng:-48.29},
+  ];
+  const project=item=>item.lat===-15.74?{x:NaN,y:Infinity}:{x:160,y:180};
+  assert.deepEqual(layoutNeighborhoodLabels(items,project,320,360,null).map(item=>item.id),['valid']);
+  assert.deepEqual(layoutNeighborhoodLabels(items,project,320,360,'invalid').map(item=>item.id),['valid']);
+  assert.deepEqual(layoutNeighborhoodLabels(items,project,NaN,360,null),[]);
+  assert.deepEqual(layoutNeighborhoodLabels(items,project,Infinity,360,null),[]);
+  assert.deepEqual(layoutNeighborhoodLabels(items,project,0,360,null),[]);
+  assert.deepEqual(neighborhoodsInViewport(items,project,Infinity,360),[]);
+});
