@@ -74,6 +74,28 @@ describe("offline preparation feedback", () => {
     }
   });
 
+  it("ignores an outdated readiness check after a newer controller event", async () => {
+    const worker = new EventTarget();
+    Object.defineProperty(navigator, "serviceWorker", {
+      configurable: true,
+      value: worker,
+    });
+    let finishStale!: (ready: boolean) => void;
+    state.check
+      .mockImplementationOnce(() => new Promise(resolve => { finishStale = resolve; }))
+      .mockResolvedValueOnce(true);
+    try {
+      render(<OfflineReadiness />);
+      await act(async () => { worker.dispatchEvent(new Event("controllerchange")); });
+      expect(await screen.findByText("Pronto para usar sem internet neste aparelho.")).toBeTruthy();
+      await act(async () => { finishStale(false); });
+      expect(screen.getByText("Pronto para usar sem internet neste aparelho.")).toBeTruthy();
+      expect(state.check).toHaveBeenCalledTimes(2);
+    } finally {
+      delete (navigator as unknown as { serviceWorker?: EventTarget }).serviceWorker;
+    }
+  });
+
   it("reports ready only after successful preparation", async () => {
     state.prepare.mockResolvedValue({ ready: true });
     render(<OfflineReadiness />);
