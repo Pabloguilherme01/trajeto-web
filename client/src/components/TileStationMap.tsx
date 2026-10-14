@@ -403,6 +403,28 @@ export default function TileStationMap({
       };
     }, width, height),
   [width, height, zoomScale, centerPx.x, centerPx.y]);
+  // Keep label decluttering out of unrelated panel, theme and selection renders.
+  // Hooks must precede map fallback returns to preserve hook call order.
+  const neighborhoodObstacles = useMemo(() => {
+    if (!showNeighborhoods) return [];
+    return [
+      ...markerGroups.singles.flatMap(station => {
+        const position = markerPositions.get(stationMapKey(station));
+        return position ? [{ x: position.left, y: position.top }] : [];
+      }),
+      ...markerGroups.groups.map(group => ({
+        x: width / 2 + group.x * clusterToCurrentScale - centerPx.x,
+        y: height / 2 + group.y * clusterToCurrentScale - centerPx.y,
+      })),
+    ].filter(point => point.x >= -50 && point.x <= width + 50 && point.y >= -50 && point.y <= height + 50);
+  }, [showNeighborhoods, markerGroups, markerPositions, width, height, clusterToCurrentScale, centerPx.x, centerPx.y]);
+  const neighborhoodLabels = useMemo(() => {
+    if (!showNeighborhoods) return [];
+    return layoutNeighborhoodLabels(LOCATED_NEIGHBORHOODS, point => {
+      const p = projectBase(point.lat, point.lng);
+      return { x: width / 2 + p.x * zoomScale - centerPx.x, y: height / 2 + p.y * zoomScale - centerPx.y };
+    }, width, height, focusedNeighborhoodId, neighborhoodObstacles);
+  }, [showNeighborhoods, zoomScale, centerPx.x, centerPx.y, width, height, focusedNeighborhoodId, neighborhoodObstacles]);
   const routeGeometryKey = useMemo(
     () => routePoints.map(point => `${point.lat},${point.lng}`).join(";"),
     [routePoints]
@@ -639,20 +661,6 @@ export default function TileStationMap({
     );
   }
 
-  const neighborhoodObstacles = [
-    ...markerGroups.singles.flatMap(station => {
-      const position = markerPositions.get(stationMapKey(station));
-      return position ? [{ x: position.left, y: position.top }] : [];
-    }),
-    ...markerGroups.groups.map(group => ({
-      x: width / 2 + group.x * clusterToCurrentScale - centerPx.x,
-      y: height / 2 + group.y * clusterToCurrentScale - centerPx.y,
-    })),
-  ].filter(point => point.x >= -50 && point.x <= width + 50 && point.y >= -50 && point.y <= height + 50);
-  const neighborhoodLabels = showNeighborhoods ? layoutNeighborhoodLabels(LOCATED_NEIGHBORHOODS, point => {
-    const p = projectBase(point.lat, point.lng);
-    return { x: width / 2 + p.x * zoomScale - centerPx.x, y: height / 2 + p.y * zoomScale - centerPx.y };
-  }, width, height, focusedNeighborhoodId, neighborhoodObstacles) : [];
   const focusNeighborhood = (item: CityNeighborhood & { lat: number; lng: number }) => {
     cancelGesture();
     setFollowing(false);
