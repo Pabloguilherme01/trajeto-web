@@ -34,4 +34,5 @@ test('mobile labels are separated and prioritise the chosen neighbourhood',()=>{
   const items=[{id:'a',name:'Jardim Brasília',lat:1,lng:1},{id:'b',name:'Mansões Olinda',lat:2,lng:2},{id:'c',name:'Fora do mapa',lat:3,lng:3}];
   const labels=layoutNeighborhoodLabels(items,item=>item.lat===3?{x:900,y:200}:{x:160,y:180},320,360,'b');
   assert.deepEqual(labels.map(item=>item.id),['b']);assert.ok(labels[0].x-labels[0].width/2>=8);
+  assert.deepEqual(layoutNeighborhoodLabels(items,item=>item.lat===3?{x:900,y:200}:{x:160,y:180},320,360,null,[{x:160,y:180}]),[]);
 });

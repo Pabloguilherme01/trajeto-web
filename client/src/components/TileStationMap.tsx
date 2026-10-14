@@ -627,10 +627,20 @@ export default function TileStationMap({
     );
   }
 
+  const neighborhoodObstacles = [
+    ...markerGroups.singles.flatMap(station => {
+      const position = markerPositions.get(stationMapKey(station));
+      return position ? [{ x: position.left, y: position.top }] : [];
+    }),
+    ...markerGroups.groups.map(group => ({
+      x: width / 2 + group.x * clusterToCurrentScale - centerPx.x,
+      y: height / 2 + group.y * clusterToCurrentScale - centerPx.y,
+    })),
+  ].filter(point => point.x >= -50 && point.x <= width + 50 && point.y >= -50 && point.y <= height + 50);
   const neighborhoodLabels = showNeighborhoods ? layoutNeighborhoodLabels(LOCATED_NEIGHBORHOODS, point => {
     const p = projectBase(point.lat, point.lng);
     return { x: width / 2 + p.x * zoomScale - centerPx.x, y: height / 2 + p.y * zoomScale - centerPx.y };
-  }, width, height, focusedNeighborhoodId) : [];
+  }, width, height, focusedNeighborhoodId, neighborhoodObstacles) : [];
   const focusNeighborhood = (item: CityNeighborhood & { lat: number; lng: number }) => {
     cancelGesture();
     setFollowing(false);
