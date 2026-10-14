@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
-  ANTT_SEMIURBAN_LINKS, CITY_CORRIDORS, corridorAddressMatches,
-  summarizeCorridorAddresses,
+  ANTT_SEMIURBAN_LINKS, CITY_CORRIDORS, PUBLISHED_MUNICIPAL_STOPS,
+  publishedStopsForCorridor, corridorAddressMatches, summarizeCorridorAddresses,
 } from "./cityMobilityCorridors";
 
 describe("city mobility corridor source and address coverage", () => {
@@ -36,6 +36,19 @@ describe("city mobility corridor source and address coverage", () => {
     expect(result.cnpjOnly).toBe(1);
     expect(result.examples.map(row => row.name)).toEqual(["Mercado Real"]);
     expect(result.publicServices.map(row => row.id)).toEqual(["clinic"]);
+  });
+  it("links only published stop names to individual municipal lines, not GPS routes", () => {
+    const jkStops = publishedStopsForCorridor("avenida-jk");
+    expect(jkStops.map(item => item.line)).toEqual(["102", "103", "105"]);
+    expect(jkStops.every(item => item.stopLabel.toLowerCase().includes("jk"))).toBe(true);
+    expect(publishedStopsForCorridor("avenida-central").map(item => item.line)).toEqual(["100"]);
+    expect(publishedStopsForCorridor("avenida-1")).toEqual([]);
+    expect(PUBLISHED_MUNICIPAL_STOPS.every(item =>
+      CITY_CORRIDORS.some(corridor => corridor.id === item.corridorId) &&
+      /^https:\/\/moovitapp\.com\//.test(item.directionSource) &&
+      /^\d{3,4}$/.test(item.line) &&
+      item.checkedAt === "2026-10-14"
+    )).toBe(true);
   });
   it("keeps transit proximity separate from any certified avenue itinerary", () => {
     expect(jk.nearbyBus?.lineIds).toEqual(["100", "2304", "2402", "2424", "2862"]);
