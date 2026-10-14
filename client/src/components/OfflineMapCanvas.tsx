@@ -1,3 +1,5 @@
+import { MapNeighborhoodLabels, MapNeighborhoodPanel } from "@/components/MapNeighborhoods";
+import { LOCATED_NEIGHBORHOODS, layoutNeighborhoodLabels, type CityNeighborhood } from "@/lib/cityNeighborhoods";
 import { Sun, Moon, Expand, Minimize, Map as MapIcon } from "lucide-react";
 import { groundMetresPerPixel } from "@/lib/mapPresentation";
 import { prepareOfflineRoadIndex, ROAD_GRID, type PreparedRoadIndex } from "@/lib/offlineMapRoadIndex";
@@ -155,6 +157,8 @@ export default function OfflineMapCanvas({
   };
   useEffect(() => () => cancelPan(), []);
   const [size, setSize] = useState({ width: 320, height: 360 });
+  const [showNeighborhoods, setShowNeighborhoods] = useState(true);
+  const [focusedNeighborhoodId, setFocusedNeighborhoodId] = useState<string | null>(null);
   const viewport = useRef<HTMLDivElement>(null);
   const gestureZoom = useRef(zoom);
   gestureZoom.current = zoom;
@@ -395,6 +399,22 @@ export default function OfflineMapCanvas({
   const namedRoads = [...visible].reverse();
   const labels = new Set<string>();
   const labelBoxes: { x: number; y: number; width: number }[] = [];
+  const majorRoadLabelPoints = namedRoads.filter(road => road.name && road.priority >= 4).map(road => {
+    const point = road.world[Math.floor(road.world.length / 2)];
+    return { x: size.width / 2 + (point.x - camera.x) * camera.scale + pan.x,
+      y: size.height / 2 + (point.y - camera.y) * camera.scale + pan.y };
+  });
+  const neighborhoodLabels = showNeighborhoods ? layoutNeighborhoodLabels(LOCATED_NEIGHBORHOODS, project, size.width, size.height, focusedNeighborhoodId,
+    [...markerCollisionPoints.map(point => ({ x: point.x + pan.x, y: point.y + pan.y })), ...majorRoadLabelPoints]) : [];
+  const focusNeighborhood = (item: CityNeighborhood & { lat: number; lng: number }) => {
+    const point = world(item);
+    onManualInteraction?.();
+    setShowNeighborhoods(true);
+    setFocusedNeighborhoodId(item.id);
+    setPan({ x: -(point.x - camera.x) * camera.scale, y: -(point.y - camera.y) * camera.scale });
+    viewport.current?.focus({ preventScroll: true });
+    viewport.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  };
   const mapTransform = offlineSvgTransform(camera, svgOrigin, size.width, size.height, pan);
   const metresPerPixel =
     groundMetresPerPixel(camera.y - pan.y / camera.scale, camera.scale);
@@ -618,6 +638,7 @@ export default function OfflineMapCanvas({
                 x > size.width - width / 2 - 8 ||
                 y < 50 ||
                 y > size.height - 40 ||
+                (road.priority < 4 && !showAllStreetNames && neighborhoodLabels.some(label => Math.abs(label.y - y) < 34 && Math.abs(label.x - x) < (label.width + width) / 2 + 6)) ||
                 labelBoxes.some(
                   box =>
                     Math.abs(box.y - baseY) < 22 &&
@@ -650,6 +671,7 @@ export default function OfflineMapCanvas({
             })}
 
         </svg>
+        {showNeighborhoods && <MapNeighborhoodLabels labels={neighborhoodLabels} dark={dark} />}
         {markerGroups.groups.filter(group => group.x + pan.x >= -30 && group.x + pan.x <= size.width + 30 && group.y + pan.y >= -30 && group.y + pan.y <= size.height + 30).map(group => <button key={group.key} type="button" aria-label={`Ampliar grupo de ${group.items.length} lugares`} onPointerDown={event => event.stopPropagation()} onClick={() => {
           onManualInteraction?.();
           const next = Math.min(6, zoom * 1.8);
@@ -778,6 +800,7 @@ export default function OfflineMapCanvas({
             : scaleMetres + " m"}
         </div>
       </div>
+      <MapNeighborhoodPanel visible={showNeighborhoods} onToggle={() => setShowNeighborhoods(value => !value)} onFocus={focusNeighborhood} />
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border bg-card px-3 py-2.5 text-xs font-semibold text-muted-foreground">
         <span role="status">
           {pack

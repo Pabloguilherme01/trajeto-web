@@ -46,7 +46,7 @@ jobs:
         run: npm run check
 
       - name: Local street routing and map camera regressions
-        run: node --test scripts/offline-road-pack.test.mjs scripts/public-routing-streets.test.mjs scripts/offline-map-camera.test.mjs
+        run: node --test scripts/offline-road-pack.test.mjs scripts/public-routing-streets.test.mjs scripts/offline-map-camera.test.mjs scripts/city-neighborhoods.test.mjs
 
       - name: ANP source validation tests
         run: npm run test:anp-source

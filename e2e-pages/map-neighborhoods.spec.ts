@@ -1,0 +1,33 @@
+import { expect, test } from "@playwright/test";
+
+for (const width of [320, 1360]) test(`Pages: neighbourhood names, search and focus work offline at ${width}px`, async ({page,context}) => {
+  await page.setViewportSize({width,height:900});
+  await page.goto("mapa");
+  const panel=page.getByRole("region",{name:"Bairros e setores do mapa"});
+  await expect(panel).toBeVisible();
+  await panel.locator("summary").click();
+  const results=panel.getByRole("list",{name:"Bairros e setores disponíveis"}).getByRole("listitem");
+  await expect(results).toHaveCount(12);
+  await panel.getByRole("button",{name:"Mostrar todos os bairros"}).click();
+  await expect(results).toHaveCount(100);
+  await panel.getByRole("searchbox",{name:"Buscar bairro no mapa"}).fill("jardim brasilia");
+  await panel.getByRole("button",{name:"Ver bairro Jardim Brasília no mapa",exact:true}).click();
+  await expect(page.locator('[data-map-neighborhood="bairro-jardim-brasilia"]')).toBeVisible();
+  await page.evaluate(async()=>{await navigator.serviceWorker.ready;});
+  await expect.poll(()=>page.evaluate(()=>Boolean(navigator.serviceWorker.controller))).toBe(true);
+  await context.setOffline(true);
+  await page.reload();
+  const localPanel=page.getByRole("region",{name:"Bairros e setores do mapa"});
+  await expect(localPanel).toBeVisible();
+  await localPanel.locator("summary").click();
+  await localPanel.getByRole("searchbox",{name:"Buscar bairro no mapa"}).fill("jardim brasilia");
+  await localPanel.getByRole("button",{name:"Ver bairro Jardim Brasília no mapa",exact:true}).click();
+  await expect(page.locator('[data-map-neighborhood="bairro-jardim-brasilia"]')).toBeVisible();
+  await localPanel.getByRole("button",{name:"Ocultar nomes dos bairros",exact:true}).click();
+  await expect(page.getByRole("group",{name:"Nomes dos bairros no mapa"})).toHaveCount(0);
+  await localPanel.getByRole("button",{name:"Mostrar nomes dos bairros",exact:true}).click();
+  await expect(page.getByRole("group",{name:"Nomes dos bairros no mapa"})).toBeVisible();
+  await localPanel.getByRole("searchbox",{name:"Buscar bairro no mapa"}).fill("Royal Parque");
+  await expect(localPanel.getByText("Localização ainda não confirmada",{exact:true})).toBeVisible();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+});
