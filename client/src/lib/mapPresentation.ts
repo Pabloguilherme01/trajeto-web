@@ -11,6 +11,14 @@ export function groundMetresPerPixel(worldY: number, scale: number) {
 
 /** Cover the viewport with one tile of overscan; fractional zoom uses CSS scale. */
 export function viewportTileBounds(center: { x: number; y: number }, width: number, height: number, scale: number) {
+  // Prevent runaway for-loops in the tile renderer when a transient camera
+  // or viewport measurement is invalid. Empty bounds draw no tiles until the
+  // next valid camera update; they never invent a map position.
+  if (
+    !Number.isFinite(center.x) || !Number.isFinite(center.y) ||
+    !Number.isFinite(width) || !Number.isFinite(height) ||
+    width < 0 || height < 0 || !Number.isFinite(scale) || scale <= 0
+  ) return { minX: 0, maxX: -1, minY: 0, maxY: -1 };
   return {
     minX: Math.floor((center.x - width / (2 * scale)) / 256) - 1,
     maxX: Math.floor((center.x + width / (2 * scale)) / 256) + 1,
