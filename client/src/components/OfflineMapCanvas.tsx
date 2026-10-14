@@ -10,6 +10,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { appUrl } from "@/lib/appUrl";
 import { isMapPoint, type MapPoint } from "@/lib/mapGeometry";
 import { fitOfflineMapCamera } from "@/lib/offlineMapCamera";
+import { offlineSvgPath, offlineSvgTransform } from "@/lib/offlineMapSvg";
 
 export type OfflineMapMarker = MapPoint & {
   id: string;
@@ -27,7 +28,7 @@ type Road = {
   points: [number, number][];
 };
 type MapPack = { schema: number; retrievedAt: string; roads: Road[] };
-const EMPTY_ROAD_INDEX: PreparedRoadIndex = { roads: [], roadGrid: new Map() };
+const EMPTY_ROAD_INDEX: PreparedRoadIndex = { roads: [], roadGrid: new Map(), svgOrigin: { x: 0, y: 0 } };
 const EMPTY_ROUTE_POINTS: MapPoint[] = [];
 let packPromise: Promise<MapPack> | undefined;
 export function loadOfflineMapPack() {
@@ -331,14 +332,6 @@ export default function OfflineMapCanvas({
       }),
     [viewportMarkers, markerWorld, camera.x, camera.y, camera.scale, size.width, size.height]
   );
-  const geometryPath = useMemo(
-    () =>
-      geometry
-        .map(point => world(point))
-        .map((point, index) => `${index ? "L" : "M"}${point.x.toFixed(8)} ${point.y.toFixed(8)}`)
-        .join(" "),
-    [fingerprint]
-  );
   // Reuse compiled Mercator roads, SVG paths and spatial buckets when
   // opening map/planner views of the same validated offline snapshot.
   // A replacement pack builds its own index without sharing old coordinates.
@@ -347,6 +340,14 @@ export default function OfflineMapCanvas({
     [pack]
   );
   const { roads, roadGrid } = preparedRoadIndex;
+  const svgOrigin = useMemo(
+    () => geometry[0] ? world(geometry[0]) : anchors[0] ? world(anchors[0]) : preparedRoadIndex.svgOrigin,
+    [fingerprint, preparedRoadIndex]
+  );
+  const geometryPath = useMemo(
+    () => offlineSvgPath(geometry.map(world), svgOrigin),
+    [fingerprint, svgOrigin]
+  );
   const visible = useMemo(() => {
     const left = size.width / 2 - camera.x * camera.scale + pan.x;
     const top = size.height / 2 - camera.y * camera.scale + pan.y;
@@ -394,7 +395,7 @@ export default function OfflineMapCanvas({
   const namedRoads = [...visible].reverse();
   const labels = new Set<string>();
   const labelBoxes: { x: number; y: number; width: number }[] = [];
-  const mapTransform = `translate(${size.width / 2 + pan.x - camera.x * camera.scale} ${size.height / 2 + pan.y - camera.y * camera.scale}) scale(${camera.scale})`;
+  const mapTransform = offlineSvgTransform(camera, svgOrigin, size.width, size.height, pan);
   const metresPerPixel =
     groundMetresPerPixel(camera.y - pan.y / camera.scale, camera.scale);
   const scaleMetres =
@@ -524,6 +525,7 @@ export default function OfflineMapCanvas({
         >
           <title>Ruas locais salvas e pontos da viagem</title>
           <g data-offline-world-layer transform={mapTransform}>
+            <g transform={`translate(${preparedRoadIndex.svgOrigin.x - svgOrigin.x} ${preparedRoadIndex.svgOrigin.y - svgOrigin.y})`}>
             {roadLayers.map(road => {
               const priority = road.priority;
               const major = priority >= 2;
@@ -557,6 +559,7 @@ export default function OfflineMapCanvas({
                 </g>
               );
             })}
+            </g>
             {geometry.length > 1 && (
               <>
                 <path

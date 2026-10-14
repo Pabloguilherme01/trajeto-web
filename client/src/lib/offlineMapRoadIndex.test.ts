@@ -25,7 +25,7 @@ describe("offline map compiled road spatial index", () => {
     expect(result.roads.map(road => road.priority)).toEqual([1, 4]);
     for (const road of result.roads) {
       expect(road.world).toHaveLength(2);
-      expect(road.path).toMatch(/^M\d+\.\d{8} \d+\.\d{8} L\d+\.\d{8} \d+\.\d{8}$/);
+      expect(road.path).toMatch(/^M-?\d+\.\d{8} -?\d+\.\d{8} L-?\d+\.\d{8} -?\d+\.\d{8}$/);
       expect(road.bounds.minX).toBeLessThanOrEqual(road.world[0].x);
       expect(road.bounds.maxX).toBeGreaterThanOrEqual(road.world[1].x);
       const key = Math.floor(road.world[0].x * ROAD_GRID) + ":" + Math.floor(road.world[0].y * ROAD_GRID);
@@ -50,3 +50,4 @@ describe("offline map compiled road spatial index", () => {
     expect(first.roads).toHaveLength(1000);
   });
 });
+

@@ -1,4 +1,5 @@
 import { roadPriority } from "./mapPresentation";
+import { offlineSvgPath } from "./offlineMapSvg";
 
 export const ROAD_GRID = 4096;
 type OfflineRoad = { id: number; kind: string; name: string; points: [number, number][] };
@@ -9,6 +10,7 @@ export type PreparedRoad = OfflineRoad & {
   priority: number; world: WorldPoint[]; bounds: Bounds; path: string;
 };
 export type PreparedRoadIndex = {
+  svgOrigin: WorldPoint;
   roads: PreparedRoad[];
   roadGrid: Map<string, number[]>;
 };
@@ -31,20 +33,21 @@ export function prepareOfflineRoadIndex(pack: RoadPack): PreparedRoadIndex {
   const cached = preparedByPack.get(pack);
   if (cached) return cached;
 
+  const firstPoint = pack.roads.find(road => road.points.length)?.points[0];
+  const svgOrigin = firstPoint ? roadWorld(firstPoint[0], firstPoint[1]) : { x: 0, y: 0 };
+
   const roads = pack.roads.map(road => {
     const world: WorldPoint[] = [];
     const bounds: Bounds = { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity };
-    const segments: string[] = [];
     for (const [lat, lng] of road.points) {
       const point = roadWorld(lat, lng);
       bounds.minX = Math.min(bounds.minX, point.x);
       bounds.maxX = Math.max(bounds.maxX, point.x);
       bounds.minY = Math.min(bounds.minY, point.y);
       bounds.maxY = Math.max(bounds.maxY, point.y);
-      segments.push((world.length ? "L" : "M") + point.x.toFixed(8) + " " + point.y.toFixed(8));
       world.push(point);
     }
-    return { ...road, priority: roadPriority(road.kind), world, bounds, path: segments.join(" ") };
+    return { ...road, priority: roadPriority(road.kind), world, bounds, path: offlineSvgPath(world, svgOrigin) };
   }).sort((a, b) => a.priority - b.priority);
 
   const roadGrid = new Map<string, number[]>();
@@ -62,7 +65,8 @@ export function prepareOfflineRoadIndex(pack: RoadPack): PreparedRoadIndex {
       }
     }
   });
-  const prepared = { roads, roadGrid };
+  const prepared = { roads, roadGrid, svgOrigin };
   preparedByPack.set(pack, prepared);
   return prepared;
 }
+
