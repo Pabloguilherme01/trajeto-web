@@ -15,6 +15,7 @@ const roleLabels = {
   principal: "Via principal",
   integracao: "Integração entre bairros",
   secundaria: "Via secundária",
+  documentada: "Via com parada publicada",
 } as const;
 
 /**
@@ -43,7 +44,7 @@ export default function CityCorridorExplorer({
       </summary>
       <div className="space-y-4 border-t border-border px-4 pb-4 pt-3">
         <p className="text-xs leading-relaxed text-foreground/75">
-          Explore uma via por vez. A hierarquia viária vem da legislação municipal de 2002 e não mede tráfego atual.
+          Explore uma via por vez. A maior parte da hierarquia viária vem da legislação municipal de 2002; vias acrescentadas a partir de nomes de paradas são identificadas separadamente. Nenhuma delas mede tráfego atual.
           Uma linha indicada nas proximidades não é um itinerário homologado da avenida.
         </p>
         <label htmlFor="city-corridor-picker" className="block text-sm font-bold text-foreground">Avenida ou corredor</label>
@@ -57,8 +58,11 @@ export default function CityCorridorExplorer({
         <div className="rounded-xl border border-border/70 bg-muted/10 p-3 text-sm">
           <h3 className="font-black text-foreground">{corridor.name}</h3>
           <p className="mt-1 text-xs leading-relaxed text-foreground/70">
-            {roleLabels[corridor.role]} · {corridor.area} · classificação histórica.
-            {" "}<a className="font-semibold text-primary underline underline-offset-2" href={ROAD_HIERARCHY_SOURCE} target="_blank" rel="noopener noreferrer">Consultar lei municipal</a>
+            {roleLabels[corridor.role]} · {corridor.area}.
+            {corridor.role === "documentada"
+              ? " Via presente em parada de ônibus publicada; não classificada nesta seleção histórica."
+              : " Classificação histórica."}
+            {" "}{corridor.role !== "documentada" && <a className="font-semibold text-primary underline underline-offset-2" href={ROAD_HIERARCHY_SOURCE} target="_blank" rel="noopener noreferrer">Consultar lei municipal</a>}
           </p>
           <Link href={cityMapLayerUrl(corridor.name, "ruas")}
             className="mt-2 inline-flex min-h-11 items-center rounded-xl border border-primary/30 bg-primary/5 px-3 text-sm font-bold text-primary focus-visible:outline-2 focus-visible:outline-ring">
