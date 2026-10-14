@@ -36,23 +36,33 @@ export default function OfflineReadiness() {
   // A controllerchange during preparation must not start an overlapping
   // readiness check that can overwrite a successful restore result.
   const preparingRef = useRef(false);
+  // Multiple online/controllerchange events may overlap a slow CacheStorage
+  // check. Only the latest completed check may update the visible readiness.
+  const statusRequest = useRef(0);
   const check = async () => {
     if (preparingRef.current) return;
+    const request = ++statusRequest.current;
     setChecking(true);
     try {
       const status = await getOfflinePackageStatus();
+      const storage = await getOfflineStorageStatus();
+      if (request !== statusRequest.current || preparingRef.current) return;
       setReady(status.ready);
       setBusinessesReady(status.businessesReady === true);
-      setStorageStatus(await getOfflineStorageStatus());
+      setStorageStatus(storage);
     } catch {
+      if (request !== statusRequest.current || preparingRef.current) return;
       setReady(false);
       setFeedback(preparationMessages.unsupported);
     } finally {
-      setChecking(false);
+      if (request === statusRequest.current && !preparingRef.current) setChecking(false);
     }
   };
   const prepare = async () => {
+    // A late status request must never override the result of a repair.
+    statusRequest.current += 1;
     preparingRef.current = true;
+    setChecking(false);
     setPreparing(true);
     setProgress(null);
     setFeedback("");
