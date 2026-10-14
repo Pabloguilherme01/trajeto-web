@@ -49,3 +49,23 @@ for (const zoom of [1,6]) test(`short route SVG stays aligned below browser tran
     assert.ok(Math.abs(y-(365+(points[i].y-camera.y)*camera.scale))<1);
   }
 });
+
+test('invalid projected route points and unmeasured viewports keep a finite camera', () => {
+  const route = [
+    {x:NaN,y:0.544},
+    {x:0.366,y:0.544},
+    {x:Infinity,y:0.7},
+    {x:0.36601,y:0.54401},
+  ];
+  const valid = fitOfflineMapCamera(route.filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y)),320,360,1);
+  assert.deepEqual(fitOfflineMapCamera(route,320,360,1),valid);
+  for (const controlMode of [false,true]) {
+    for (const [width,height,zoom] of [[0,0,1],[50,50,1],[NaN,Infinity,NaN],[320,360,-1]]) {
+      const camera = fitOfflineMapCamera(route,width,height,zoom,controlMode);
+      assert.ok(Number.isFinite(camera.x) && Number.isFinite(camera.y) && Number.isFinite(camera.scale));
+      assert.ok(camera.scale>0, 'camera scale must never invert or disappear');
+    }
+  }
+  assert.deepEqual(fitOfflineMapCamera([],320,360,1),{x:0,y:0,scale:1});
+  assert.deepEqual(fitOfflineMapCamera([{x:NaN,y:Infinity}],320,360,1),{x:0,y:0,scale:1});
+});
