@@ -81,8 +81,13 @@ export default function CityMap() {
   const { railRef: categoryRailRef, onFocusCapture: onCategoryFocusCapture } =
     useFilterRail(activeLayer, CITY_MAP_TABS);
   const supportsCompanies = cityMapNeedsBusinessCatalog(activeLayer);
-  const needsBusinessCatalog = supportsCompanies && (activeLayer !== "todos" ||
-    query.trim().length >= 2 || selectedArea !== "" || exploreCompanies || businessMode !== "all");
+  // Transit corridors and stop names use the small public atlas; avoid decoding
+  // 21,486 business records merely by opening the Transport layer. An explicit
+  // search, area/company filter or Explore Companies action still loads them.
+  const needsBusinessCatalog = supportsCompanies && (
+    (activeLayer !== "todos" && activeLayer !== "transporte") ||
+    query.trim().length >= 2 || selectedArea !== "" || exploreCompanies || businessMode !== "all"
+  );
   // An atlas-only layer must not read, parse or fetch the ANP station catalog.
   const lastSuccessfulAnpFetchAt = useRef(0);
   const [anpRows, setAnpRows] = useState<AnpFuelRow[]>(() =>

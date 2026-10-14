@@ -56,6 +56,27 @@ it("normalizes incompatible company deep links back to the public layer", () => 
   expect(screen.getByRole("button", { name: "Mapa completo" }).getAttribute("aria-pressed")).toBe("true");
   expect(screen.getByText("Posto Ponteio", { exact: true })).toBeTruthy();
 });
+it("does not fetch the full commercial catalog just by exploring transport lines", () => {
+  mapSearch.value = "?camada=transporte";
+  render(<CityMap />);
+  expect(catalogEnabled.values).not.toContain(true);
+  fireEvent.click(screen.getByText("Corredores da cidade · ônibus, comércio e serviços"));
+  expect(catalogEnabled.values.at(-1)).toBe(false);
+  fireEvent.click(screen.getByRole("button", { name: "Explorar empresas" }));
+  expect(catalogEnabled.values.at(-1)).toBe(true);
+});
+it("keeps direct commercial search available within the transport layer", () => {
+  mapSearch.value = "?camada=transporte";
+  render(<CityMap />);
+  expect(catalogEnabled.values.at(-1)).toBe(false);
+  fireEvent.change(screen.getByRole("textbox", { name: "Buscar destino no mapa" }), { target: { value: "rodoviária" } });
+  expect(catalogEnabled.values.at(-1)).toBe(true);
+});
+it("respects explicit company deep links in the transport layer", () => {
+  mapSearch.value = "?camada=transporte&empresas=nome";
+  render(<CityMap />);
+  expect(catalogEnabled.values.at(-1)).toBe(true);
+});
 it("opens the general map without loading businesses until an explicit intent", () => {
   render(<CityMap />);
   expect(catalogEnabled.values).not.toContain(true);
