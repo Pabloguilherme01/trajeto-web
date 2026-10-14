@@ -67,4 +67,19 @@ describe("offline map reference decluttering", () => {
     expect(result).toEqual([items[0]]);
     expect(projection).toHaveBeenCalledTimes(items.length);
   });
+
+  it("does not emit unrenderable reference pins or corrupt spatial buckets", () => {
+    const items: Marker[] = [
+      { id: "invalid-ref", x: NaN, y: 10, isReference: true },
+      { id: "invalid-primary", x: Infinity, y: 20, isReference: false },
+      { id: "origin", x: 10, y: 10, isReference: false },
+      { id: "near-origin", x: 12, y: 12, isReference: true },
+      { id: "valid-ref", x: 150, y: 150, isReference: true },
+      { id: "invalid-ref-infinity", x: 40, y: -Infinity, isReference: true },
+    ];
+    const projection = vi.fn(project);
+    expect(declutterMapReferences(items, projection, item => item.isReference).map(item => item.id))
+      .toEqual(["invalid-primary", "origin", "valid-ref"]);
+    expect(projection).toHaveBeenCalledTimes(items.length);
+  });
 });
