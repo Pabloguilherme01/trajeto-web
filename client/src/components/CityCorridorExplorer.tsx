@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Link } from "wouter";
 import { appUrl } from "@/lib/appUrl";
 import { hasBusinessName } from "@/lib/businessCatalogState";
