@@ -357,8 +357,16 @@ async function offlineStatus() {
     const data = await caches.open(DATA_CACHE);
     const snapshots = await Promise.all(LOCAL_SNAPSHOTS.map(asset => data.match(asset, { ignoreVary: true })));
     const coreAssets = new Set([...STATIC_SHELL, ...collectManifestAssets(manifest, false)]);
+    // Essential routes, public services, stations and ANP snapshots are usable
+    // even before the separately prepared commercial catalog / heavy map data.
+    // Never equate optional coverage with a failed core PWA installation.
+    const coreReady = [...coreAssets].every(asset => hasCachedStaticAsset(savedUrls, asset)) &&
+      snapshots.slice(0, CORE_SNAPSHOTS.length).every(isCachedJsonSnapshot);
     const businessesReady = assets.every(asset => coreAssets.has(asset) || hasCachedStaticAsset(savedUrls, asset));
-    return { ready: assets.every(asset => hasCachedStaticAsset(savedUrls, asset)) && snapshots.every(isCachedJsonSnapshot), businessesReady, version: VERSION };
+    return {
+      ready: assets.every(asset => hasCachedStaticAsset(savedUrls, asset)) && snapshots.every(isCachedJsonSnapshot),
+      coreReady, businessesReady, version: VERSION,
+    };
   } catch {
     return { ready: false };
   }
