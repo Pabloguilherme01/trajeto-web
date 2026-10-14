@@ -11,7 +11,10 @@ for (const width of [280, 320, 360, 390, 768]) {
     test.setTimeout(120_000);
     await page.setViewportSize({ width, height: 740 });
     for (const path of ["/", "/planejar", "/servicos", "/mapa", "/ajuda"]) {
-      await page.goto("." + path);
+      // This suite checks responsive layouts, not the loading of every image
+      // or third-party resource. Firefox can leave window.load pending while
+      // the page itself is already interactive on slower CI workers.
+      await page.goto("." + path, { waitUntil: "domcontentloaded" });
       await expect(page.locator("main")).toBeVisible();
       await page.evaluate(() => document.fonts.ready);
       for (const position of [0, 700, 1400, 2500, 5000, 0]) {

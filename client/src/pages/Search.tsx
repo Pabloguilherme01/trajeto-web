@@ -273,11 +273,17 @@ export default function SearchPage() {
     setResultLimit(6);
   }, [params]);
 
-  const companies = useBusinessCatalog(query.trim().length >= 2);
-  const allBusinesses = useMemo(() => searchBusinesses(companies.items, query), [companies.items, query]);
-  const allResults = useMemo(() => getUniversalSearchResults(query), [query]);
+  // Only the general and company tabs need the optional 21k-record catalog.
+  // Service, fuel, route and public-data tabs stay light even for deep-linked
+  // queries; switching back to All/Companies restores complete offline search.
   const showBusinesses = searchType === "todos" || searchType === "businesses";
-  const businessResults = showBusinesses ? allBusinesses : [];
+  const companies = useBusinessCatalog(showBusinesses && query.trim().length >= 2);
+  const allBusinesses = useMemo(
+    () => showBusinesses ? searchBusinesses(companies.items, query) : [],
+    [showBusinesses, companies.items, query],
+  );
+  const allResults = useMemo(() => getUniversalSearchResults(query), [query]);
+  const businessResults = allBusinesses;
   const results = {
     services: searchType === "todos" || searchType === "services" ? allResults.services : [],
     stations: searchType === "todos" || searchType === "stations" ? allResults.stations : [],
