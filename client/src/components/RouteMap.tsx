@@ -262,6 +262,8 @@ type RouteMapProps = {
   showRouteDetails?: boolean;
   referencesVisible?: boolean;
   showReferenceControl?: boolean;
+  businessesVisible?: boolean;
+  showBusinessControl?: boolean;
 };
 
 export function OfflineRoutePreview({
@@ -280,17 +282,21 @@ export function OfflineRoutePreview({
   showRouteDetails = true,
   referencesVisible,
   showReferenceControl = true,
+  businessesVisible,
+  showBusinessControl = true,
 }: RouteMapProps) {
   const originLabel = endpointLabel(suppliedOriginLabel, "Origem");
   const destinationLabel = endpointLabel(suppliedDestinationLabel, "Destino");
-  // Do not download the business catalogue while no destination can be mapped.
-  const businesses = useBusinessCatalog(isMapPoint(destination));
-  const nearbyBusinesses = useMemo(
-    () => nearbyBusinessReferences(businesses.items, destination),
-    [businesses.items, destination?.lat, destination?.lng]
-  );
   const [localReferences, setShowReferences] = useState(true);
   const showReferences = referencesVisible ?? localReferences;
+  // Civic/road references remain free. The 21k-company catalog is opt-in.
+  const [localBusinesses, setLocalBusinesses] = useState(false);
+  const showBusinesses = businessesVisible ?? localBusinesses;
+  const businesses = useBusinessCatalog(showBusinesses && showReferences && isMapPoint(destination));
+  const nearbyBusinesses = useMemo(
+    () => showBusinesses ? nearbyBusinessReferences(businesses.items, destination) : [],
+    [showBusinesses, businesses.items, destination?.lat, destination?.lng]
+  );
   const [zoom, setZoom] = useState(1);
   const [resetKey, setResetKey] = useState(0);
   const [selectedPoint, setSelectedPoint] = useState("");
@@ -776,6 +782,18 @@ export function OfflineRoutePreview({
       />
       <div className="route-map-actions flex flex-wrap gap-2 border-b border-border px-3 pb-3">
         {showReferenceControl && <button type="button" aria-pressed={showReferences} onClick={() => setShowReferences(value => !value)} className="min-h-11 rounded-xl border border-border bg-card px-3 text-xs font-bold">{showReferences ? "Ocultar referências" : "Mostrar referências"}</button>}
+        {showBusinessControl && showReferences && validDestination && (
+          <button type="button" aria-pressed={showBusinesses} onClick={() => setLocalBusinesses(value => !value)}
+            className="min-h-11 rounded-xl border border-border bg-card px-3 text-xs font-bold focus-visible:outline-2 focus-visible:outline-ring">
+            {showBusinesses ? "Ocultar empresas próximas" : "Carregar empresas próximas"}
+          </button>
+        )}
+        {showBusinesses && businesses.loading && <span role="status" className="self-center text-xs text-muted-foreground">Carregando empresas…</span>}
+        {showBusinesses && businesses.error && (
+          <button type="button" onClick={businesses.retry} className="min-h-11 rounded-xl border border-border bg-card px-3 text-xs font-bold">
+            Tentar carregar empresas novamente
+          </button>
+        )}
         {validOrigin && (
           <button
             type="button"
@@ -948,11 +966,13 @@ function RouteMapContent({
 }: RouteMapProps) {
   const originLabel = endpointLabel(suppliedOriginLabel, "Origem");
   const destinationLabel = endpointLabel(suppliedDestinationLabel, "Destino");
-  // Do not download the business catalogue while no destination can be mapped.
-  const businesses = useBusinessCatalog(isMapPoint(destination));
+  const [showReferences, setShowReferences] = useState(true);
+  const [showBusinesses, setShowBusinesses] = useState(false);
+  // The catalog is optional: opening a route must not download all businesses.
+  const businesses = useBusinessCatalog(showBusinesses && showReferences && isMapPoint(destination));
   const businessReferences = useMemo(
-    () => nearbyBusinessReferences(businesses.items, destination),
-    [businesses.items, destination?.lat, destination?.lng]
+    () => showBusinesses ? nearbyBusinessReferences(businesses.items, destination) : [],
+    [showBusinesses, businesses.items, destination?.lat, destination?.lng]
   );
   // Only the active route contributes proximity references and route bounds.
   // Share this decoded geometry across map effects and Pages renders.
@@ -968,7 +988,6 @@ function RouteMapContent({
   const [mapReady, setMapReady] = useState(false);
   const [satellite, setSatellite] = useState(false);
   const [traffic, setTraffic] = useState(false);
-  const [showReferences, setShowReferences] = useState(true);
 
   const [is3D, setIs3D] = useState(false);
   const [heading, setHeading] = useState(0);
@@ -1266,6 +1285,14 @@ function RouteMapContent({
             className="min-h-11 rounded-xl border border-border bg-background px-3 text-xs font-bold focus-visible:outline-2 focus-visible:outline-ring">
             {showReferences ? "Ocultar referências" : "Mostrar referências"}
           </button>
+          {showReferences && isMapPoint(destination) && (
+            <button type="button" aria-pressed={showBusinesses} onClick={() => setShowBusinesses(value => !value)}
+              className="min-h-11 rounded-xl border border-border bg-background px-3 text-xs font-bold focus-visible:outline-2 focus-visible:outline-ring">
+              {showBusinesses ? "Ocultar empresas próximas" : "Carregar empresas próximas"}
+            </button>
+          )}
+          {showBusinesses && businesses.loading && <span role="status" className="text-xs text-muted-foreground">Carregando empresas…</span>}
+          {showBusinesses && businesses.error && <button type="button" onClick={businesses.retry} className="min-h-11 rounded-xl border border-border bg-background px-3 text-xs font-bold">Tentar carregar empresas novamente</button>}
         </div>
         <TileStationMap
           selectionLabel="Escolher ponto da viagem"
@@ -1285,6 +1312,8 @@ function RouteMapContent({
                 showRouteDetails={false}
                 referencesVisible={showReferences}
                 showReferenceControl={false}
+                businessesVisible={showBusinesses}
+                showBusinessControl={false}
               />
             </div>
           }
