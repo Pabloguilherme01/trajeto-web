@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "wouter";
+import { appUrl } from "@/lib/appUrl";
 import { hasBusinessName } from "@/lib/businessCatalogState";
 import type { CityAtlasItem } from "@/lib/cityAtlas";
 import { cityMapLayerUrl } from "@/lib/cityMapLayers";
@@ -112,7 +113,7 @@ export default function CityCorridorExplorer({
               ))}
             </ul>
           ) : <p className="mt-2 text-xs text-foreground/70">Nenhum endereço desta via encontrado no diretório; não significa ausência de atendimento.</p>}
-          <Link href="/servicos" className="inline-flex min-h-11 items-center text-sm font-bold text-primary underline underline-offset-2">Consultar todos os serviços públicos</Link>
+          <Link href={appUrl("/servicos")} className="inline-flex min-h-11 items-center text-sm font-bold text-primary underline underline-offset-2">Consultar todos os serviços públicos</Link>
         </div>
         <div className="rounded-xl border border-border/70 p-3">
           <h4 className="text-sm font-black">Ligações de ônibus com o Distrito Federal</h4>
