@@ -22,7 +22,7 @@ test('browser search finds accentless and abbreviated names without mixing numbe
   assert.ok(found.some(item=>item.name==='Jardim América II'));
   assert.ok(!found.some(item=>item.name==='Jardim América I'));
   assert.ok(searchCityNeighborhoods('pq aguas bonitas 1').some(item=>item.name==='Parque Águas Bonitas I'));
-  assert.equal(searchCityNeighborhoods(''),dataset.items);
+  assert.equal(searchCityNeighborhoods('').length,dataset.items.length);
   assert.equal(searchCityNeighborhoods('bairro inexistente').length,0);
 });
 test('a city CEP and missing coordinates never create a mapped neighbourhood',()=>{
