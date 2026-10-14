@@ -1,5 +1,5 @@
 import { MapNeighborhoodLabels, MapNeighborhoodPanel } from "@/components/MapNeighborhoods";
-import { LOCATED_NEIGHBORHOODS, layoutNeighborhoodLabels, type CityNeighborhood } from "@/lib/cityNeighborhoods";
+import { LOCATED_NEIGHBORHOODS, layoutNeighborhoodLabels, neighborhoodsInViewport, type CityNeighborhood } from "@/lib/cityNeighborhoods";
 import { Apple, LocateFixed, Navigation, Minus, Plus, Layers, Scan } from "lucide-react";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -391,6 +391,40 @@ export default function TileStationMap({
     }
     return result;
   }, [markerGroups, drawableWorld, width, height, centerPx.x, centerPx.y, zoomScale]);
+  // Count every neighborhood in the current viewport, not just those that
+  // fit as text on the map. Memoized with the camera so unrelated UI updates
+  // never scan the local reference list again.
+  const neighborhoodsOnScreen = useMemo(() =>
+    neighborhoodsInViewport(LOCATED_NEIGHBORHOODS, point => {
+      const p = projectBase(point.lat, point.lng);
+      return {
+        x: width / 2 + p.x * zoomScale - centerPx.x,
+        y: height / 2 + p.y * zoomScale - centerPx.y,
+      };
+    }, width, height),
+  [width, height, zoomScale, centerPx.x, centerPx.y]);
+  // Keep label decluttering out of unrelated panel, theme and selection renders.
+  // Hooks must precede map fallback returns to preserve hook call order.
+  const neighborhoodObstacles = useMemo(() => {
+    if (!showNeighborhoods) return [];
+    return [
+      ...markerGroups.singles.flatMap(station => {
+        const position = markerPositions.get(stationMapKey(station));
+        return position ? [{ x: position.left, y: position.top }] : [];
+      }),
+      ...markerGroups.groups.map(group => ({
+        x: width / 2 + group.x * clusterToCurrentScale - centerPx.x,
+        y: height / 2 + group.y * clusterToCurrentScale - centerPx.y,
+      })),
+    ].filter(point => point.x >= -50 && point.x <= width + 50 && point.y >= -50 && point.y <= height + 50);
+  }, [showNeighborhoods, markerGroups, markerPositions, width, height, clusterToCurrentScale, centerPx.x, centerPx.y]);
+  const neighborhoodLabels = useMemo(() => {
+    if (!showNeighborhoods) return [];
+    return layoutNeighborhoodLabels(LOCATED_NEIGHBORHOODS, point => {
+      const p = projectBase(point.lat, point.lng);
+      return { x: width / 2 + p.x * zoomScale - centerPx.x, y: height / 2 + p.y * zoomScale - centerPx.y };
+    }, width, height, focusedNeighborhoodId, neighborhoodObstacles);
+  }, [showNeighborhoods, zoomScale, centerPx.x, centerPx.y, width, height, focusedNeighborhoodId, neighborhoodObstacles]);
   const routeGeometryKey = useMemo(
     () => routePoints.map(point => `${point.lat},${point.lng}`).join(";"),
     [routePoints]
@@ -627,20 +661,6 @@ export default function TileStationMap({
     );
   }
 
-  const neighborhoodObstacles = [
-    ...markerGroups.singles.flatMap(station => {
-      const position = markerPositions.get(stationMapKey(station));
-      return position ? [{ x: position.left, y: position.top }] : [];
-    }),
-    ...markerGroups.groups.map(group => ({
-      x: width / 2 + group.x * clusterToCurrentScale - centerPx.x,
-      y: height / 2 + group.y * clusterToCurrentScale - centerPx.y,
-    })),
-  ].filter(point => point.x >= -50 && point.x <= width + 50 && point.y >= -50 && point.y <= height + 50);
-  const neighborhoodLabels = showNeighborhoods ? layoutNeighborhoodLabels(LOCATED_NEIGHBORHOODS, point => {
-    const p = projectBase(point.lat, point.lng);
-    return { x: width / 2 + p.x * zoomScale - centerPx.x, y: height / 2 + p.y * zoomScale - centerPx.y };
-  }, width, height, focusedNeighborhoodId, neighborhoodObstacles) : [];
   const focusNeighborhood = (item: CityNeighborhood & { lat: number; lng: number }) => {
     cancelGesture();
     setFollowing(false);
@@ -913,7 +933,7 @@ export default function TileStationMap({
         </div>}
       </div>
 
-      <MapNeighborhoodPanel visible={showNeighborhoods} onToggle={() => setShowNeighborhoods(value => !value)} onFocus={focusNeighborhood} />
+      <MapNeighborhoodPanel visible={showNeighborhoods} onToggle={() => setShowNeighborhoods(value => !value)} onFocus={focusNeighborhood} inViewport={neighborhoodsOnScreen} />
       <div className="relative min-w-0 border-t border-border bg-card p-3.5 text-card-foreground sm:p-4">
         {routePoints.length > 1 && <div className="mb-3 rounded-xl border border-border bg-muted/40 p-3">
           <div className="flex flex-wrap items-center justify-between gap-2">

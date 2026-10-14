@@ -44,6 +44,25 @@ export function searchCityNeighborhoods(query: string): readonly CityNeighborhoo
     .map(entry => entry.item);
 }
 type ScreenPoint = { x: number; y: number };
+/**
+ * Keep every geographically referenced neighborhood discoverable in the current
+ * viewport, even when the map hides overlapping text labels. This list is
+ * based only on provided reference coordinates, never inferred centroids.
+ */
+export function neighborhoodsInViewport(
+  items: readonly (CityNeighborhood & { lat: number; lng: number })[],
+  project: (item: { lat: number; lng: number }) => ScreenPoint,
+  width: number,
+  height: number,
+): Array<CityNeighborhood & { lat: number; lng: number }> {
+  if (width <= 0 || height <= 0) return [];
+  return items.filter(item => {
+    const { x, y } = project(item);
+    return Number.isFinite(x) && Number.isFinite(y) &&
+      x >= 0 && x <= width && y >= 0 && y <= height;
+  });
+}
+
 export function layoutNeighborhoodLabels(
   items: readonly (CityNeighborhood & { lat: number; lng: number })[],
   project: (item: { lat: number; lng: number }) => ScreenPoint,

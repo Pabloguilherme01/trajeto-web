@@ -5,7 +5,7 @@ for (const width of [320, 1360]) test(`Pages: neighbourhood names, search and fo
   await page.goto("mapa");
   const panel=page.getByRole("region",{name:"Bairros e setores do mapa"});
   await expect(panel).toBeVisible();
-  await panel.locator("summary").click();
+  await panel.getByText("Encontrar bairro ou setor",{exact:true}).click();
   const results=panel.getByRole("list",{name:"Bairros e setores disponíveis"}).getByRole("listitem");
   await expect(results).toHaveCount(12);
   await panel.getByRole("button",{name:"Mostrar todos os bairros"}).click();
@@ -16,13 +16,17 @@ for (const width of [320, 1360]) test(`Pages: neighbourhood names, search and fo
   await panel.getByRole("searchbox",{name:"Buscar bairro no mapa"}).fill("jardim brasilia");
   await panel.getByRole("button",{name:"Ver bairro Jardim Brasília no mapa",exact:true}).click();
   await expect(page.locator('[data-map-neighborhood="bairro-jardim-brasilia"]')).toBeVisible();
+  await panel.locator("[data-neighborhood-viewport] summary").click();
+  await expect(panel.getByRole("button",{name:"Centralizar bairro Jardim Brasília",exact:true})).toBeVisible();
+  await panel.getByRole("button",{name:"Centralizar bairro Jardim Brasília",exact:true}).click();
+  await expect(page.locator('[data-map-neighborhood="bairro-jardim-brasilia"]')).toBeVisible();
   await page.evaluate(async()=>{await navigator.serviceWorker.ready;});
   await expect.poll(()=>page.evaluate(()=>Boolean(navigator.serviceWorker.controller))).toBe(true);
   await context.setOffline(true);
   await page.reload();
   const localPanel=page.getByRole("region",{name:"Bairros e setores do mapa"});
   await expect(localPanel).toBeVisible();
-  await localPanel.locator("summary").click();
+  await localPanel.getByText("Encontrar bairro ou setor",{exact:true}).click();
   await localPanel.getByRole("searchbox",{name:"Buscar bairro no mapa"}).fill("jardim brasilia");
   await localPanel.getByRole("button",{name:"Ver bairro Jardim Brasília no mapa",exact:true}).click();
   await expect(page.locator('[data-map-neighborhood="bairro-jardim-brasilia"]')).toBeVisible();
@@ -32,5 +36,7 @@ for (const width of [320, 1360]) test(`Pages: neighbourhood names, search and fo
   await expect(page.getByRole("group",{name:"Nomes dos bairros no mapa"})).toBeVisible();
   await localPanel.getByRole("searchbox",{name:"Buscar bairro no mapa"}).fill("Royal Parque");
   await expect(localPanel.getByText("Localização ainda não confirmada",{exact:true})).toBeVisible();
+  await localPanel.locator("[data-neighborhood-viewport] summary").click();
+  await expect(localPanel.getByRole("button",{name:"Centralizar bairro Royal Parque",exact:true})).toHaveCount(0);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
 });

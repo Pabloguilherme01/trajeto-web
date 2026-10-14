@@ -1,5 +1,5 @@
 import { MapNeighborhoodLabels, MapNeighborhoodPanel } from "@/components/MapNeighborhoods";
-import { LOCATED_NEIGHBORHOODS, layoutNeighborhoodLabels, type CityNeighborhood } from "@/lib/cityNeighborhoods";
+import { LOCATED_NEIGHBORHOODS, layoutNeighborhoodLabels, neighborhoodsInViewport, type CityNeighborhood } from "@/lib/cityNeighborhoods";
 import { Sun, Moon, Expand, Minimize, Map as MapIcon } from "lucide-react";
 import { groundMetresPerPixel } from "@/lib/mapPresentation";
 import { prepareOfflineRoadIndex, ROAD_GRID, type PreparedRoadIndex } from "@/lib/offlineMapRoadIndex";
@@ -412,6 +412,17 @@ export default function OfflineMapCanvas({
   }, [namedRoads, showNeighborhoods, size.width, size.height, camera.x, camera.y, camera.scale, pan.x, pan.y]);
   // Recalculate the labels only when their positions or obstacles change,
   // not on theme/panel state updates. Road and marker layers remain independent.
+  // The viewport list retains names hidden by label collision rules. Compute
+  // it independently so the directory stays useful when labels are switched off.
+  const neighborhoodsOnScreen = useMemo(() =>
+    neighborhoodsInViewport(LOCATED_NEIGHBORHOODS, point => {
+      const p = world(point);
+      return {
+        x: size.width / 2 + (p.x - camera.x) * camera.scale + pan.x,
+        y: size.height / 2 + (p.y - camera.y) * camera.scale + pan.y,
+      };
+    }, size.width, size.height),
+  [size.width, size.height, camera.x, camera.y, camera.scale, pan.x, pan.y]);
   const neighborhoodLabels = useMemo(() => {
     if (!showNeighborhoods) return [];
     return layoutNeighborhoodLabels(LOCATED_NEIGHBORHOODS, point => {
@@ -818,7 +829,7 @@ export default function OfflineMapCanvas({
             : scaleMetres + " m"}
         </div>
       </div>
-      <MapNeighborhoodPanel visible={showNeighborhoods} onToggle={() => setShowNeighborhoods(value => !value)} onFocus={focusNeighborhood} />
+      <MapNeighborhoodPanel visible={showNeighborhoods} onToggle={() => setShowNeighborhoods(value => !value)} onFocus={focusNeighborhood} inViewport={neighborhoodsOnScreen} />
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border bg-card px-3 py-2.5 text-xs font-semibold text-muted-foreground">
         <span role="status">
           {pack
