@@ -12,6 +12,7 @@ Este documento registra a proveniência dos dados expostos em `/mapa` nas camada
 | Transporte semiurbano GO–DF | ANTT: informações operacionais, quadros de horários e relação de linhas/tarifas | Ligações regionais com Brasília, Brazlândia, Ceilândia e Taguatinga; consultar linha e quadro atualizado |
 | Tarifas Taguatur | Comunicado ANTT, efeitos a partir de 28/06/2026 | Referência histórica publicada: Taguatinga R$ 7,65; Ceilândia R$ 5,85; pode mudar |
 | Proximidade de ônibus na Av. JK | Moovit (consulta 14/10/2026, página com atualização de setembro/2026) | Linhas relatadas **perto** da avenida: 100, 2304, 2402, 2424, 2862. **Não** afirmar que percorrem a via |
+| Linhas municipais TAG (base secundária) | Moovit, operador TAG: linhas 100, 102, 103, 104, 105 e páginas individuais de um sentido | Vincular **rótulos de paradas** explicitamente publicados a ruas selecionadas, sem inferir trajeto contínuo nem lat/lng |
 | Comércio | Catálogo local já importado, ~21.486 registros CNPJ | Cruzar nome da via **dentro do endereço**; distinguir nome legível de cadastro só com CNPJ |
 | Serviços públicos | Diretório `PUBLIC_SERVICES`, fontes municipais e oficiais por ficha | Cruzar apenas endereço textual, mostrar nome/endereço/fonte, sem criar coordenadas |
 | Ruas e bairros | Snapshot municipal e mapa offline OSM, referências aproximadas | Pesquisa por nome; geometrias de ruas não provam trajeto de ônibus |
@@ -24,9 +25,33 @@ Este documento registra a proveniência dos dados expostos em `/mapa` nas camada
 - ANTT quadro de horários: https://www.gov.br/antt/pt-br/assuntos/passageiros/transportesemiurbano/informacoes-operacionais-do-semiurbano/quadro-de-horarios
 - ANTT comunicado Taguatur: https://www.gov.br/antt/pt-br/assuntos/noticias-defeso-eleitoral/entorno-do-df-novas-tarifas-da-taguatur-entram-em-vigor-a-partir-de-28-de-junho
 - Moovit Av. JK: https://moovitapp.com/index/pt-br/transporte_p%C3%BAblico-Avenida_Jk-Brasilia-street_12895751-1702
+- Operador TAG (Moovit): https://moovitapp.com/index/pt-br/transporte_p%C3%BAblico-lines-Brasilia-1702-2190941
+- Linha municipal 100, um sentido: https://moovitapp.com/index/pt-br/transporte_p%C3%BAblico-line-100-Brasilia-1702-2190941-82705269-1
+- Linha municipal 102, um sentido: https://moovitapp.com/index/pt-br/transporte_p%C3%BAblico-line-102-Brasilia-1702-2190941-79764567-0
+- Linha municipal 103, um sentido: https://moovitapp.com/index/pt-br/transporte_p%C3%BAblico-line-103-Brasilia-1702-2190941-82705271-0
+- Linha municipal 104, um sentido: https://moovitapp.com/index/pt-br/transporte_p%C3%BAblico-line-104-Brasilia-1702-2190941-79764568-1
+- Linha municipal 105, um sentido: https://moovitapp.com/index/pt-br/transporte_p%C3%BAblico-line-105-Brasilia-1702-2190941-79764569-0
 - Prefeitura, unidades de saúde: https://aguaslindasdegoias.go.gov.br/unidades-de-saude/
 - Prefeitura, escolas municipais: https://aguaslindasdegoias.go.gov.br/escolas-municipais-de-aguas-lindas-de-goias/
 - CNES do município: https://cnes2.datasus.gov.br/Lista_Es_Municipio.asp?NomeEstado=&VCodMunicipio=520025&VEstado=52
+
+## 1.1 Linhas municipais com paradas de rua nomeadas
+
+A consulta a **um sentido publicado** de cada linha municipal TAG no Moovit apresentou
+paradas nomeadas na BR-070/marginais, Avenida Brasília, Avenida JK, Avenida Central,
+Avenida Porto Velho e Rua Pau-Brasil. A referência é exclusivamente o **texto da parada**,
+nunca uma geometria ou coordenada inventada.
+
+- Linha 100: Avenida Central, Rua Pau Brasil, BR-070, Avenida Brasília, Avenida Porto Velho.
+- Linha 102: Avenida JK, Avenida Porto Velho, marginal da BR-070.
+- Linha 103: Rua Pau-Brasil, Avenida JK, Avenida Porto Velho, marginal da BR-070.
+- Linha 104: Rua Pau-Brasil e Avenida Brasília.
+- Linha 105: Rua Pau-Brasil, Avenida JK e marginal da BR-070.
+
+**Divergência da fonte:** a página geral do operador declara um total de rotas/paradas
+que não coincide com as cinco linhas listadas na própria página. Portanto, os números
+são um inventário de linhas/páginas encontradas, **não** contagem oficial de linhas
+em operação. Verificar a operação/horários com o prestador antes da viagem.
 
 ## 2. Como é feito o cruzamento de comércio/serviços por corredor
 
