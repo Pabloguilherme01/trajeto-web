@@ -42,11 +42,13 @@ paradas nomeadas na BR-070/marginais, Avenida Brasília, Avenida JK, Avenida Cen
 Avenida Porto Velho e Rua Pau-Brasil. A referência é exclusivamente o **texto da parada**,
 nunca uma geometria ou coordenada inventada.
 
-- Linha 100: Avenida Central, Rua Pau Brasil, BR-070, Avenida Brasília, Avenida Porto Velho.
+- Linha 100: Avenida Central, Rua Pau Brasil, BR-070, Avenida Brasília, Avenida Porto Velho, Avenida JK, Avenida 4, Avenida Águas Lindas.
 - Linha 102: Avenida JK, Avenida Porto Velho, marginal da BR-070.
 - Linha 103: Rua Pau-Brasil, Avenida JK, Avenida Porto Velho, marginal da BR-070.
-- Linha 104: Rua Pau-Brasil e Avenida Brasília.
+- Linha 104: Rua Pau-Brasil, Avenida Brasília, Avenida JK, Avenida Goiânia, Avenida 4, Avenida Águas Lindas e marginal da BR-070.
 - Linha 105: Rua Pau-Brasil, Avenida JK e marginal da BR-070.
+
+A Avenida Águas Lindas consta nos rótulos das paradas das linhas 100 e 104 e foi adicionada como **via documentada**, sem atribuir a ela uma classe de 2002.
 
 **Divergência da fonte:** a página geral do operador declara um total de rotas/paradas
 que não coincide com as cinco linhas listadas na própria página. Portanto, os números
