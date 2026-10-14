@@ -98,6 +98,44 @@ describe("auditoria de links públicos sem acessar a rede", () => {
     expect(fetchLink).not.toHaveBeenCalled();
   });
 
+  it("confirms HEAD 404/410 with GET before declaring an official link missing", async () => {
+    for (const headStatus of [404, 410]) {
+      const request = vi.fn(async (_url: RequestInfo | URL, init?: RequestInit) => ({
+        status: init?.method === "HEAD" ? headStatus : 200,
+        body: null,
+        headers: { get: () => null },
+      } as unknown as Response));
+      const result = await probePublicServiceLink("https://gov.br/servico", request);
+      expect(result).toMatchObject({
+        classification: "reachable", status: 200, method: "GET",
+        finalHostname: "gov.br",
+      });
+      expect(request.mock.calls.map(call => call[1]?.method)).toEqual(["HEAD", "GET"]);
+    }
+  });
+
+  it("reports not found only when GET confirms a 404/410 response", async () => {
+    for (const status of [404, 410]) {
+      const request = vi.fn(async () => ({
+        status, body: null, headers: { get: () => null },
+      } as unknown as Response));
+      const result = await probePublicServiceLink("https://gov.br/ficha", request);
+      expect(result).toMatchObject({ classification: "not-found", status, method: "GET" });
+      expect(request).toHaveBeenCalledTimes(2);
+    }
+  });
+
+  it("does not mark a HEAD 404 as broken when the verifying GET fails", async () => {
+    const request = vi.fn(async (_url: RequestInfo | URL, init?: RequestInit) => {
+      if (init?.method === "GET") throw new Error("temporary connection failure");
+      return { status: 404, body: null, headers: { get: () => null } } as unknown as Response;
+    });
+    expect(await probePublicServiceLink("https://gov.br/ficha", request)).toMatchObject({
+      classification: "unverified", status: null, method: "GET",
+    });
+    expect(request).toHaveBeenCalledTimes(2);
+  });
+
   it("falls back from HEAD to GET for servers rejecting HEAD", async () => {
     const method = vi.fn(async (_: RequestInfo | URL, init?: RequestInit) => ({
       status: init?.method === "HEAD" ? 405 : 200,

@@ -115,7 +115,10 @@ export async function probePublicServiceLink(
         redirects += 1;
         continue;
       }
-      if (method === "HEAD" && (status === 405 || status === 501)) {
+      // Several official portals reject HEAD with 404/410 even though a
+      // normal page request succeeds. Confirm absence via GET before
+      // reporting a link as not found. GET errors remain "unverified".
+      if (method === "HEAD" && (status === 405 || status === 501 || status === 404 || status === 410)) {
         method = "GET";
         continue;
       }
