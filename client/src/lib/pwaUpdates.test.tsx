@@ -105,3 +105,89 @@ it("continues first offline preparation when installation takes more than 15 sec
     expect.any(Array)
   );
 });
+
+
+function setupProgressingOfflineWorker() {
+  type Message = Record<string, unknown>;
+  let sendToPage: ((message: Message) => void) | undefined;
+  class MockMessageChannel {
+    port1: { onmessage: ((event: { data: Message }) => void) | null; close: ReturnType<typeof vi.fn> };
+    port2: { postMessage: (data: Message) => void; close: ReturnType<typeof vi.fn> };
+    constructor() {
+      this.port1 = { onmessage: null, close: vi.fn() };
+      this.port2 = {
+        postMessage: data => this.port1.onmessage?.({ data }),
+        close: vi.fn(),
+      };
+    }
+  }
+  const worker = {
+    postMessage: vi.fn((message: { type: string }, ports?: Array<{ postMessage: (data: Message) => void }>) => {
+      if (message.type === "OFFLINE_STATUS") ports?.[0]?.postMessage({ ready: false });
+      if (message.type === "RESTORE_OFFLINE") sendToPage = data => ports?.[0]?.postMessage(data);
+    }),
+  };
+  const registration = { waiting: null, update: vi.fn().mockResolvedValue(undefined) };
+  const serviceWorker = Object.assign(new EventTarget(), {
+    controller: worker,
+    getRegistration: vi.fn().mockResolvedValue(registration),
+    ready: Promise.resolve(registration),
+  });
+  vi.stubGlobal("navigator", { onLine: true, serviceWorker });
+  vi.stubGlobal("window", Object.assign(new EventTarget(), { setTimeout, clearTimeout, location: { reload: vi.fn() } }));
+  vi.stubGlobal("MessageChannel", MockMessageChannel);
+  return {
+    worker,
+    send: (data: Message) => {
+      if (!sendToPage) throw new Error("RESTORE_OFFLINE was not posted");
+      sendToPage(data);
+    },
+  };
+}
+
+it("keeps an actively progressing offline preparation alive beyond 60 seconds", async () => {
+  const { worker, send } = setupProgressingOfflineWorker();
+  const { prepareOfflineAccess } = await import("./pwa");
+  const notify = vi.fn();
+  const preparing = prepareOfflineAccess(notify);
+  await vi.advanceTimersByTimeAsync(1);
+  expect(worker.postMessage).toHaveBeenCalledWith(
+    { type: "RESTORE_OFFLINE", progress: true }, expect.any(Array),
+  );
+  await vi.advanceTimersByTimeAsync(45_000);
+  send({ type: "OFFLINE_PROGRESS", stage: "downloading", completed: 1, total: 3 });
+  await vi.advanceTimersByTimeAsync(45_000);
+  send({ type: "OFFLINE_PROGRESS", stage: "downloading", completed: 2, total: 3 });
+  await vi.advanceTimersByTimeAsync(10_000);
+  send({ type: "OFFLINE_PROGRESS", stage: "verifying" });
+  send({ ready: true, coreReady: true, businessesReady: true });
+  await expect(preparing).resolves.toEqual({ ready: true, coreReady: true, businessesReady: true });
+  expect(notify).toHaveBeenCalledWith({ stage: "downloading", completed: 2, total: 3 });
+});
+
+it("does not let duplicate progress messages conceal a stalled offline download", async () => {
+  const { send } = setupProgressingOfflineWorker();
+  const { prepareOfflineAccess } = await import("./pwa");
+  const preparing = prepareOfflineAccess(vi.fn());
+  await vi.advanceTimersByTimeAsync(1);
+  await vi.advanceTimersByTimeAsync(20_000);
+  send({ type: "OFFLINE_PROGRESS", stage: "downloading", completed: 1, total: 2 });
+  await vi.advanceTimersByTimeAsync(40_000);
+  send({ type: "OFFLINE_PROGRESS", stage: "downloading", completed: 1, total: 2 });
+  send({ type: "OFFLINE_PROGRESS", stage: "downloading", completed: -1, total: 2 });
+  await vi.advanceTimersByTimeAsync(20_100);
+  await expect(preparing).resolves.toEqual({ ready: false, reason: "connection" });
+});
+
+it("caps even an active offline preparation at three minutes", async () => {
+  const { send } = setupProgressingOfflineWorker();
+  const { prepareOfflineAccess } = await import("./pwa");
+  const preparing = prepareOfflineAccess(vi.fn());
+  await vi.advanceTimersByTimeAsync(1);
+  for (let completed = 1; completed <= 4; completed++) {
+    await vi.advanceTimersByTimeAsync(40_000);
+    send({ type: "OFFLINE_PROGRESS", stage: "downloading", completed, total: 5 });
+  }
+  await vi.advanceTimersByTimeAsync(20_100);
+  await expect(preparing).resolves.toEqual({ ready: false, reason: "connection" });
+});
