@@ -30,3 +30,26 @@ it("limits dense route geometry without losing the route endpoints", () => {
   expect(limited[0]).toBe(points[0]);
   expect(limited[limited.length - 1]).toBe(points[points.length - 1]);
 });
+
+
+it("never produces infinite tile loops when the camera or viewport is invalid", () => {
+  const center = { x: 4096, y: 4096 };
+  const badCameras = [
+    [{ x: NaN, y: center.y }, 320, 520, 1],
+    [{ x: center.x, y: Infinity }, 320, 520, 1],
+    [center, NaN, 520, 1],
+    [center, 320, -1, 1],
+    [center, 320, 520, 0],
+    [center, 320, 520, -1],
+    [center, 320, 520, Infinity],
+    [center, 320, 520, NaN],
+  ] as const;
+  for (const [position, width, height, scale] of badCameras) {
+    const bounds = viewportTileBounds(position, width, height, scale);
+    expect(bounds).toEqual({ minX: 0, maxX: -1, minY: 0, maxY: -1 });
+  }
+  // A valid camera restores the original tile coverage immediately.
+  const valid = viewportTileBounds(center, 320, 520, 1);
+  expect(valid.maxX).toBeGreaterThanOrEqual(valid.minX);
+  expect(valid.maxY).toBeGreaterThanOrEqual(valid.minY);
+});
