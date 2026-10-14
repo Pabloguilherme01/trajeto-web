@@ -115,21 +115,48 @@ function requestOfflineStatus(type: "OFFLINE_STATUS" | "RESTORE_OFFLINE", timeou
   return new Promise(resolve => {
     const channel = new MessageChannel();
     let finished = false;
+    let idleTimer: ReturnType<typeof setTimeout>;
+    let deadlineTimer: ReturnType<typeof setTimeout> | null = null;
     const finish = (result: OfflinePreparation) => {
       if (finished) return;
       finished = true;
-      clearTimeout(timer);
+      clearTimeout(idleTimer);
+      if (deadlineTimer !== null) clearTimeout(deadlineTimer);
       channel.port1.close();
       channel.port2.close();
       resolve(result);
     };
-    const timer = setTimeout(() => finish({ ready: false, reason: "connection" }), timeout);
+    const connectionTimeout = () => finish({ ready: false, reason: "connection" });
+    // A worker preparing 38 business chunks can make real progress for longer
+    // than 60 seconds on a modest phone. Fail only after 60 seconds of *no*
+    // progress, while retaining a finite 3-minute total safety deadline.
+    idleTimer = setTimeout(connectionTimeout, timeout);
+    if (type === "RESTORE_OFFLINE" && onProgress)
+      deadlineTimer = setTimeout(connectionTimeout, 180_000);
+    let progressStage: "downloading" | "verifying" | null = null;
+    let progressCount = -1;
+    const reportProgress = (progress: OfflineProgress) => {
+      // Duplicate/stale messages cannot postpone an actual stalled download.
+      const advanced = progress.stage !== progressStage ||
+        (progress.stage === "downloading" && typeof progress.completed === "number" && progress.completed > progressCount);
+      if (advanced) {
+        progressStage = progress.stage === "downloading" ? "downloading" : "verifying";
+        if (progress.stage === "downloading" && typeof progress.completed === "number")
+          progressCount = Math.max(progressCount, progress.completed);
+        if (deadlineTimer !== null) {
+          clearTimeout(idleTimer);
+          idleTimer = setTimeout(connectionTimeout, timeout);
+        }
+      }
+      try { onProgress?.(progress); } catch { /* A UI callback must not interrupt the download. */ }
+    };
     channel.port1.onmessage = event => {
+      if (finished) return;
       if (event.data?.type === "OFFLINE_PROGRESS") {
         const { stage, completed, total } = event.data;
-        if (stage === "verifying") onProgress?.({ stage });
+        if (stage === "verifying") reportProgress({ stage });
         else if (stage === "downloading" && Number.isInteger(completed) && Number.isInteger(total) && completed >= 0 && total > 0 && completed <= total) {
-          onProgress?.({ stage, completed, total });
+          reportProgress({ stage, completed, total });
         }
         return;
       }
