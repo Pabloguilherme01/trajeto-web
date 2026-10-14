@@ -45,8 +45,10 @@ export async function getOfflineStorageStatus(): Promise<OfflineStorageStatus> {
       ? storage.persisted().catch(() => null)
       : Promise.resolve(null),
   ]);
-  const usageBytes = typeof estimate.usage === "number" ? estimate.usage : null;
-  const quotaBytes = typeof estimate.quota === "number" ? estimate.quota : null;
+  // Browsers may return missing/invalid estimates under private mode or
+  // storage pressure. Do not present NaN/Infinity as an OK storage state.
+  const usageBytes = typeof estimate.usage === "number" && Number.isFinite(estimate.usage) && estimate.usage >= 0 ? estimate.usage : null;
+  const quotaBytes = typeof estimate.quota === "number" && Number.isFinite(estimate.quota) && estimate.quota > 0 ? estimate.quota : null;
 
   return {
     supported: true,
@@ -69,6 +71,7 @@ export async function requestOfflineStoragePersistence() {
 
 export function formatStorageBytes(value: number | null) {
   if (value === null || !Number.isFinite(value) || value < 0) return "indisponível";
+  if (value < 1024) return Math.round(value) + " B";
   if (value < 1024 * 1024) return Math.max(1, Math.round(value / 1024)) + " KB";
   if (value < 1024 * 1024 * 1024) return (value / (1024 * 1024)).toFixed(1) + " MB";
   return (value / (1024 * 1024 * 1024)).toFixed(1) + " GB";
