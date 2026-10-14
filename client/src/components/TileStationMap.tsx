@@ -1,5 +1,5 @@
 import { MapNeighborhoodLabels, MapNeighborhoodPanel } from "@/components/MapNeighborhoods";
-import { LOCATED_NEIGHBORHOODS, layoutNeighborhoodLabels, type CityNeighborhood } from "@/lib/cityNeighborhoods";
+import { LOCATED_NEIGHBORHOODS, layoutNeighborhoodLabels, neighborhoodsInViewport, type CityNeighborhood } from "@/lib/cityNeighborhoods";
 import { Apple, LocateFixed, Navigation, Minus, Plus, Layers, Scan } from "lucide-react";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -391,6 +391,18 @@ export default function TileStationMap({
     }
     return result;
   }, [markerGroups, drawableWorld, width, height, centerPx.x, centerPx.y, zoomScale]);
+  // Count every neighborhood in the current viewport, not just those that
+  // fit as text on the map. Memoized with the camera so unrelated UI updates
+  // never scan the local reference list again.
+  const neighborhoodsOnScreen = useMemo(() =>
+    neighborhoodsInViewport(LOCATED_NEIGHBORHOODS, point => {
+      const p = projectBase(point.lat, point.lng);
+      return {
+        x: width / 2 + p.x * zoomScale - centerPx.x,
+        y: height / 2 + p.y * zoomScale - centerPx.y,
+      };
+    }, width, height),
+  [width, height, zoomScale, centerPx.x, centerPx.y]);
   const routeGeometryKey = useMemo(
     () => routePoints.map(point => `${point.lat},${point.lng}`).join(";"),
     [routePoints]
@@ -913,7 +925,7 @@ export default function TileStationMap({
         </div>}
       </div>
 
-      <MapNeighborhoodPanel visible={showNeighborhoods} onToggle={() => setShowNeighborhoods(value => !value)} onFocus={focusNeighborhood} />
+      <MapNeighborhoodPanel visible={showNeighborhoods} onToggle={() => setShowNeighborhoods(value => !value)} onFocus={focusNeighborhood} inViewport={neighborhoodsOnScreen} />
       <div className="relative min-w-0 border-t border-border bg-card p-3.5 text-card-foreground sm:p-4">
         {routePoints.length > 1 && <div className="mb-3 rounded-xl border border-border bg-muted/40 p-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
