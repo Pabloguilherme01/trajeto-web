@@ -10,6 +10,9 @@ for (const width of [320, 1360]) test(`Pages: neighbourhood names, search and fo
   await expect(results).toHaveCount(12);
   await panel.getByRole("button",{name:"Mostrar todos os bairros"}).click();
   await expect(results).toHaveCount(100);
+  await panel.getByRole("searchbox",{name:"Buscar bairro no mapa"}).fill("Jd. América 02");
+  await expect(panel.getByRole("button",{name:"Ver bairro Jardim América II no mapa",exact:true})).toBeVisible();
+  await expect(panel.getByRole("button",{name:"Ver bairro Jardim América I no mapa",exact:true})).toHaveCount(0);
   await panel.getByRole("searchbox",{name:"Buscar bairro no mapa"}).fill("jardim brasilia");
   await panel.getByRole("button",{name:"Ver bairro Jardim Brasília no mapa",exact:true}).click();
   await expect(page.locator('[data-map-neighborhood="bairro-jardim-brasilia"]')).toBeVisible();
