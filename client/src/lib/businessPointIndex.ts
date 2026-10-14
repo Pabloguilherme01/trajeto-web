@@ -54,7 +54,11 @@ export function resolveBusinessPointFromCatalog(items: CityAtlasItem[], value: s
   const query = normalizeCatalogText(value);
   if (!query) return null;
 
-  const digits = value.replace(/\D/g, "");
+  // Route only an exact CNPJ (optionally labelled "CNPJ:") or an exact
+  // unique company name. A street, address or descriptive phrase containing
+  // 14 digits must never silently become somebody else's business marker.
+  const registryValue = value.trim().replace(/^cnpj\s*[:·-]?\s*/i, "");
+  const digits = /^[\d\s./-]+$/.test(registryValue) ? registryValue.replace(/\D/g, "") : "";
   const byCnpj = digits.length === 14 ? cnpjIndex(items).get(digits) : undefined;
   // All indexed business names contain letters, so a numeric-only CNPJ
   // cannot match a name; skip the name index for this frequent case.
