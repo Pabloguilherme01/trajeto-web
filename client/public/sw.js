@@ -419,7 +419,16 @@ async function restoreOfflinePackage(onProgress = () => {}) {
     onProgress({ stage: "verifying" });
     return await offlineStatus();
   } catch (error) {
-    return { ready: false, reason: error?.name === "QuotaExceededError" ? "storage" : error?.message === "update" ? "update" : "connection" };
+    // Optional downloads can fail after the essential shell/ANP package was
+    // already saved. Return its real cached coverage instead of discarding
+    // coreReady/businessesReady and making the UI claim everything is offline.
+    // Keep the full-package flag false: this preparation did not complete.
+    const cached = await offlineStatus();
+    return {
+      ...cached,
+      ready: false,
+      reason: error?.name === "QuotaExceededError" ? "storage" : error?.message === "update" ? "update" : "connection",
+    };
   }
 }
 

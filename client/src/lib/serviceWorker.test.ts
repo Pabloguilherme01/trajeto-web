@@ -322,7 +322,7 @@ describe("service worker", () => {
   it("rejects an HTML fallback when an old chunk was removed by deployment", async () => {
     const { worker, saved } = recoverableWorker(["./assets/installed.js"]);
     worker.fetch.mockResolvedValue(new Response("new HTML", { headers: { "Content-Type": "text/html" } }));
-    expect(await worker.restoreOfflinePackage()).toEqual({ ready: false, reason: "update" });
+    expect(await worker.restoreOfflinePackage()).toMatchObject({ ready: false, coreReady: false, reason: "update" });
     expect(saved.has("./assets/installed.js")).toBe(false);
     expect(worker.fetch).toHaveBeenCalledTimes(1); // Never retry a removed build's HTML fallback.
   });
@@ -341,8 +341,48 @@ describe("service worker", () => {
     const { worker } = recoverableWorker(["./assets/installed.js"]);
     worker.fetch.mockResolvedValue(new Response("installed code", { headers: { "Content-Type": "text/javascript" } }));
     worker.cache.put.mockRejectedValue(Object.assign(new Error("Full"), { name: "QuotaExceededError" }));
-    expect(await worker.restoreOfflinePackage()).toEqual({ ready: false, reason: "storage" });
+    expect(await worker.restoreOfflinePackage()).toMatchObject({ ready: false, coreReady: false, reason: "storage" });
   });
+  it("keeps verified essential access visible if a commercial download loses connection", async () => {
+    const { worker, saved } = recoverableWorker(["./assets/business.js"]);
+    const priorMatch = worker.cache.match.getMockImplementation()!;
+    worker.cache.match.mockImplementation(async (request: string | Request, options?: CacheQueryOptions) => {
+      if (request === "./offline-assets.json") return new Response(JSON.stringify({
+        main: { file: "assets/installed.js" },
+        business: { src: "src/data/businesses/part-00.json", file: "assets/business.js" },
+      }));
+      return priorMatch(request, options);
+    });
+    expect(await worker.offlineStatus()).toMatchObject({
+      ready: false, coreReady: true, businessesReady: false,
+    });
+    worker.fetch.mockRejectedValue(new Error("network unavailable"));
+    expect(await worker.restoreOfflinePackage()).toMatchObject({
+      ready: false, coreReady: true, businessesReady: false, reason: "connection",
+    });
+    expect(saved.has("./assets/business.js")).toBe(false);
+    expect(worker.fetch).toHaveBeenCalledTimes(2); // bounded retry
+  });
+
+  it("preserves a prepared essential core when optional downloads exceed storage quota", async () => {
+    const { worker } = recoverableWorker(["./assets/business.js"]);
+    const priorMatch = worker.cache.match.getMockImplementation()!;
+    worker.cache.match.mockImplementation(async (request: string | Request, options?: CacheQueryOptions) => {
+      if (request === "./offline-assets.json") return new Response(JSON.stringify({
+        main: { file: "assets/installed.js" },
+        business: { src: "src/data/businesses/part-00.json", file: "assets/business.js" },
+      }));
+      return priorMatch(request, options);
+    });
+    worker.fetch.mockResolvedValue(new Response("business code", {
+      headers: { "Content-Type": "text/javascript" },
+    }));
+    worker.cache.put.mockRejectedValue(Object.assign(new Error("Full"), { name: "QuotaExceededError" }));
+    expect(await worker.restoreOfflinePackage()).toMatchObject({
+      ready: false, coreReady: true, businessesReady: false, reason: "storage",
+    });
+  });
+
   it("keeps the refreshed document with its new assets when the HTTP cache has an older shell", async () => {
     const worker = loadWorker();
     const stored = new Map<string, Response>();

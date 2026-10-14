@@ -1,16 +1,20 @@
 import { expect, test } from "@playwright/test";
 
 for (const width of [280, 320, 360, 390, 768]) {
-  test(`public screens stay inside the viewport before and after scrolling and focusing inputs at ${width}px`, async ({
-    page,
-  }, testInfo) => {
+  // The map uses its own browser page/context. Previously one test traversed
+  // four heavy screens in sequence and could stall on map scroll at 390px in
+  // loaded CI runners. Isolate map rendering without raising the timeout.
+  for (const group of ["directory", "map"] as const) {
+    test(`${group} screens stay inside the viewport while scrolling and focusing at ${width}px`, async ({
+      page,
+    }, testInfo) => {
     test.skip(
       testInfo.project.name === "chromium-mobile",
       "This matrix sets its own 280–768px viewports; run it once on Chromium instead of duplicating the same matrix."
     );
     test.setTimeout(120_000);
     await page.setViewportSize({ width, height: 740 });
-    for (const path of ["/", "/planejar", "/servicos", "/mapa", "/ajuda"]) {
+    for (const path of (group === "map" ? ["/mapa"] : ["/", "/planejar", "/servicos", "/ajuda"])) {
       // This suite checks responsive layouts, not the loading of every image
       // or third-party resource. Firefox can leave window.load pending while
       // the page itself is already interactive on slower CI workers.
@@ -74,7 +78,8 @@ for (const width of [280, 320, 360, 390, 768]) {
         ).toBeLessThanOrEqual(width + 1);
       }
     }
-  });
+    });
+  }
 }
 
 test("home remains usable with enlarged text on a narrow installed-app-like viewport", async ({

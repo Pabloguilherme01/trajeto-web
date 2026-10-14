@@ -117,6 +117,22 @@ describe("offline preparation feedback", () => {
     expect(screen.queryByText(/O núcleo essencial já está disponível offline/)).toBeNull();
   });
 
+  it("keeps the essential offline status visible when optional preparation fails", async () => {
+    state.check.mockResolvedValueOnce({
+      ready: false, coreReady: true, businessesReady: false,
+    });
+    state.prepare.mockResolvedValue({
+      ready: false, coreReady: true, businessesReady: false, reason: "connection",
+    });
+    render(<OfflineReadiness />);
+    expect(await screen.findByText(/O núcleo essencial já está disponível offline/)).toBeTruthy();
+    fireEvent.click(await prepareButton());
+    await screen.findByText(/Conecte-se à internet e tente preparar novamente/);
+    expect(screen.getByText(/O núcleo essencial já está disponível offline/)).toBeTruthy();
+    expect(screen.getByText(/Catálogo de empresas ainda não preparado/)).toBeTruthy();
+    expect(screen.queryByText("Pronto para usar sem internet neste aparelho.")).toBeNull();
+  });
+
   it("reports ready only after successful preparation", async () => {
     state.prepare.mockResolvedValue({ ready: true });
     render(<OfflineReadiness />);
