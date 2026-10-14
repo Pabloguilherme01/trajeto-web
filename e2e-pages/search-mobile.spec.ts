@@ -106,7 +106,20 @@ test("Pages: offline preparation recovers a missing chunk and survives a reload"
   page,
   context,
 }) => {
+  // This scenario tests recovery of an already installed package, not a race
+  // with the first service-worker install. Pages precaches route chunks before
+  // claiming a newly opened tab; on slower mobile CI runners that can take
+  // longer than the default 8s assertion timeout.
+  test.setTimeout(150_000);
   await page.goto("ajuda", { waitUntil: "domcontentloaded" });
+  await page.evaluate(async () => { await navigator.serviceWorker.ready; });
+  if (!await page.evaluate(() => Boolean(navigator.serviceWorker.controller))) {
+    await page.reload({ waitUntil: "domcontentloaded" });
+  }
+  await expect.poll(
+    () => page.evaluate(() => Boolean(navigator.serviceWorker.controller)),
+    { timeout: 90_000, message: "installed service worker must control the help page" },
+  ).toBe(true);
   const initialPrepare = page.getByRole("button", { name: "Preparar acesso offline" });
   await expect(initialPrepare).toBeEnabled();
   await initialPrepare.click();
