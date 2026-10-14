@@ -5,7 +5,7 @@ for (const width of [320, 1360]) test(`Pages: neighbourhood names, search and fo
   await page.goto("mapa");
   const panel=page.getByRole("region",{name:"Bairros e setores do mapa"});
   await expect(panel).toBeVisible();
-  await panel.locator("summary").click();
+  await panel.getByText("Encontrar bairro ou setor",{exact:true}).click();
   const results=panel.getByRole("list",{name:"Bairros e setores disponíveis"}).getByRole("listitem");
   await expect(results).toHaveCount(12);
   await panel.getByRole("button",{name:"Mostrar todos os bairros"}).click();
@@ -26,7 +26,7 @@ for (const width of [320, 1360]) test(`Pages: neighbourhood names, search and fo
   await page.reload();
   const localPanel=page.getByRole("region",{name:"Bairros e setores do mapa"});
   await expect(localPanel).toBeVisible();
-  await localPanel.locator("summary").click();
+  await localPanel.getByText("Encontrar bairro ou setor",{exact:true}).click();
   await localPanel.getByRole("searchbox",{name:"Buscar bairro no mapa"}).fill("jardim brasilia");
   await localPanel.getByRole("button",{name:"Ver bairro Jardim Brasília no mapa",exact:true}).click();
   await expect(page.locator('[data-map-neighborhood="bairro-jardim-brasilia"]')).toBeVisible();
