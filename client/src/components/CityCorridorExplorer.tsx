@@ -89,7 +89,7 @@ export default function CityCorridorExplorer({
             <p className="mt-1 text-xs leading-relaxed text-foreground/70">
               Nomes de paradas publicados no Moovit para um sentido de cada linha TAG municipal; não são coordenadas GPS, trajetos homologados ou prova de que a linha percorra toda a via.
               {" "}<a href={MUNICIPAL_TAG_LINES_SOURCE} target="_blank" rel="noopener noreferrer" className="font-bold text-primary underline underline-offset-2">
-                Consultar operadora municipal
+                Ver linhas publicadas no Moovit
               </a>.
             </p>
           </div>
@@ -102,11 +102,11 @@ export default function CityCorridorExplorer({
                 {" "}<a className="font-bold text-primary underline underline-offset-2" target="_blank" rel="noopener noreferrer" href={corridor.nearbyBus.sourceUrl}>Ver paradas e itinerários na fonte</a>.
               </p>
             </div>
-          ) : (
+          ) : observedStops.length === 0 ? (
             <p className="mt-3 text-xs leading-relaxed text-foreground/70">
-              Ainda não há itinerário por trecho ou paradas vinculadas a esta via por fonte verificável. Nenhuma linha foi presumida.
+              Nenhuma parada ou linha foi confirmada nesta via nas fontes consultadas; outros serviços podem existir.
             </p>
-          )}
+          ) : null}
         </div>
         <div className="rounded-xl border border-border/70 p-3">
           <h4 className="text-sm font-black">Comércio com endereço textual nesta via</h4>
