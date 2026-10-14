@@ -26,6 +26,7 @@ it("shows sourced bus proximity without claiming avenue itineraries and separate
   expect(screen.getByText("Linha 104")).toBeTruthy();
   expect(screen.getByText("Linha 103")).toBeTruthy();
   expect(screen.getByText("Linha 105")).toBeTruthy();
+  expect(screen.getByRole("link", { name: "Ver linhas publicadas no Moovit" }).getAttribute("href")).toContain("moovitapp.com");
   expect(screen.getByText("Linhas relatadas nas proximidades")).toBeTruthy();
   expect(screen.getByText("100 · 2304 · 2402 · 2424 · 2862")).toBeTruthy();
   expect(screen.getByText(/1 empresas com nome · 1 registros apenas cadastrais/)).toBeTruthy();
@@ -42,11 +43,21 @@ it("switches to avenue 1 without colliding with Avenida 10 or inventing local bu
   expect(screen.getByText(/1 empresas com nome · 0 registros apenas cadastrais/)).toBeTruthy();
   expect(screen.getByText(/Loja Av 1/)).toBeTruthy();
   expect(screen.queryByText(/Loja Av 10/)).toBeNull();
-  expect(screen.getByText(/Ainda não há itinerário por trecho/)).toBeTruthy();
+  expect(screen.getByText(/Nenhuma parada ou linha foi confirmada nesta via/)).toBeTruthy();
 });
 
 it("does not display a false zero when the optional 21k-company catalog is unloaded", () => {
   render(<CityCorridorExplorer businesses={[]} commercialCatalogLoaded={false} />);
   fireEvent.click(screen.getByText("Corredores da cidade · ônibus, comércio e serviços"));
   expect(screen.getByText(/Catálogo comercial completo não carregado nesta camada/)).toBeTruthy();
+});
+
+it("does not contradict verified municipal stops with an unsupported no-stops message", () => {
+  render(<CityCorridorExplorer businesses={[]} commercialCatalogLoaded={false} />);
+  fireEvent.click(screen.getByText("Corredores da cidade · ônibus, comércio e serviços"));
+  fireEvent.change(screen.getByRole("combobox", { name: "Avenida ou corredor" }), { target: { value: "avenida-brasilia" } });
+  expect(screen.getByText("Linha 100")).toBeTruthy();
+  expect(screen.getByText("Linha 104")).toBeTruthy();
+  expect(screen.queryByText(/Nenhuma parada ou linha foi confirmada/)).toBeNull();
+  expect(screen.queryByText(/Ainda não há itinerário por trecho ou paradas vinculadas/)).toBeNull();
 });
