@@ -26,6 +26,7 @@ const preparationMessages: Record<
 
 export default function OfflineReadiness() {
   const [ready, setReady] = useState(false);
+  const [coreReady, setCoreReady] = useState(false);
   const [businessesReady, setBusinessesReady] = useState(false);
   const [checking, setChecking] = useState(true);
   const [preparing, setPreparing] = useState(false);
@@ -53,11 +54,13 @@ export default function OfflineReadiness() {
       ]);
       if (request !== statusRequest.current || preparingRef.current) return;
       setReady(status.ready);
+      setCoreReady(status.coreReady === true || status.ready);
       setBusinessesReady(status.businessesReady === true);
       setStorageStatus(storage);
     } catch {
       if (request !== statusRequest.current || preparingRef.current) return;
       setReady(false);
+      setCoreReady(false);
       setFeedback(preparationMessages.unsupported);
     } finally {
       if (request === statusRequest.current && !preparingRef.current) setChecking(false);
@@ -74,6 +77,7 @@ export default function OfflineReadiness() {
     try {
       const result = await prepareOfflineAccess(setProgress);
       setReady(result.ready);
+      setCoreReady(result.coreReady === true || result.ready);
       setBusinessesReady(result.businessesReady === true || result.ready);
       if (!result.ready)
         setFeedback(preparationMessages[result.reason ?? "connection"]);
@@ -155,6 +159,11 @@ export default function OfflineReadiness() {
             destinos ainda não preparados continuam dependendo de conexão; ligações
             precisam de rede telefônica.
           </p>
+          {!checking && !preparing && coreReady && !ready && (
+            <p className="mt-2 text-sm leading-relaxed text-[#C7FF3C]">
+              O núcleo essencial já está disponível offline neste aparelho. O pacote completo de empresas e mapas ainda pode precisar de preparação.
+            </p>
+          )}
           {!checking && <p className="mt-2 text-sm text-white/75" role="status">
             {businessesReady ? "Catálogo de empresas disponível offline neste aparelho." : "Catálogo de empresas ainda não preparado para offline. Use Preparar acesso offline para salvar todas as empresas."}
           </p>}

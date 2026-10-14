@@ -106,7 +106,7 @@ export function installOfflinePersistence() {
   window.addEventListener("offline", () => window.dispatchEvent(new Event("trajeto:offline")));
 }
 
-export type OfflinePreparation = { ready: boolean; businessesReady?: boolean; reason?: "unsupported" | "preparing" | "connection" | "storage" | "update" };
+export type OfflinePreparation = { ready: boolean; coreReady?: boolean; businessesReady?: boolean; reason?: "unsupported" | "preparing" | "connection" | "storage" | "update" };
 export type OfflineProgress = { stage: "waiting" | "downloading" | "verifying"; completed?: number; total?: number };
 
 function requestOfflineStatus(type: "OFFLINE_STATUS" | "RESTORE_OFFLINE", timeout: number, onProgress?: (progress: OfflineProgress) => void): Promise<OfflinePreparation> {
@@ -134,7 +134,12 @@ function requestOfflineStatus(type: "OFFLINE_STATUS" | "RESTORE_OFFLINE", timeou
         return;
       }
       const reason = event.data?.reason;
-      finish({ ready: event.data?.ready === true, ...(typeof event.data?.businessesReady === "boolean" ? { businessesReady: event.data.businessesReady } : {}), ...(["update", "storage", "connection"].includes(reason) ? { reason } : {}) });
+      finish({
+        ready: event.data?.ready === true,
+        ...(typeof event.data?.coreReady === "boolean" ? { coreReady: event.data.coreReady } : {}),
+        ...(typeof event.data?.businessesReady === "boolean" ? { businessesReady: event.data.businessesReady } : {}),
+        ...(["update", "storage", "connection"].includes(reason) ? { reason } : {}),
+      });
     };
     try {
       worker.postMessage({ type, ...(onProgress ? { progress: true } : {}) }, [channel.port2]);
