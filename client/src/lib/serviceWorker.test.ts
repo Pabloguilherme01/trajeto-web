@@ -126,6 +126,35 @@ describe("service worker", () => {
     expect(await saved.get("./assets/installed.js")!.text()).toBe("installed code");
   });
 
+  it("reports essential readiness separately when business chunks and heavy maps are not prepared", async () => {
+    const { worker } = recoverableWorker([
+      "./assets/business.js",
+      "./data/aguas-lindas-offline-map.json",
+    ]);
+    const originalMatch = worker.cache.match.getMockImplementation()!;
+    worker.cache.match.mockImplementation(async (request: string | Request, options?: CacheQueryOptions) => {
+      const key = "./" + new URL(typeof request === "string" ? request : request.url, worker.self.registration.scope).pathname.replace("/trajeto-web/", "");
+      if (key === "./offline-assets.json") return new Response(JSON.stringify({
+        main: { file: "assets/installed.js" },
+        "src/data/businesses/part-00.json": {
+          src: "src/data/businesses/part-00.json",
+          file: "assets/business.js",
+        },
+      }));
+      return originalMatch(request, options);
+    });
+    expect(await worker.offlineStatus()).toMatchObject({
+      ready: false, coreReady: true, businessesReady: false,
+    });
+  });
+
+  it("does not claim the essential offline core is ready when ANP data is missing", async () => {
+    const { worker } = recoverableWorker(["./data/aguas-lindas-anp.json"]);
+    expect(await worker.offlineStatus()).toMatchObject({
+      ready: false, coreReady: false,
+    });
+  });
+
   it("checks the static cache inventory once without reading each bundled Response", async () => {
     const { worker } = recoverableWorker([]);
     expect(await worker.offlineStatus()).toMatchObject({ ready: true, businessesReady: true });
