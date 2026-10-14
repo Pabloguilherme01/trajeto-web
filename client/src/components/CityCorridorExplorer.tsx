@@ -7,6 +7,7 @@ import { cityMapLayerUrl } from "@/lib/cityMapLayers";
 import { PUBLIC_SERVICES } from "@/lib/publicServices";
 import {
   ANTT_OPERATIONAL_SOURCE, ANTT_SEMIURBAN_LINKS, CITY_CORRIDORS,
+  MUNICIPAL_TAG_LINES_SOURCE, publishedStopsForCorridor,
   ROAD_HIERARCHY_SOURCE, summarizeCorridorAddresses,
 } from "@/lib/cityMobilityCorridors";
 
@@ -30,6 +31,7 @@ export default function CityCorridorExplorer({
 }) {
   const [selectedId, setSelectedId] = useState("avenida-jk");
   const corridor = CITY_CORRIDORS.find(entry => entry.id === selectedId) ?? CITY_CORRIDORS[0];
+  const observedStops = useMemo(() => publishedStopsForCorridor(corridor.id), [corridor.id]);
   const coverage = useMemo(
     () => summarizeCorridorAddresses(corridor, businesses, PUBLIC_SERVICES, hasBusinessName),
     [corridor, businesses]
@@ -62,6 +64,31 @@ export default function CityCorridorExplorer({
             className="mt-2 inline-flex min-h-11 items-center rounded-xl border border-primary/30 bg-primary/5 px-3 text-sm font-bold text-primary focus-visible:outline-2 focus-visible:outline-ring">
             Localizar via no mapa de ruas
           </Link>
+          <div className="mt-3 border-t border-border/70 pt-3">
+            <h4 className="text-sm font-bold">Linhas municipais com parada nomeada nesta via</h4>
+            {observedStops.length ? (
+              <ul className="mt-2 space-y-2 text-sm">
+                {observedStops.map(stop => (
+                  <li key={stop.line + ":" + stop.corridorId} className="break-words">
+                    <span className="font-black">Linha {stop.line}</span>
+                    <span className="block text-xs text-foreground/70">Parada publicada: {stop.stopLabel}</span>
+                    <a href={stop.directionSource} target="_blank" rel="noopener noreferrer"
+                      className="inline-flex min-h-11 items-center text-xs font-bold text-primary underline underline-offset-2">
+                      Conferir sentido, paradas e horários
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-1 text-xs text-foreground/70">Nenhuma parada nomeada nesta via foi confirmada nas páginas consultadas; outras linhas podem existir.</p>
+            )}
+            <p className="mt-1 text-xs leading-relaxed text-foreground/70">
+              Nomes de paradas publicados no Moovit para um sentido de cada linha TAG municipal; não são coordenadas GPS, trajetos homologados ou prova de que a linha percorra toda a via.
+              {" "}<a href={MUNICIPAL_TAG_LINES_SOURCE} target="_blank" rel="noopener noreferrer" className="font-bold text-primary underline underline-offset-2">
+                Consultar operadora municipal
+              </a>.
+            </p>
+          </div>
           {corridor.nearbyBus ? (
             <div className="mt-3">
               <h4 className="text-sm font-bold">Linhas relatadas nas proximidades</h4>
