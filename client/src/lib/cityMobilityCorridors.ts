@@ -8,7 +8,7 @@ export type CityCorridor = {
   id: string;
   name: string;
   area: string;
-  role: "principal" | "integracao" | "secundaria";
+  role: "principal" | "integracao" | "secundaria" | "documentada";
   aliases: readonly string[];
   nearbyBus?: { lineIds: readonly string[]; sourceUrl: string; checkedAt: string };
 };
@@ -31,6 +31,7 @@ export const CITY_CORRIDORS: readonly CityCorridor[] = [
     nearbyBus: { lineIds: ["100", "2304", "2402", "2424", "2862"], sourceUrl: JK_NEARBY_SOURCE, checkedAt: "2026-10-14" } },
   { id: "avenida-diagonal", name: "Avenida Diagonal", area: "Mansões Olinda", role: "secundaria", aliases: ["avenida diagonal"] },
   { id: "avenida-porto-velho", name: "Avenida Porto Velho", area: "Jardim da Barragem", role: "secundaria", aliases: ["avenida porto velho"] },
+  { id: "avenida-aguas-lindas", name: "Avenida Águas Lindas", area: "Trechos citados no itinerário municipal", role: "documentada", aliases: ["avenida aguas lindas"] },
   { id: "avenida-goiania", name: "Avenida Goiânia", area: "Jardim da Barragem", role: "secundaria", aliases: ["avenida goiania"] },
   { id: "avenida-santa-luzia", name: "Avenida Santa Luzia", area: "Pérola da Barragem", role: "secundaria", aliases: ["avenida santa luzia"] },
   { id: "avenida-tiradentes", name: "Avenida Tiradentes", area: "Pérola da Barragem", role: "secundaria", aliases: ["avenida tiradentes"] },
@@ -80,15 +81,23 @@ export const PUBLISHED_MUNICIPAL_STOPS: readonly PublishedStopEvidence[] = [
   { corridorId: "avenida-central", line: "100", stopLabel: "Avenida Central, 810", directionSource: LINE_100, checkedAt: "2026-10-14" },
   { corridorId: "avenida-brasilia", line: "100", stopLabel: "Avenida Brasília, 1048-1198", directionSource: LINE_100, checkedAt: "2026-10-14" },
   { corridorId: "avenida-brasilia", line: "104", stopLabel: "Avenida Brasília, 817", directionSource: LINE_104, checkedAt: "2026-10-14" },
+  { corridorId: "avenida-jk", line: "100", stopLabel: "Avenida Jk, 11", directionSource: LINE_100, checkedAt: "2026-10-14" },
   { corridorId: "avenida-jk", line: "102", stopLabel: "Avenida Jk, 26", directionSource: LINE_102, checkedAt: "2026-10-14" },
   { corridorId: "avenida-jk", line: "103", stopLabel: "Avenida Jk, 978", directionSource: LINE_103, checkedAt: "2026-10-14" },
+  { corridorId: "avenida-jk", line: "104", stopLabel: "Avenida Jk, 11", directionSource: LINE_104, checkedAt: "2026-10-14" },
   { corridorId: "avenida-jk", line: "105", stopLabel: "Avenida Jk, 978", directionSource: LINE_105, checkedAt: "2026-10-14" },
+  { corridorId: "avenida-goiania", line: "104", stopLabel: "Avenida Goiânia, 2", directionSource: LINE_104, checkedAt: "2026-10-14" },
+  { corridorId: "avenida-4", line: "100", stopLabel: "Avenida 4, 299", directionSource: LINE_100, checkedAt: "2026-10-14" },
+  { corridorId: "avenida-4", line: "104", stopLabel: "Avenida 4, 299", directionSource: LINE_104, checkedAt: "2026-10-14" },
+  { corridorId: "avenida-aguas-lindas", line: "100", stopLabel: "Avenida Águas Lindas, 89-327", directionSource: LINE_100, checkedAt: "2026-10-14" },
+  { corridorId: "avenida-aguas-lindas", line: "104", stopLabel: "Avenida Águas Lindas, 89-327", directionSource: LINE_104, checkedAt: "2026-10-14" },
   { corridorId: "avenida-porto-velho", line: "100", stopLabel: "Avenida Pôrto Velho, 696", directionSource: LINE_100, checkedAt: "2026-10-14" },
   { corridorId: "avenida-porto-velho", line: "102", stopLabel: "Avenida Pôrto Velho, 838-892", directionSource: LINE_102, checkedAt: "2026-10-14" },
   { corridorId: "avenida-porto-velho", line: "103", stopLabel: "Avenida Pôrto Velho, 838-892", directionSource: LINE_103, checkedAt: "2026-10-14" },
   { corridorId: "br-070", line: "100", stopLabel: "Br-070, 2", directionSource: LINE_100, checkedAt: "2026-10-14" },
   { corridorId: "br-070", line: "102", stopLabel: "Marginal Br 070 - Posto Ipiranga E Viaduto", directionSource: LINE_102, checkedAt: "2026-10-14" },
   { corridorId: "br-070", line: "103", stopLabel: "Marginal Br 070 - Posto Ipiranga E Viaduto", directionSource: LINE_103, checkedAt: "2026-10-14" },
+  { corridorId: "br-070", line: "104", stopLabel: "Marginal Br 070 - Posto Ponteio", directionSource: LINE_104, checkedAt: "2026-10-14" },
   { corridorId: "br-070", line: "105", stopLabel: "Marginal Br 070 - Posto Ipiranga E Viaduto", directionSource: LINE_105, checkedAt: "2026-10-14" },
 ];
 export function publishedStopsForCorridor(id: string): readonly PublishedStopEvidence[] {
