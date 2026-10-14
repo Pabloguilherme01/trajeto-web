@@ -21,7 +21,9 @@ it("shows sourced bus proximity without claiming avenue itineraries and separate
   render(<CityCorridorExplorer businesses={shops} commercialCatalogLoaded />);
   fireEvent.click(screen.getByText("Corredores da cidade · ônibus, comércio e serviços"));
   expect(screen.getByText("Linhas municipais com parada nomeada nesta via")).toBeTruthy();
+  expect(screen.getByText("Linha 100")).toBeTruthy();
   expect(screen.getByText("Linha 102")).toBeTruthy();
+  expect(screen.getByText("Linha 104")).toBeTruthy();
   expect(screen.getByText("Linha 103")).toBeTruthy();
   expect(screen.getByText("Linha 105")).toBeTruthy();
   expect(screen.getByText("Linhas relatadas nas proximidades")).toBeTruthy();
