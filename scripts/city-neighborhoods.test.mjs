@@ -6,7 +6,7 @@ import { buildCityNeighborhoods, neighborhoodKey } from './city-neighborhoods.mj
 
 const dataset=JSON.parse(await readFile(new URL('../client/public/data/aguas-lindas-neighborhoods.json',import.meta.url),'utf8'));
 const code=(await readFile(new URL('../client/src/lib/cityNeighborhoods.ts',import.meta.url),'utf8')).replace(/import snapshot from .*?;/,'const snapshot='+JSON.stringify(dataset)+';');
-const {layoutNeighborhoodLabels,neighborhoodSearchKey,searchCityNeighborhoods}=await import('data:text/javascript;base64,'+Buffer.from(stripTypeScriptTypes(code)).toString('base64'));
+const {layoutNeighborhoodLabels,neighborhoodSearchKey,searchCityNeighborhoods,neighborhoodsInViewport}=await import('data:text/javascript;base64,'+Buffer.from(stripTypeScriptTypes(code)).toString('base64'));
 function part(rows){const strings=[];return{strings,rows:rows.map(([name,lat,lng,precision])=>{const row=Array(17).fill(0);row[7]=strings.push('QUADRA 1, 2, '+name+', CEP 72910001, Águas Lindas de Goiás - GO')-1;row[8]=lat;row[9]=lng;row[10]=strings.push(precision)-1;return row;})};}
 const atlas={items:[{id:'bairro-jardim-brasilia',name:'Jardim Brasília'},{id:'bairro-royal-parque',name:'Royal Parque'}]};
 test('normalizes spelling and sectors without merging different numbered areas',()=>{
@@ -46,4 +46,18 @@ test('mobile labels are separated and prioritise the chosen neighbourhood',()=>{
   const labels=layoutNeighborhoodLabels(items,item=>item.lat===3?{x:900,y:200}:{x:160,y:180},320,360,'b');
   assert.deepEqual(labels.map(item=>item.id),['b']);assert.ok(labels[0].x-labels[0].width/2>=8);
   assert.deepEqual(layoutNeighborhoodLabels(items,item=>item.lat===3?{x:900,y:200}:{x:160,y:180},320,360,null,[{x:160,y:180}]),[]);
+});
+
+test('viewport directory preserves overlapping neighborhood names without inventing coordinates',()=>{
+  const items=[
+    {id:'a',name:'Jardim América I',lat:-15.7,lng:-48.3},
+    {id:'b',name:'Jardim América II',lat:-15.7,lng:-48.3},
+    {id:'c',name:'Longe do mapa',lat:-15.8,lng:-48.4},
+  ];
+  const points={a:{x:160,y:180},b:{x:160,y:180},c:{x:340,y:180}};
+  const project=item=>item.lat===-15.8?points.c:points.a;
+  assert.deepEqual(neighborhoodsInViewport(items,project,320,360).map(item=>item.id),['a','b']);
+  assert.deepEqual(layoutNeighborhoodLabels(items,project,320,360,null).map(item=>item.id),['a']);
+  assert.deepEqual(neighborhoodsInViewport(items,project,0,360),[]);
+  assert.deepEqual(neighborhoodsInViewport(items,()=>({x:NaN,y:180}),320,360),[]);
 });
