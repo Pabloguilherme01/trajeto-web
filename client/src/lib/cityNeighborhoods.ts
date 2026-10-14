@@ -55,7 +55,7 @@ export function neighborhoodsInViewport(
   width: number,
   height: number,
 ): Array<CityNeighborhood & { lat: number; lng: number }> {
-  if (width <= 0 || height <= 0) return [];
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) return [];
   return items.filter(item => {
     const { x, y } = project(item);
     return Number.isFinite(x) && Number.isFinite(y) &&
@@ -69,7 +69,13 @@ export function layoutNeighborhoodLabels(
   width: number, height: number, selectedId: string | null, occupied: readonly ScreenPoint[] = []
 ) {
   const labels: Array<CityNeighborhood & ScreenPoint & { width: number }> = [];
-  const candidates = items.map(item=>({item,...project(item)})).sort((a,b)=>
+  // Map cameras may briefly have an unmeasured viewport or invalid projected
+  // coordinates during a gesture. Never turn those into NaN CSS positions.
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) return labels;
+  const candidates = items
+    .map(item => ({ item, ...project(item) }))
+    .filter(point => Number.isFinite(point.x) && Number.isFinite(point.y))
+    .sort((a,b)=>
     Number(b.item.id===selectedId)-Number(a.item.id===selectedId) ||
     Math.hypot(a.x-width/2,a.y-height/2)-Math.hypot(b.x-width/2,b.y-height/2) || a.item.id.localeCompare(b.item.id));
   for(const point of candidates) {
