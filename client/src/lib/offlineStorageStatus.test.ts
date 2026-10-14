@@ -19,6 +19,21 @@ it("reports browser storage quota without exposing location data", async () => {
   expect(status.storageRisk).toBe("attention");
 });
 
+it("keeps invalid storage estimates unknown rather than displaying false spare capacity", async () => {
+  vi.stubGlobal("navigator", {
+    storage: {
+      estimate: vi.fn().mockResolvedValue({ usage: Number.NaN, quota: Number.POSITIVE_INFINITY }),
+      persisted: vi.fn().mockResolvedValue(false),
+    },
+  });
+  const status = await getOfflineStorageStatus();
+  expect(status.usageBytes).toBeNull();
+  expect(status.quotaBytes).toBeNull();
+  expect(status.usageRatio).toBeNull();
+  expect(status.storageRisk).toBe("unknown");
+  expect(formatStorageBytes(status.usageBytes)).toBe("indisponível");
+});
+
 it("requests persistent storage only through an explicit call", async () => {
   const persist = vi.fn().mockResolvedValue(true);
   vi.stubGlobal("navigator", { storage: { persist } });
@@ -27,7 +42,10 @@ it("requests persistent storage only through an explicit call", async () => {
   expect(persist).toHaveBeenCalledTimes(1);
 });
 
-it("formats storage sizes for people instead of raw bytes", () => {
+it("formats storage sizes without inventing 1 KB for zero bytes", () => {
+  expect(formatStorageBytes(0)).toBe("0 B");
+  expect(formatStorageBytes(512)).toBe("512 B");
+  expect(formatStorageBytes(1024)).toBe("1 KB");
   expect(formatStorageBytes(5 * 1024 * 1024)).toBe("5.0 MB");
   expect(formatStorageBytes(null)).toBe("indisponível");
 });

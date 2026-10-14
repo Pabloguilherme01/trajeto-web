@@ -29,6 +29,18 @@ it("resolves formatted and numeric CNPJ repeatedly without changing the catalog"
   expect(items).toEqual([record]);
 });
 
+it("never treats a CNPJ embedded in an address or description as an exact route identity", () => {
+  const item = company("12.345.678/0001-90", "Mercado Aurora", -15.7, -48.2);
+  const items = [item];
+  expect(resolveBusinessPointFromCatalog(items, "CNPJ: 12.345.678/0001-90")).toEqual({ lat: -15.7, lng: -48.2 });
+  expect(resolveBusinessPointFromCatalog(items, "CNPJ 12345678000190")).toEqual({ lat: -15.7, lng: -48.2 });
+  expect(resolveBusinessPointFromCatalog(items, "Mercado Aurora")).toEqual({ lat: -15.7, lng: -48.2 });
+  expect(resolveBusinessPointFromCatalog(items, "Rua 12345678000190")).toBeNull();
+  expect(resolveBusinessPointFromCatalog(items, "Rua 12.345.678/0001-90")).toBeNull();
+  expect(resolveBusinessPointFromCatalog(items, "Referência ao CNPJ 12345678000190")).toBeNull();
+  expect(resolveBusinessPointFromCatalog(items, "12345678000190, Loja desconhecida")).toBeNull();
+});
+
 it("does not resolve an unnamed legacy business as a planner endpoint", () => {
   const item = company("12.345.678/0001-90", "CNPJ 12.345.678/0001-90", -15.7, -48.2);
   expect(resolveBusinessPointFromCatalog([item], item.business!.cnpj)).toBeNull();
