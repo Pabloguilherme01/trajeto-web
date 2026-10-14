@@ -19,6 +19,8 @@ export function MapNeighborhoodPanel({ visible, onToggle, onFocus, inViewport }:
 }) {
   const [query,setQuery]=useState("");
   const [showAll,setShowAll]=useState(false);
+  // Do not mount dozens of offscreen controls while this disclosure is closed.
+  const [viewportOpen,setViewportOpen]=useState(false);
   const searchKey=useMemo(()=>neighborhoodSearchKey(query),[query]);
   const matches=useMemo(()=>searchCityNeighborhoods(searchKey),[searchKey]);
   // Avoid mounting a long list of hidden results on low-memory phones.
@@ -30,12 +32,12 @@ export function MapNeighborhoodPanel({ visible, onToggle, onFocus, inViewport }:
         className="min-h-11 rounded-xl border border-border bg-secondary px-3 text-xs font-bold text-secondary-foreground">Bairros {visible?"visíveis":"ocultos"}</button>
       <span className="text-xs text-muted-foreground">{CITY_NEIGHBORHOODS.length} nomes · {LOCATED_NEIGHBORHOODS.length} com referência aproximada</span>
     </div>
-    <details className="mt-1 min-w-0" data-neighborhood-viewport>
+    <details className="mt-1 min-w-0" data-neighborhood-viewport onToggle={event=>setViewportOpen(event.currentTarget.open)}>
       <summary className="min-h-11 cursor-pointer py-3 text-sm font-bold">Bairros nesta área · {inViewport.length}</summary>
       <p className="mb-2 text-xs leading-relaxed text-muted-foreground">
         Todas as referências localizadas neste recorte, inclusive nomes ocultados no desenho para evitar sobreposição. Não são limites oficiais.
       </p>
-      {inViewport.length ? (
+      {viewportOpen && (inViewport.length ? (
         <ul aria-label="Bairros visíveis nesta área" className="max-h-48 space-y-1 overflow-y-auto overscroll-contain">
           {inViewport.map(item => (
             <li key={item.id}>
@@ -49,7 +51,7 @@ export function MapNeighborhoodPanel({ visible, onToggle, onFocus, inViewport }:
         </ul>
       ) : (
         <p className="py-2 text-sm text-muted-foreground">Nenhum bairro com localização aproximada neste recorte. Mova ou reduza o zoom para explorar outras áreas.</p>
-      )}
+      ))}
     </details>
     <details className="mt-1 min-w-0">
       <summary className="min-h-11 cursor-pointer py-3 text-sm font-bold">Encontrar bairro ou setor</summary>

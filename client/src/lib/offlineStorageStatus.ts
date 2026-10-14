@@ -20,8 +20,11 @@ function riskFor(usage: number | null, quota: number | null): OfflineStorageStat
 
 export async function getOfflineStorageStatus(): Promise<OfflineStorageStatus> {
   const storage = typeof navigator !== "undefined" ? navigator.storage : undefined;
-  const routeCount = await countOfflineRoutes().catch(() => 0);
+  // Launch IndexedDB counting immediately. Estimate/quota and persistence are
+  // independent of route counting, so do not serialize three device I/O calls.
+  const routeCountPromise = countOfflineRoutes().catch(() => 0);
   if (!storage) {
+    const routeCount = await routeCountPromise;
     return {
       supported: false,
       persisted: null,
@@ -33,14 +36,17 @@ export async function getOfflineStorageStatus(): Promise<OfflineStorageStatus> {
     };
   }
 
-  const estimate: StorageEstimate = typeof storage.estimate === "function"
-    ? await storage.estimate().catch(() => ({} as StorageEstimate))
-    : {};
+  const [routeCount, estimate, persisted] = await Promise.all([
+    routeCountPromise,
+    typeof storage.estimate === "function"
+      ? storage.estimate().catch(() => ({} as StorageEstimate))
+      : Promise.resolve({} as StorageEstimate),
+    typeof storage.persisted === "function"
+      ? storage.persisted().catch(() => null)
+      : Promise.resolve(null),
+  ]);
   const usageBytes = typeof estimate.usage === "number" ? estimate.usage : null;
   const quotaBytes = typeof estimate.quota === "number" ? estimate.quota : null;
-  const persisted = typeof storage.persisted === "function"
-    ? await storage.persisted().catch(() => null)
-    : null;
 
   return {
     supported: true,

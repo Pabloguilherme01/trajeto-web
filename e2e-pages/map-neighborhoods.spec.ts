@@ -16,10 +16,14 @@ for (const width of [320, 1360]) test(`Pages: neighbourhood names, search and fo
   await panel.getByRole("searchbox",{name:"Buscar bairro no mapa"}).fill("jardim brasilia");
   await panel.getByRole("button",{name:"Ver bairro Jardim Brasília no mapa",exact:true}).click();
   await expect(page.locator('[data-map-neighborhood="bairro-jardim-brasilia"]')).toBeVisible();
+  // An unopened directory should not mount dozens of hidden buttons.
+  await expect(panel.getByRole("list",{name:"Bairros visíveis nesta área"})).toHaveCount(0);
   await panel.locator("[data-neighborhood-viewport] summary").click();
   await expect(panel.getByRole("button",{name:"Centralizar bairro Jardim Brasília",exact:true})).toBeVisible();
   await panel.getByRole("button",{name:"Centralizar bairro Jardim Brasília",exact:true}).click();
   await expect(page.locator('[data-map-neighborhood="bairro-jardim-brasilia"]')).toBeVisible();
+  await panel.locator("[data-neighborhood-viewport] summary").click();
+  await expect(panel.getByRole("list",{name:"Bairros visíveis nesta área"})).toHaveCount(0);
   await page.evaluate(async()=>{await navigator.serviceWorker.ready;});
   await expect.poll(()=>page.evaluate(()=>Boolean(navigator.serviceWorker.controller))).toBe(true);
   await context.setOffline(true);
