@@ -58,6 +58,10 @@ export default function CityCorridorExplorer({
             {roleLabels[corridor.role]} · {corridor.area} · classificação histórica.
             {" "}<a className="font-semibold text-primary underline underline-offset-2" href={ROAD_HIERARCHY_SOURCE} target="_blank" rel="noopener noreferrer">Consultar lei municipal</a>
           </p>
+          <Link href={cityMapLayerUrl(corridor.name, "ruas")}
+            className="mt-2 inline-flex min-h-11 items-center rounded-xl border border-primary/30 bg-primary/5 px-3 text-sm font-bold text-primary focus-visible:outline-2 focus-visible:outline-ring">
+            Localizar via no mapa de ruas
+          </Link>
           {corridor.nearbyBus ? (
             <div className="mt-3">
               <h4 className="text-sm font-bold">Linhas relatadas nas proximidades</h4>
