@@ -10,12 +10,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import SearchPage from "./Search";
 import { localDataEvent } from "@/lib/localData";
 
-vi.mock("@/hooks/useBusinessCatalog", () => ({ useBusinessCatalog: () => ({ items: [], loading: false, error: false, retry: vi.fn() }) }));
+const businessCatalog = vi.hoisted(() => ({
+  useBusinessCatalog: vi.fn((_enabled: boolean) => ({ items: [], loading: false, error: false, retry: vi.fn() })),
+}));
+vi.mock("@/hooks/useBusinessCatalog", () => ({ useBusinessCatalog: businessCatalog.useBusinessCatalog }));
 
 beforeEach(() => {
   vi.stubGlobal("React", React);
   vi.spyOn(navigator, "onLine", "get").mockReturnValue(true);
   localStorage.clear();
+  businessCatalog.useBusinessCatalog.mockClear();
   window.history.replaceState(null, "", "/buscar");
 });
 afterEach(() => {
@@ -156,4 +160,22 @@ it("hides the commercial section when a noncommercial result filter is selected"
   expect(screen.queryByRole("heading", { name: /Empresas do catálogo/ })).toBeNull();
   expect(screen.queryByText(/Nenhuma empresa correspondente no arquivo/)).toBeNull();
   expect(screen.getByRole("status").textContent).toContain("Nenhum resultado local");
+});
+
+it("keeps service and station deep links free of company-chunk loading, then restores the full catalog on demand", () => {
+  window.history.replaceState(null, "", "/buscar?q=cras&tipo=services");
+  render(<SearchPage />);
+  expect(businessCatalog.useBusinessCatalog).toHaveBeenLastCalledWith(false);
+  expect(screen.getAllByRole("button", { name: /CRAS/ })).toHaveLength(3);
+  fireEvent.click(screen.getByRole("button", { name: "Postos (0)" }));
+  expect(businessCatalog.useBusinessCatalog).toHaveBeenLastCalledWith(false);
+  fireEvent.click(screen.getByRole("button", { name: "Empresas (0)" }));
+  expect(businessCatalog.useBusinessCatalog).toHaveBeenLastCalledWith(true);
+  fireEvent.click(screen.getByRole("button", { name: "Tudo (3)" }));
+  expect(businessCatalog.useBusinessCatalog).toHaveBeenLastCalledWith(true);
+});
+
+it("does not start commercial downloads on the empty search page", () => {
+  render(<SearchPage />);
+  expect(businessCatalog.useBusinessCatalog).toHaveBeenLastCalledWith(false);
 });
