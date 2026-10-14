@@ -12,7 +12,10 @@ import OfflineReadiness from "./OfflineReadiness";
 
 const state = vi.hoisted(() => ({ check: vi.fn(), prepare: vi.fn() }));
 vi.mock("@/lib/pwa", () => ({
-  getOfflinePackageStatus: async () => ({ ready: await state.check() }),
+  getOfflinePackageStatus: async () => {
+    const status = await state.check();
+    return typeof status === "boolean" ? { ready: status } : status;
+  },
   prepareOfflineAccess: state.prepare,
 }));
 beforeEach(() => {
@@ -94,6 +97,24 @@ describe("offline preparation feedback", () => {
     } finally {
       delete (navigator as unknown as { serviceWorker?: EventTarget }).serviceWorker;
     }
+  });
+
+  it("identifies a working essential package without claiming the full catalog is offline", async () => {
+    state.check.mockResolvedValueOnce({
+      ready: false, coreReady: true, businessesReady: false,
+    });
+    render(<OfflineReadiness />);
+    expect(await screen.findByText(/O núcleo essencial já está disponível offline/)).toBeTruthy();
+    expect(screen.getByText(/Catálogo de empresas ainda não preparado/)).toBeTruthy();
+    expect(screen.queryByText("Pronto para usar sem internet neste aparelho.")).toBeNull();
+    expect(screen.getByRole("button", { name: "Preparar acesso offline" })).toBeTruthy();
+  });
+
+  it("does not claim essential readiness when the core is incomplete", async () => {
+    state.check.mockResolvedValueOnce({ ready: false, coreReady: false, businessesReady: false });
+    render(<OfflineReadiness />);
+    await screen.findByRole("button", { name: "Preparar acesso offline" });
+    expect(screen.queryByText(/O núcleo essencial já está disponível offline/)).toBeNull();
   });
 
   it("reports ready only after successful preparation", async () => {
