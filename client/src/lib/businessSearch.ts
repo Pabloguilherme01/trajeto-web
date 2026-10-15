@@ -1,7 +1,7 @@
 import { cityAtlasSearchText, filterCityAtlas } from "./cityAtlasSearch";
 import type { CityAtlasItem, CityAtlasLayer } from "./cityAtlas";
 import { hasBusinessName } from "./businessCatalogState";
-import { normalizeCatalogText } from "./catalogSearch";
+import { createCatalogSearchIndex, matchesCatalogTerms, normalizeCatalogText } from "./catalogSearch";
 
 const categories: Record<string, CityAtlasLayer> = {
   alimentacao: "alimentacao", comer: "alimentacao", restaurantes: "alimentacao",
@@ -74,7 +74,14 @@ export function searchBusinesses(items: CityAtlasItem[], query: string) {
     const registryQuery = value.replace(/^cnpj\s*[:·-]?\s*/, "");
     const digits = registryQuery.replace(/\D/g, "");
     const exactCnpj = /^[\d\s./-]+$/.test(registryQuery) && digits.length === 14;
-    return exactCnpj ? companyByCnpj(items, digits) : filterCityAtlas(items, value, "todos");
+    if (exactCnpj) return companyByCnpj(items, digits);
+    const matches = filterCityAtlas(items, value, "todos");
+    // Reuse the catalog's identifier boundaries: UPA is not a substring of
+    // "roupas". Keep the atlas prefix cache unchanged for street searches.
+    const identifiers = value.split(" ").filter(term => term.length <= 3 || /^\d+$/.test(term));
+    return identifiers.length
+      ? matches.filter(item => matchesCatalogTerms(identifiers, createCatalogSearchIndex([cityAtlasSearchText(item)])))
+      : matches;
   }
   let cache = aliasResults.get(items);
   if (!cache) { cache = new Map(); aliasResults.set(items, cache); }

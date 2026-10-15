@@ -2,6 +2,21 @@ import { expect, it } from "vitest";
 import { loadBusinessCatalog } from "./businessCatalog";
 import { businessesForMapLayer, businessesForMapLayerByIdentity, searchBusinesses, partitionBusinessCatalog } from "./businessSearch";
 
+it("does not match UPA inside clothing names while retaining real acronyms and longer searches", () => {
+  const items = [
+    { id: "clothing", name: "Loja de roupas", category: "compras" },
+    { id: "health", name: "UPA Atendimento", category: "saude" },
+    { id: "school", name: "Escola Municipal", category: "educacao" },
+  ] as import("./cityAtlas").CityAtlasItem[];
+  expect(searchBusinesses(items, "UPA").map(item => item.id)).toEqual(["health"]);
+  expect(searchBusinesses(items, "upa atendimento").map(item => item.id)).toEqual(["health"]);
+  expect(searchBusinesses(items, "UP")).toEqual([]);
+  expect(searchBusinesses(items, "escol").map(item => item.id)).toEqual(["school"]);
+  // A short exact token becoming a longer substring must restore candidates.
+  expect(searchBusinesses(items, "upa" )).toHaveLength(1);
+  expect(searchBusinesses(items, "roup" ).map(item => item.id)).toEqual(["clothing"]);
+});
+
 it("partitions identity results once without removing searchable CNPJ records", async () => {
   const items = await loadBusinessCatalog();
   const groups = partitionBusinessCatalog(items);
