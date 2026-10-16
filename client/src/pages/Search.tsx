@@ -279,11 +279,12 @@ export default function SearchPage() {
   const showBusinesses = searchType === "todos" || searchType === "businesses";
   const companies = useBusinessCatalog(showBusinesses && query.trim().length >= 2);
   const allBusinesses = useMemo(
-    () => showBusinesses ? searchBusinesses(companies.items, query) : [],
-    [showBusinesses, companies.items, query],
+    () => searchBusinesses(companies.items, query),
+    [companies.items, query],
   );
   const allResults = useMemo(() => getUniversalSearchResults(query), [query]);
-  const businessResults = allBusinesses;
+  const businessResults = showBusinesses ? allBusinesses : [];
+  const businessCountKnown = companies.items.length > 0;
   const results = {
     services: searchType === "todos" || searchType === "services" ? allResults.services : [],
     stations: searchType === "todos" || searchType === "stations" ? allResults.stations : [],
@@ -295,7 +296,8 @@ export default function SearchPage() {
       : searchType === "data" ? allResults.dataResources.length + allResults.transitFares.length
       : allResults[searchType].length,
   };
-  const typeCounts = { todos: allResults.total + allBusinesses.length, businesses: allBusinesses.length,
+  const typeCounts = { todos: businessCountKnown ? allResults.total + allBusinesses.length : allResults.total + "+",
+    businesses: businessCountKnown ? allBusinesses.length : "…",
     services: allResults.services.length, stations: allResults.stations.length, places: allResults.places.length,
     routes: allResults.routes.length, data: allResults.dataResources.length + allResults.transitFares.length };
   const selectType = (type: SearchType) => {
@@ -485,7 +487,8 @@ export default function SearchPage() {
               {showBusinesses && companies.loading && !results.total
                 ? "Buscando no catálogo de empresas…"
                 : (results.total + businessResults.length)
-                ? (results.total + businessResults.length) + " resultado(s) para “" + query + "”"
+                ? (results.total + businessResults.length) + " resultado(s)" +
+                  (showBusinesses && !businessCountKnown ? " · empresas pendentes." : " para “" + query + "”")
                 : "Nenhum resultado local para “" + query + "”."}
             </p>
             {results.services.length > 0 && (
@@ -531,7 +534,8 @@ export default function SearchPage() {
             )}
             {showBusinesses && query.trim().length >= 2 && (
               <section aria-labelledby="search-businesses-title">
-                <h2 id="search-businesses-title" className="text-lg font-bold">Empresas do catálogo <span className="text-sm font-normal text-foreground/75">({businessResults.length})</span></h2>
+                <h2 id="search-businesses-title" className="text-lg font-bold">Empresas do catálogo <span className="text-sm font-normal text-foreground/75">({businessCountKnown ? businessResults.length : "…"})</span></h2>
+                {!businessCountKnown && <p className="mt-1 text-xs text-muted-foreground">Empresas ainda não contabilizadas.</p>}
                 <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Arquivo importado · situação informada no cadastro, sem confirmação de funcionamento atual. Consulte a ficha e confirme o endereço.</p>
                 {companies.loading && <p role="status" className="mt-2 text-sm">Carregando empresas sem interromper a busca…</p>}
                 {companies.error && <button type="button" onClick={companies.retry} className="mt-2 min-h-11 rounded-xl border border-border px-3 text-sm">Tentar carregar empresas novamente</button>}

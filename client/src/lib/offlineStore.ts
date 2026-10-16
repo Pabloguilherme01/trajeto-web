@@ -150,9 +150,11 @@ async function withStore<T, R = T>(
 
 function migrateRoutes(candidates: unknown[], store: IDBObjectStore): OfflineRoute[] {
   const validById = new Map<string, OfflineRoute>();
+  const unchanged = new Set<OfflineRoute>();
   for (const candidate of candidates) {
     if (isValidRoute(candidate)) {
       const safeRoute = sanitizeOfflineRoute(candidate);
+      if (safeRoute === candidate) unchanged.add(safeRoute);
       const existing = validById.get(safeRoute.id);
       if (!existing || Date.parse(safeRoute.savedAt) > Date.parse(existing.savedAt)) {
         validById.set(safeRoute.id, safeRoute);
@@ -164,7 +166,12 @@ function migrateRoutes(candidates: unknown[], store: IDBObjectStore): OfflineRou
       store.delete(candidate.id);
     }
   }
-  for (const safeRoute of validById.values()) store.put(safeRoute);
+  // Already-canonical records came directly from this transaction's read.
+  // Only migrated winners need writing back; listing must not rewrite every
+  // geometry payload merely to display a route count or refresh the screen.
+  for (const safeRoute of validById.values()) {
+    if (!unchanged.has(safeRoute)) store.put(safeRoute);
+  }
   return [...validById.values()].sort((a, b) => Date.parse(b.savedAt) - Date.parse(a.savedAt));
 }
 
