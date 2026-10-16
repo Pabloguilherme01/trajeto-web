@@ -487,9 +487,9 @@ export default function SearchPage() {
               {showBusinesses && companies.loading && !results.total
                 ? "Buscando no catálogo de empresas…"
                 : (results.total + businessResults.length)
-                ? (results.total + businessResults.length) + " resultado(s) para “" + query + "”"
+                ? (results.total + businessResults.length) + " resultado(s)" +
+                  (showBusinesses && !businessCountKnown ? " · empresas pendentes." : " para “" + query + "”")
                 : "Nenhum resultado local para “" + query + "”."}
-              {showBusinesses && !businessCountKnown && " · empresas ainda não contabilizadas."}
             </p>
             {results.services.length > 0 && (
               <section aria-labelledby="search-services-title">
@@ -535,6 +535,7 @@ export default function SearchPage() {
             {showBusinesses && query.trim().length >= 2 && (
               <section aria-labelledby="search-businesses-title">
                 <h2 id="search-businesses-title" className="text-lg font-bold">Empresas do catálogo <span className="text-sm font-normal text-foreground/75">({businessCountKnown ? businessResults.length : "…"})</span></h2>
+                {!businessCountKnown && <p className="mt-1 text-xs text-muted-foreground">Empresas ainda não contabilizadas.</p>}
                 <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Arquivo importado · situação informada no cadastro, sem confirmação de funcionamento atual. Consulte a ficha e confirme o endereço.</p>
                 {companies.loading && <p role="status" className="mt-2 text-sm">Carregando empresas sem interromper a busca…</p>}
                 {companies.error && <button type="button" onClick={companies.retry} className="mt-2 min-h-11 rounded-xl border border-border px-3 text-sm">Tentar carregar empresas novamente</button>}

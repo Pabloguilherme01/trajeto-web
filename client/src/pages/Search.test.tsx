@@ -204,5 +204,6 @@ it("does not report zero companies before loading the optional catalog", () => {
   expect(screen.getByRole("button", { name: "Tudo (3+)" })).toBeTruthy();
   expect(businessCatalog.useBusinessCatalog).toHaveBeenLastCalledWith(false);
   fireEvent.click(screen.getByRole("button", { name: "Tudo (3+)" }));
-  expect(screen.getByRole("status").textContent).toContain("empresas ainda não contabilizadas");
+  expect(screen.getByRole("status").textContent).toContain("empresas pendentes");
+  expect(screen.getByText("Empresas ainda não contabilizadas.")).toBeTruthy();
 });

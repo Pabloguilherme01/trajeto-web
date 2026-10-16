@@ -1,4 +1,4 @@
-import { expect, it } from "vitest";
+import { expect, it, vi } from "vitest";
 import { loadBusinessCatalog } from "./businessCatalog";
 import { businessesForMapLayer, businessesForMapLayerByIdentity, searchBusinesses, partitionBusinessCatalog } from "./businessSearch";
 
@@ -130,4 +130,35 @@ it("accepts a labeled CNPJ without matching unrelated descriptive text", () => {
   const company = { id: "business-1", name: "Mercado Aurora", category: "compras", business: { cnpj: "12.345.678/0001-90" } } as import("./cityAtlas").CityAtlasItem;
   const unrelated = { ...company, id: "business-2", name: "CNPJ 12345678000190", business: { ...company.business!, cnpj: "98.765.432/0001-10" } };
   expect(searchBusinesses([unrelated, company], "CNPJ: 12.345.678/0001-90")).toEqual([company]);
+});
+
+
+it("reuses prepared record text instead of normalizing it again for short identifiers", () => {
+  const items = Array.from({ length: 200 }, (_, i) => ({
+    id: "record-" + i, name: "Marcador Loja " + i, category: "compras", address: "Águas Lindas GO",
+  })) as import("./cityAtlas").CityAtlasItem[];
+  searchBusinesses(items, "marcador");
+  const normalization = vi.spyOn(String.prototype, "normalize");
+  try {
+    expect(searchBusinesses(items, "go")).toHaveLength(200);
+    expect(searchBusinesses(items, "loja go")).toHaveLength(200);
+    const recordNormalizations = normalization.mock.contexts.filter(value => String(value).includes("marcador"));
+    expect(recordNormalizations).toHaveLength(0);
+  } finally {
+    normalization.mockRestore();
+  }
+});
+
+it("keeps short identifiers equivalent to catalog token matching across punctuation and accents", () => {
+  const items = [
+    { id: "real", name: "UPA GO", category: "saude", address: "Área 070" },
+    { id: "clothes", name: "Roupas e artigos", category: "compras", address: "Código 0701" },
+    { id: "ordinal", name: "Área 2ª", category: "servicos", address: "BR-070 GO" },
+  ] as import("./cityAtlas").CityAtlasItem[];
+  expect(searchBusinesses(items, "upa").map(item => item.id)).toEqual(["real"]);
+  expect(searchBusinesses(items, "go").map(item => item.id)).toEqual(["real", "ordinal"]);
+  expect(searchBusinesses(items, "070").map(item => item.id)).toEqual(["real", "ordinal"]);
+  expect(searchBusinesses(items, "2").map(item => item.id)).toEqual(["ordinal"]);
+  expect(searchBusinesses(items, "g.")).toEqual([]);
+  expect(searchBusinesses(items, "árEa 070").map(item => item.id)).toEqual(["real", "ordinal"]);
 });

@@ -1,7 +1,7 @@
 import { cityAtlasSearchText, filterCityAtlas } from "./cityAtlasSearch";
 import type { CityAtlasItem, CityAtlasLayer } from "./cityAtlas";
 import { hasBusinessName } from "./businessCatalogState";
-import { createCatalogSearchIndex, matchesCatalogTerms, normalizeCatalogText } from "./catalogSearch";
+import { normalizeCatalogText } from "./catalogSearch";
 
 const categories: Record<string, CityAtlasLayer> = {
   alimentacao: "alimentacao", comer: "alimentacao", restaurantes: "alimentacao",
@@ -79,9 +79,17 @@ export function searchBusinesses(items: CityAtlasItem[], query: string) {
     // Reuse the catalog's identifier boundaries: UPA is not a substring of
     // "roupas". Keep the atlas prefix cache unchanged for street searches.
     const identifiers = value.split(" ").filter(term => term.length <= 3 || /^\d+$/.test(term));
-    return identifiers.length
-      ? matches.filter(item => matchesCatalogTerms(identifiers, createCatalogSearchIndex([cityAtlasSearchText(item)])))
-      : matches;
+    if (!identifiers.length) return matches;
+    // Catalog tokens contain only a-z/0-9. Reject punctuation in identifiers
+    // rather than treating it as regex syntax or inventing a partial match.
+    if (identifiers.some(term => /[^a-z0-9]/.test(term))) return [];
+    const boundaries = identifiers.map(term => new RegExp("(?:^|[^a-z0-9])" + term + "(?:$|[^a-z0-9])"));
+    // The atlas text is already normalized. Compile boundaries once per query
+    // instead of normalizing/tokenizing every matching row on every keystroke.
+    return matches.filter(item => {
+      const text = cityAtlasSearchText(item).replace(/[ºª]/g, "");
+      return boundaries.every(boundary => boundary.test(text));
+    });
   }
   let cache = aliasResults.get(items);
   if (!cache) { cache = new Map(); aliasResults.set(items, cache); }
