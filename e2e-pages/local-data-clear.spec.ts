@@ -117,3 +117,23 @@ test("Pages: clearing Trajeto device data also removes offline routes and sessio
   expect(remaining.otherLocal).toBe("keep");
   expect(remaining.otherSession).toBe("keep");
 });
+
+test("Pages: clearing data refreshes an already open trip-readiness panel without reloading", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.addInitScript(() => {
+    localStorage.setItem("trajeto-mobile-vehicle", JSON.stringify({
+      name: "Veículo de teste", fuel: "gasolina", consumption: 10, tank: 50,
+    }));
+  });
+  await page.goto("", { waitUntil: "domcontentloaded" });
+  await page.getByText("Recursos do aparelho", { exact: true }).click();
+  await expect(page.getByText("Veículo de teste", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Abrir acessibilidade", exact: true }).click();
+  await page.getByRole("button", { name: "Limpar dados do Trajeto neste aparelho" }).click();
+  await page.getByRole("button", { name: "Confirmar limpeza" }).click();
+  await expect(page.getByText("Dados locais removidos. O Trajeto voltou ao estado inicial neste aparelho.")).toBeVisible();
+  await page.getByRole("button", { name: "Fechar acessibilidade" }).click();
+  await expect(page.getByText("Veículo de teste", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("Nenhum veículo cadastrado.", { exact: true })).toBeVisible();
+  await expect(page.getByText("Nenhuma viagem preparada.", { exact: true })).toBeVisible();
+});
