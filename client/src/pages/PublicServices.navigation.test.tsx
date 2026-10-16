@@ -305,3 +305,34 @@ it("clears an advanced category directly without losing the search or Premium re
   expect(screen.getByRole("button", { name: "Resolver online" }).getAttribute("aria-pressed"))
     .toBe("true");
 });
+
+
+it("focuses completed service results only after submitting and preserves filters", async () => {
+  window.history.replaceState({}, "", "/servicos?categoria=saude&recurso=rota");
+  render(<PublicServices />);
+  const input = screen.getByRole("textbox", { name: "Buscar serviços públicos" });
+  input.focus();
+  fireEvent.change(input, { target: { value: "UBS" } });
+  await waitFor(() => expect(screen.getByRole("heading", { name: "UBS Barragem II" })).toBeTruthy());
+  expect(document.activeElement).toBe(input);
+  fireEvent.click(screen.getByRole("button", { name: "Pesquisar serviços" }));
+  await waitFor(() => expect(document.activeElement?.id).toBe("service-results"));
+  const params = new URLSearchParams(window.location.search);
+  expect(params.get("q")).toBe("UBS");
+  expect(params.get("categoria")).toBe("saude");
+  expect(params.get("recurso")).toBe("rota");
+  expect(document.activeElement?.getAttribute("aria-describedby")).toContain("service-results-status");
+});
+
+it("focuses and describes empty service results when submitting with reduced motion", async () => {
+  vi.stubGlobal("matchMedia", vi.fn(() => ({ matches: true })));
+  window.history.replaceState({}, "", "/servicos?salvos=1");
+  render(<PublicServices />);
+  fireEvent.change(screen.getByRole("textbox", { name: "Buscar serviços públicos" }), { target: { value: "zzzx-inexistente" } });
+  fireEvent.click(screen.getByRole("button", { name: "Pesquisar serviços" }));
+  await waitFor(() => expect(document.activeElement?.id).toBe("service-results"));
+  expect(new URLSearchParams(window.location.search).get("salvos")).toBe("1");
+  expect(document.activeElement?.getAttribute("aria-describedby")).toContain("service-results-empty");
+  expect(document.getElementById("service-results-empty")?.textContent).toContain("Nenhum serviço salvo ainda.");
+  expect(Element.prototype.scrollIntoView).toHaveBeenCalledWith({ behavior: "auto", block: "start" });
+});

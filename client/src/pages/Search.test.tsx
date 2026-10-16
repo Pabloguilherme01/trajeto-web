@@ -8,10 +8,11 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import SearchPage from "./Search";
+import type { CityAtlasItem } from "@/lib/cityAtlas";
 import { localDataEvent } from "@/lib/localData";
 
 const businessCatalog = vi.hoisted(() => ({
-  useBusinessCatalog: vi.fn((_enabled: boolean) => ({ items: [], loading: false, error: false, retry: vi.fn() })),
+  useBusinessCatalog: vi.fn((_enabled: boolean) => ({ items: [] as CityAtlasItem[], loading: false, error: false, retry: vi.fn() })),
 }));
 vi.mock("@/hooks/useBusinessCatalog", () => ({ useBusinessCatalog: businessCatalog.useBusinessCatalog }));
 
@@ -19,7 +20,8 @@ beforeEach(() => {
   vi.stubGlobal("React", React);
   vi.spyOn(navigator, "onLine", "get").mockReturnValue(true);
   localStorage.clear();
-  businessCatalog.useBusinessCatalog.mockClear();
+  businessCatalog.useBusinessCatalog.mockReset();
+  businessCatalog.useBusinessCatalog.mockReturnValue({ items: [], loading: false, error: false, retry: vi.fn() });
   window.history.replaceState(null, "", "/buscar");
 });
 afterEach(() => {
@@ -135,14 +137,14 @@ it("filters by result type, preserves the query and restores the selection from 
   cleanup();
   render(<SearchPage />);
   expect(screen.getByRole("button", { name: "Postos (0)" }).getAttribute("aria-pressed")).toBe("true");
-  fireEvent.click(screen.getByRole("button", { name: "Tudo (3)" }));
+  fireEvent.click(screen.getByRole("button", { name: "Tudo (3+)" }));
   expect(screen.getAllByRole("button", { name: /CRAS/ })).toHaveLength(3);
   expect(new URLSearchParams(window.location.search).has("tipo")).toBe(false);
 });
 it("uses all results for an unsupported type and resets filters on a new search", () => {
   window.history.replaceState(null, "", "/buscar?q=cras&tipo=unknown");
   render(<SearchPage />);
-  expect(screen.getByRole("button", { name: "Tudo (3)" }).getAttribute("aria-pressed")).toBe("true");
+  expect(screen.getByRole("button", { name: "Tudo (3+)" }).getAttribute("aria-pressed")).toBe("true");
   fireEvent.click(screen.getByRole("button", { name: "Postos (0)" }));
   fireEvent.change(screen.getByRole("textbox", { name: "Buscar locais e serviços" }), { target: { value: "upa" } });
   fireEvent.click(screen.getByRole("button", { name: "Pesquisar" }));
@@ -169,13 +171,38 @@ it("keeps service and station deep links free of company-chunk loading, then res
   expect(screen.getAllByRole("button", { name: /CRAS/ })).toHaveLength(3);
   fireEvent.click(screen.getByRole("button", { name: "Postos (0)" }));
   expect(businessCatalog.useBusinessCatalog).toHaveBeenLastCalledWith(false);
-  fireEvent.click(screen.getByRole("button", { name: "Empresas (0)" }));
+  fireEvent.click(screen.getByRole("button", { name: "Empresas (…)" }));
   expect(businessCatalog.useBusinessCatalog).toHaveBeenLastCalledWith(true);
-  fireEvent.click(screen.getByRole("button", { name: "Tudo (3)" }));
+  fireEvent.click(screen.getByRole("button", { name: "Tudo (3+)" }));
   expect(businessCatalog.useBusinessCatalog).toHaveBeenLastCalledWith(true);
 });
 
 it("does not start commercial downloads on the empty search page", () => {
   render(<SearchPage />);
   expect(businessCatalog.useBusinessCatalog).toHaveBeenLastCalledWith(false);
+});
+
+
+it("keeps loaded company and overall counts stable across result types", () => {
+  const items = [{ id: "test-cras", name: "CRAS Consultoria", category: "servicos" }] as CityAtlasItem[];
+  businessCatalog.useBusinessCatalog.mockReturnValue({ items, loading: false, error: false, retry: vi.fn() });
+  window.history.replaceState(null, "", "/buscar?q=cras");
+  render(<SearchPage />);
+  for (const label of ["Serviços (3)", "Postos (0)", "Empresas (1)", "Tudo (4)"]) {
+    fireEvent.click(screen.getByRole("button", { name: label }));
+    expect(screen.getByRole("button", { name: "Empresas (1)" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Tudo (4)" })).toBeTruthy();
+    const business = screen.queryByRole("button", { name: /CRAS Consultoria/ });
+    expect(Boolean(business)).toBe(label.startsWith("Empresas") || label.startsWith("Tudo"));
+  }
+});
+
+it("does not report zero companies before loading the optional catalog", () => {
+  window.history.replaceState(null, "", "/buscar?q=cras&tipo=services");
+  render(<SearchPage />);
+  expect(screen.getByRole("button", { name: "Empresas (…)" })).toBeTruthy();
+  expect(screen.getByRole("button", { name: "Tudo (3+)" })).toBeTruthy();
+  expect(businessCatalog.useBusinessCatalog).toHaveBeenLastCalledWith(false);
+  fireEvent.click(screen.getByRole("button", { name: "Tudo (3+)" }));
+  expect(screen.getByRole("status").textContent).toContain("empresas ainda não contabilizadas");
 });

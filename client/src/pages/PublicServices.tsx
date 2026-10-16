@@ -339,7 +339,8 @@ export default function PublicServices() {
   };
 
   useEffect(() => {
-    if (!pendingSection || (pendingSection === "ready-routes" && !browsing)) return;
+    if (!pendingSection || (pendingSection === "ready-routes" && !browsing) ||
+      (pendingSection === "service-results" && searchUpdating)) return;
     const frame = window.requestAnimationFrame(() => {
       const target = document.getElementById(pendingSection);
       if (!target) return;
@@ -353,7 +354,7 @@ export default function PublicServices() {
       setPendingSection(null);
     });
     return () => window.cancelAnimationFrame(frame);
-  }, [pendingSection, browsing]);
+  }, [pendingSection, browsing, searchUpdating]);
 
   const showAllServicesFromSummary = () => {
     setQuery("");
@@ -552,6 +553,7 @@ export default function PublicServices() {
           onSubmit={event => {
             event.preventDefault();
             applyFilters(query, category);
+            setPendingSection("service-results");
             inputRef.current?.blur();
           }}
           className="premium-search mt-5 flex items-center gap-2 rounded-2xl border border-primary/18 bg-background px-3"
@@ -1325,6 +1327,7 @@ export default function PublicServices() {
           </div>
         )}
         <p
+          id="service-results-status"
           role="status"
           aria-live="polite"
           aria-busy={searchUpdating}
@@ -1338,6 +1341,7 @@ export default function PublicServices() {
         <section
           id="service-results"
           tabIndex={-1}
+          aria-describedby={"service-results-status" + (!searchUpdating && !results.length ? " service-results-empty" : "")}
           aria-busy={searchUpdating}
           className={
             "mt-3 grid gap-3 " +
@@ -1368,7 +1372,7 @@ export default function PublicServices() {
 
         {!searchUpdating && !results.length && (
           <section className="premium-card mt-5 rounded-3xl border border-border/8 bg-card p-6 text-center">
-            <p className="text-sm font-black">
+            <p id="service-results-empty" className="text-sm font-black">
               {savedOnly && !favoriteCount
                 ? "Nenhum serviço salvo ainda."
                 : "Nenhum serviço corresponde ao filtro."}

@@ -89,3 +89,26 @@ test("service needs and Organic Maps modes remain usable at 320px", async ({ pag
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   expect((await new AxeBuilder({ page }).include("main").analyze()).violations).toEqual([]);
 });
+
+
+for (const [width, height] of [[320, 568], [390, 844], [1440, 900]]) {
+  test(`submitted service results and empty state are reachable at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height });
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("servicos");
+    const input = page.getByRole("textbox", { name: "Buscar serviços públicos" });
+    await input.fill("UBS");
+    await expect(input).toBeFocused();
+    await input.press("Enter");
+    const results = page.locator("#service-results");
+    await expect(results).toBeFocused();
+    await expect(results.getByRole("heading").first()).toBeInViewport();
+    await expect(page).toHaveURL(/q=UBS/);
+    await input.fill("zzzx-sem-correspondencia");
+    await page.getByRole("button", { name: "Pesquisar serviços", exact: true }).click();
+    await expect(results).toBeFocused();
+    await expect(page.getByText("Nenhum serviço corresponde ao filtro.", { exact: true })).toBeInViewport();
+    await expect(results).toHaveAttribute("aria-describedby", /service-results-empty/);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+  });
+}
