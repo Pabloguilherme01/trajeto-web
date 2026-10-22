@@ -13,40 +13,44 @@ export default function DailyModeSelector() {
   const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
   const [savedRoutes, setSavedRoutes] = useState(0);
   const [selected, setSelected] = useState<DailyModeId>(() => getSavedDailyMode() ?? "automatico");
-  const [autoMode, setAutoMode] = useState<DailyModeId>(() => getAutomaticDailyMode(online, 0));
+  const [preferenceVersion, setPreferenceVersion] = useState(0);
+  const autoMode = useMemo(() => getAutomaticDailyMode(online, savedRoutes), [online, savedRoutes, preferenceVersion]);
   const [expanded, setExpanded] = useState(false);
   const [, setLocation] = useLocation();
 
   useEffect(() => {
+    let routeRead = 0;
     const refresh = () => {
+      const currentRead = ++routeRead;
+      setPreferenceVersion(value => value + 1);
       setOnline(navigator.onLine);
       void listOfflineRoutes().then(routes => {
-        setSavedRoutes(routes.length);
-        setAutoMode(getAutomaticDailyMode(navigator.onLine, routes.length));
+        if (currentRead === routeRead) setSavedRoutes(routes.length);
       }).catch(() => {
-        setSavedRoutes(0);
-        setAutoMode(getAutomaticDailyMode(navigator.onLine, 0));
+        if (currentRead === routeRead) setSavedRoutes(0);
       });
     };
-    const network = () => refresh();
+    const preferencesChanged = () => setPreferenceVersion(value => value + 1);
+    const network = () => setOnline(navigator.onLine);
     refresh();
     window.addEventListener("online", network);
     window.addEventListener("offline", network);
     window.addEventListener("focus", refresh);
-    window.addEventListener(mobilePreferenceEvent, refresh);
-    window.addEventListener(mobileDestinationEvent, refresh);
+    window.addEventListener(mobilePreferenceEvent, preferencesChanged);
+    window.addEventListener(mobileDestinationEvent, preferencesChanged);
     window.addEventListener(offlineRouteEvent, refresh);
     return () => {
+      routeRead++;
       window.removeEventListener("online", network);
       window.removeEventListener("offline", network);
       window.removeEventListener("focus", refresh);
-      window.removeEventListener(mobilePreferenceEvent, refresh);
-      window.removeEventListener(mobileDestinationEvent, refresh);
+      window.removeEventListener(mobilePreferenceEvent, preferencesChanged);
+      window.removeEventListener(mobileDestinationEvent, preferencesChanged);
       window.removeEventListener(offlineRouteEvent, refresh);
     };
   }, []);
 
-  const modes = useMemo(() => buildDailyModes(online, savedRoutes), [online, savedRoutes]);
+  const modes = useMemo(() => buildDailyModes(online, savedRoutes), [online, savedRoutes, preferenceVersion]);
   const activeId = selected === "automatico" ? autoMode : selected;
   const active = modes.find(mode => mode.id === activeId) ?? modes[0];
   const automatic = modes.find(mode => mode.id === autoMode) ?? modes[0];

@@ -1,7 +1,7 @@
-import { IDBFactory } from "fake-indexeddb";
+import { IDBFactory, IDBObjectStore } from "fake-indexeddb";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  clearOfflineRoutes, getOfflineRoute, listOfflineRoutes, offlineRouteEvent,
+  clearOfflineRoutes, countOfflineRoutes, getOfflineRoute, listOfflineRoutes, offlineRouteEvent,
   offlineRouteId, removeOfflineRoute, saveOfflineRoute, type OfflineRoute,
 } from "./offlineStore";
 
@@ -115,4 +115,30 @@ describe("saved route transactions", () => {
     expect(await result).toBe(true);
     expect(window.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({ type: offlineRouteEvent }));
   });
+});
+
+
+it("lists and counts canonical saved routes without rewriting their payloads", async () => {
+  await seed(Array.from({ length: 50 }, (_, i) => route(i)));
+  const put = vi.spyOn(IDBObjectStore.prototype, "put");
+  try {
+    expect(await listOfflineRoutes()).toEqual(Array.from({ length: 50 }, (_, i) => route(49 - i)));
+    expect(await countOfflineRoutes()).toBe(50);
+    expect(put).not.toHaveBeenCalled();
+  } finally { put.mockRestore(); }
+});
+
+it("persists the newest migrated duplicate once and leaves later reads unchanged", async () => {
+  const canonical = { ...route(1), origin: "Minha localização", id: offlineRouteId("Minha localização", "Hospital 1", "driving") };
+  const legacy = { ...route(1), origin: "-15.76123, -48.28123", id: "-15.76123, -48.28123::hospital 1", savedAt: route(2).savedAt };
+  await seed([canonical, legacy]);
+  const put = vi.spyOn(IDBObjectStore.prototype, "put");
+  try {
+    const expected = { ...canonical, savedAt: legacy.savedAt };
+    expect(await listOfflineRoutes()).toEqual([expected]);
+    expect(put).toHaveBeenCalledOnce();
+    put.mockClear();
+    expect(await listOfflineRoutes()).toEqual([expected]);
+    expect(put).not.toHaveBeenCalled();
+  } finally { put.mockRestore(); }
 });

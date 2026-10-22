@@ -4,6 +4,7 @@ import { getMobileVehicle, mobileVehicleEvent, type MobileVehicle } from "@/lib/
 import { getMaintenanceItems, getMaintenanceStatus, vehicleMaintenanceEvent } from "@/lib/vehicleMaintenance";
 import { isOfflineRouteStale, listOfflineRoutes, offlineRouteEvent, type OfflineRoute } from "@/lib/offlineStore";
 import { getLastTrip, getMostUsedRoute, mobilePreferenceEvent } from "@/lib/mobilePreferences";
+import { localDataEvent } from "@/lib/localData";
 
 type Item = { label: string; detail: string; ok: boolean; warn?: boolean };
 
@@ -40,16 +41,27 @@ export default function TripReadinessCard() {
   const [mostUsedTrip, setMostUsedTrip] = useState(() => getMostUsedRoute());
 
   useEffect(() => {
+    let routeRead = 0;
     const refresh = () => {
+      const currentRead = ++routeRead;
       setVehicle(getMobileVehicle());
       setMaintenance(getMaintenanceItems());
       setLastTrip(getLastTrip());
       setMostUsedTrip(getMostUsedRoute());
-      void listOfflineRoutes().then(setRoutes).catch(() => setRoutes([]));
+      void listOfflineRoutes().then(next => {
+        if (currentRead === routeRead) setRoutes(next);
+      }).catch(() => {
+        if (currentRead === routeRead) setRoutes([]);
+      });
+    };
+    const dataCleared = () => {
+      setRoutes([]);
+      refresh();
     };
     const onlineHandler = () => setOnline(true);
     const offlineHandler = () => setOnline(false);
     refresh();
+    window.addEventListener(localDataEvent, dataCleared);
     window.addEventListener("online", onlineHandler);
     window.addEventListener("offline", offlineHandler);
     window.addEventListener(mobileVehicleEvent, refresh);
@@ -60,6 +72,8 @@ export default function TripReadinessCard() {
     connection?.addEventListener("change", refresh);
     window.addEventListener("focus", refresh);
     return () => {
+      routeRead += 1;
+      window.removeEventListener(localDataEvent, dataCleared);
       window.removeEventListener("online", onlineHandler);
       window.removeEventListener("offline", offlineHandler);
       window.removeEventListener(mobileVehicleEvent, refresh);

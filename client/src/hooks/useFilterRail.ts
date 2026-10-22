@@ -40,7 +40,10 @@ export function useFilterRail(selection: string, options: unknown) {
 
   function onFocusCapture(event: FocusEvent<HTMLDivElement>) {
     const control = event.target.closest<HTMLElement>("button");
-    if (control && event.currentTarget.contains(control)) reveal(event.currentTarget, control);
+    // Pointer focus happens before release. Moving the rail here can move
+    // the target out from under the pointer and cancel its eventual click.
+    if (control && !control.matches(":active") && event.currentTarget.contains(control))
+      reveal(event.currentTarget, control);
   }
 
   return { railRef, onFocusCapture };

@@ -88,9 +88,16 @@ test("Pages: saved routes commit, prune to 50 and reopen offline", async ({
   await page.evaluate(async () => {
     await navigator.serviceWorker.ready;
   });
+  // ready identifies the active worker, but the document that installed it
+  // can still be uncontrolled. Cross that lifecycle boundary online before
+  // asserting real control and testing an offline reload.
+  if (!await page.evaluate(() => Boolean(navigator.serviceWorker.controller))) {
+    await page.reload({ waitUntil: "domcontentloaded" });
+  }
   await expect
     .poll(() =>
-      page.evaluate(() => Boolean(navigator.serviceWorker.controller))
+      page.evaluate(() => Boolean(navigator.serviceWorker.controller)),
+      { timeout: 20000 },
     )
     .toBe(true);
   await context.setOffline(true);
