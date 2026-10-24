@@ -84,20 +84,20 @@ export default function MobileNavigationCenter({
           </span>
         </div>
 
-        <div className="mt-5 grid grid-cols-3 gap-2">
-          <div className="rounded-xl border border-border/10 bg-muted/[.04] p-3">
-            <p className="text-[0.52rem] font-bold uppercase tracking-[.12em] text-muted-foreground">Rota</p>
+        <div className="mt-5 grid min-w-0 grid-cols-2 gap-2 sm:grid-cols-3">
+          <div className="min-w-0 rounded-xl border border-border/10 bg-muted/[.04] p-3">
+            <p className="text-[0.7rem] font-bold uppercase tracking-wide text-muted-foreground">Rota</p>
             <p className="mt-1 text-base font-black">{distance}</p>
             <p className="text-[0.65rem] text-muted-foreground">{duration}</p>
           </div>
-          <div className="rounded-xl border border-border/10 bg-muted/[.04] p-3">
-            <p className="text-[0.52rem] font-bold uppercase tracking-[.12em] text-muted-foreground">Combustível</p>
-            <p className="mt-1 text-base font-black">{fuelCost != null ? fuelCost.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }).replace(/\u00A0/g, " ") : "—"}</p>
+          <div className="min-w-0 rounded-xl border border-border/10 bg-muted/[.04] p-3">
+            <p className="text-[0.7rem] font-bold uppercase tracking-wide text-muted-foreground">Combustível</p>
+            <p className="mt-1 break-words text-base font-black tabular-nums">{fuelCost != null ? fuelCost.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }).replace(/\u00A0/g, " ") : "—"}</p>
             <p className="text-[0.65rem] text-muted-foreground">{litersNeeded != null ? `${litersNeeded.toLocaleString("pt-BR")} L` : "configure o veículo"}</p>
           </div>
-          <div className="rounded-xl border border-border/10 bg-muted/[.04] p-3">
-            <p className="text-[0.52rem] font-bold uppercase tracking-[.12em] text-muted-foreground">Parada</p>
-            <p className="mt-1 truncate text-base font-black">{recommendationName ?? "—"}</p>
+          <div className="col-span-2 min-w-0 rounded-xl border border-border/10 bg-muted/[.04] p-3 sm:col-span-1">
+            <p className="text-[0.7rem] font-bold uppercase tracking-wide text-muted-foreground">Parada</p>
+            <p className="mt-1 break-words text-base font-black">{recommendationName ?? "—"}</p>
             <p className="text-[0.65rem] text-muted-foreground">{detourKm != null ? `${detourKm.toLocaleString("pt-BR")} km de desvio` : "sem parada calculada"}</p>
           </div>
         </div>
@@ -152,10 +152,10 @@ export default function MobileNavigationCenter({
         {(onGoogleMapsPreferred || onAppleMapsPreferred || onOrganicMaps) && <div className="col-span-2 rounded-xl border border-border/10 bg-muted/[.03] p-3 sm:col-span-4">
           <p className="text-xs font-black text-foreground">Preferência da viagem</p>
           <p className="mt-1 text-[0.62rem] text-muted-foreground">O navegador escolhido calcula o trânsito e a rota atual.</p>
-          <div className="mt-2 grid grid-cols-3 gap-1.5">
+          <div className="mt-2 grid grid-cols-1 gap-1.5 min-[360px]:grid-cols-3">
             {(["default","avoid-tolls","avoid-highways"] as const).map(value => <button key={value} type="button" onClick={() => { setRoutePreference(value); setNavigationPreference(value); }} className={"min-h-10 rounded-lg px-2 text-[0.62rem] font-black " + (routePreference === value ? "bg-primary text-background" : "bg-muted/[.06] text-foreground/70")}>{value === "default" ? "Equilibrada" : value === "avoid-tolls" ? "Evitar pedágios" : "Evitar rodovias"}</button>)}
           </div>
-          <div className="mt-2 grid grid-cols-3 gap-1.5">
+          <div className="mt-2 grid grid-cols-2 gap-1.5 sm:grid-cols-4">
             {(["google","waze","apple", ...(onOrganicMaps ? ["organic"] as const : [])] as NavigationProvider[]).map(provider => <button key={provider} type="button" onClick={() => { setPreferredProvider(provider); saveNavigationPreferences({ provider, preference: routePreference }); }} className={"min-h-10 rounded-lg px-2 text-[0.62rem] font-black " + (preferredProvider === provider ? "bg-foreground text-background" : "bg-muted/[.06] text-foreground/70")}>{provider === "google" ? "Google" : provider === "waze" ? "Waze" : provider === "apple" ? "Apple" : "Organic"}</button>)}
           </div>
           <div className="mt-2 grid grid-cols-2 gap-2">
