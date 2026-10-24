@@ -90,4 +90,27 @@ describe("MobileNavigationCenter", () => {
     expect(screen.getByRole("button", { name: /Navegar agora/i }).getAttribute("disabled")).not.toBeNull();
     expect(screen.getByText(/A rota salva continua disponível/)).toBeTruthy();
   });
+  it("organiza métricas e opções para telas estreitas sem cortar valores", () => {
+    render(
+      <MobileNavigationCenter
+        origin="Águas Lindas"
+        destination="Brasília"
+        distance="48 km"
+        duration="55 min"
+        recommendationName="Posto com nome comprido para leitura"
+        fuelCost={1288.5}
+        offline={false}
+        onNavigate={vi.fn()}
+        onShare={vi.fn()}
+        onSave={vi.fn()}
+        onStations={vi.fn()}
+      />,
+    );
+    const summaryGrid = screen.getByText("Combustível").parentElement?.parentElement;
+    expect(summaryGrid?.className).toContain("grid-cols-2");
+    expect(summaryGrid?.className).toContain("sm:grid-cols-3");
+    expect(screen.getByText("Posto com nome comprido para leitura").className).toContain("break-words");
+    expect(screen.getByText(/R\$\s*1\.288,50/).className).toContain("tabular-nums");
+  });
+
 });
