@@ -1,5 +1,35 @@
 import { expect, test } from "@playwright/test";
 
+
+// Failure-only diagnostics for CI stalls. Collect layout metrics, never
+// GPS, URL queries, user-entered text, cookies or page contents.
+test.afterEach(async ({ page }, testInfo) => {
+  if (testInfo.status === testInfo.expectedStatus) return;
+  const snapshot: Record<string, unknown> = {
+    test: testInfo.title,
+    project: testInfo.project.name,
+    viewportWidth: page.viewportSize()?.width ?? null,
+    browserClosed: page.isClosed(),
+  };
+  if (!page.isClosed()) {
+    const layout = await Promise.race([
+      page.evaluate(() => ({
+        viewport: document.documentElement.clientWidth,
+        documentWidth: document.documentElement.scrollWidth,
+        bodyWidth: document.body?.scrollWidth ?? null,
+        scrollY: window.scrollY,
+        mainPresent: Boolean(document.querySelector("main")),
+      })).catch(() => null),
+      new Promise<null>(resolve => setTimeout(() => resolve(null), 1500)),
+    ]);
+    snapshot.layout = layout ?? "unavailable";
+  }
+  await testInfo.attach("responsive-failure-state", {
+    body: JSON.stringify(snapshot),
+    contentType: "application/json",
+  });
+});
+
 for (const width of [280, 320, 360, 390, 768]) {
   // The map uses its own browser page/context. Previously one test traversed
   // four heavy screens in sequence and could stall on map scroll at 390px in
