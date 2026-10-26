@@ -69,6 +69,7 @@ export default function LocalRouteCalculator({ initialDistanceKm, compact = fals
   const [other, setOther] = useState(draft?.other ?? "");
   const [alternativePrice, setAlternativePrice] = useState(draft?.alternativePrice ?? "");
   const [alternativeConsumption, setAlternativeConsumption] = useState(draft?.alternativeConsumption ?? "");
+  const [comparisonFuelOrder, setComparisonFuelOrder] = useState<"generic" | "ethanol-first" | "gasoline-first">("generic");
   const [monthlyBudget, setMonthlyBudget] = useState(draft?.monthlyBudget ?? "");
 
   useEffect(() => {
@@ -182,6 +183,7 @@ export default function LocalRouteCalculator({ initialDistanceKm, compact = fals
     setOther("");
     setAlternativePrice("");
     setAlternativeConsumption("");
+    setComparisonFuelOrder("generic");
     setMonthlyBudget("");
   };
 
@@ -263,11 +265,13 @@ export default function LocalRouteCalculator({ initialDistanceKm, compact = fals
       recurring,
     });
     const budgetStatus = recurring ? compareMonthlyBudget(projection.monthlyCost, numberValue(monthlyBudget)) : null;
-    const fuelChoice = compareEthanolGasoline({
-      ethanolPrice: pricePerLiter,
-      gasolinePrice: numberValue(alternativePrice),
-      ethanolKmPerLiter: kmPerLiter,
-      gasolineKmPerLiter: numberValue(alternativeConsumption),
+    // Do not assign ethanol/gasoline labels to generic vehicle comparisons.
+    // Require an explicit order before recommending a named fuel.
+    const fuelChoice = comparisonFuelOrder === "generic" ? null : compareEthanolGasoline({
+      ethanolPrice: comparisonFuelOrder === "ethanol-first" ? pricePerLiter : numberValue(alternativePrice),
+      gasolinePrice: comparisonFuelOrder === "ethanol-first" ? numberValue(alternativePrice) : pricePerLiter,
+      ethanolKmPerLiter: comparisonFuelOrder === "ethanol-first" ? kmPerLiter : numberValue(alternativeConsumption),
+      gasolineKmPerLiter: comparisonFuelOrder === "ethanol-first" ? numberValue(alternativeConsumption) : kmPerLiter,
     });
 
     return {
@@ -282,7 +286,7 @@ export default function LocalRouteCalculator({ initialDistanceKm, compact = fals
       currentFuelInvalid,
       currentFuelAboveTank,
     };
-  }, [distance, price, consumption, tank, currentFuel, toll, parking, other, alternativePrice, alternativeConsumption, monthlyBudget, roundTrip, tripsPerWeek, recurring]);
+  }, [distance, price, consumption, tank, currentFuel, toll, parking, other, alternativePrice, alternativeConsumption, comparisonFuelOrder, monthlyBudget, roundTrip, tripsPerWeek, recurring]);
 
   const smartSummary = useMemo(() => {
     if (!values) return "";
@@ -622,6 +626,19 @@ export default function LocalRouteCalculator({ initialDistanceKm, compact = fals
         <div className="mt-4 rounded-xl border border-[#D7DFD8] bg-[#F8FAF7] p-3">
           <p className="text-xs font-extrabold text-[#163840]">Comparar outro combustível ou veículo</p>
           <p className="mt-1 text-[0.62rem] leading-relaxed text-[#71877E]">O percurso e os extras permanecem iguais; você troca apenas preço e consumo.</p>
+          <label className="mt-3 block text-xs font-bold text-[#365E51]">
+            Tipo de comparação
+            <select
+              value={comparisonFuelOrder}
+              onChange={event => setComparisonFuelOrder(event.target.value as typeof comparisonFuelOrder)}
+              className="mt-1.5 min-h-11 w-full min-w-0 rounded-xl border border-[#A7CDBA] bg-white px-3 py-2 text-sm text-[#163840] outline-none focus-visible:border-[#163840] focus-visible:ring-2 focus-visible:ring-[#3B826D]"
+            >
+              <option value="generic">Genérica: dois veículos ou combustíveis</option>
+              <option value="ethanol-first">Atual: etanol · Segundo: gasolina</option>
+              <option value="gasoline-first">Atual: gasolina · Segundo: etanol</option>
+            </select>
+            <span className="mt-1 block text-[0.62rem] font-normal leading-relaxed text-[#71877E]">Escolha etanol ou gasolina apenas se os valores corresponderem a esses combustíveis. Em outras comparações, mantenha a opção genérica.</span>
+          </label>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <label className="text-xs font-bold text-[#365E51]">
               Segundo preço (R$/L)
