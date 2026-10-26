@@ -9,6 +9,7 @@ for (const width of [320, 390]) {
     const calculator = page.locator('section[aria-labelledby="local-calculator-title"]');
     await expect(calculator).toBeVisible();
 
+    await calculator.getByPlaceholder("35").fill("7,1");
     await calculator.getByPlaceholder("5,89").fill("6,09");
     await calculator.getByPlaceholder("10,5").fill("12");
     await calculator.getByText("Ajustes avançados", { exact: true }).click();
