@@ -349,3 +349,32 @@ it("não recomenda abastecimento com combustível acima da capacidade do tanque"
   cleanup();
   localStorage.clear();
 });
+
+it("não identifica etanol e gasolina sem ordem explícita e respeita os dois sentidos", () => {
+  cleanup();
+  localStorage.clear();
+  render(<LocalRouteCalculator initialDistanceKm={7.1} />);
+
+  // Primeiro cenário: gasolina. Segundo cenário: etanol.
+  fireEvent.change(screen.getByPlaceholderText("5,89"), { target: { value: "6,09" } });
+  fireEvent.change(screen.getByLabelText(/consumo do veículo/i), { target: { value: "12" } });
+  fireEvent.change(screen.getByPlaceholderText("Ex.: 5,49"), { target: { value: "4,19" } });
+  fireEvent.change(screen.getByPlaceholderText("Ex.: 8,5"), { target: { value: "8" } });
+
+  const typeSelect = screen.getByLabelText(/Tipo de comparação/i) as HTMLSelectElement;
+  expect(typeSelect.value).toBe("generic");
+  expect(screen.queryByText("Etanol tem o menor custo estimado.")).toBeNull();
+  expect(screen.queryByText("Gasolina tem o menor custo estimado.")).toBeNull();
+  expect(screen.getByText(/O segundo cenário custa/)).toBeTruthy();
+
+  fireEvent.change(typeSelect, { target: { value: "gasoline-first" } });
+  expect(screen.getByText("Gasolina tem o menor custo estimado.")).toBeTruthy();
+
+  fireEvent.change(typeSelect, { target: { value: "ethanol-first" } });
+  expect(screen.getByText("Etanol tem o menor custo estimado.")).toBeTruthy();
+
+  fireEvent.click(screen.getByRole("button", { name: "Limpar cálculo" }));
+  expect(typeSelect.value).toBe("generic");
+  cleanup();
+  localStorage.clear();
+});
