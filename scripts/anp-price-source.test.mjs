@@ -52,3 +52,11 @@ test("restores leading zeroes only for numeric Excel CNPJs", () => {
   assert.equal(normalizeAnpCnpj("02.316.635/0001-28"), "02316635000128");
   for (const value of ["2316635000128", null, 0, "00000000000000", -1, 1.5, Number.MAX_SAFE_INTEGER + 1, "unknown"]) assert.equal(normalizeAnpCnpj(value), "");
 });
+
+test("ignores malformed links while retaining a valid official workbook", () => {
+  const good = "/anp/revendas_lpc_2026-09-27_2026-10-03.xlsx";
+  for (const bad of ["http://[bad", "/bad%ZZ.xlsx", "/anp/postos-%E0%A4%A.xlsx"]) {
+    const html = `<a href="${bad}">bad</a><a href="${good}">good</a>`;
+    assert.equal(selectWeeklyPriceSource(html, page).sourceUrl, new URL(good, page).href);
+  }
+});
