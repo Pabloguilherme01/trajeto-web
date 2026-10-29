@@ -17,9 +17,11 @@ function checkedHost(url: string): string | null {
     if (
       parsed.protocol !== "https:" ||
       !parsed.hostname ||
+      !parsed.hostname.includes(".") ||
       parsed.username ||
       parsed.password ||
       /\s/.test(url) ||
+      parsed.hostname.endsWith(".") ||
       parsed.hostname === "localhost" ||
       parsed.hostname.endsWith(".localhost") ||
       parsed.hostname.endsWith(".local") ||

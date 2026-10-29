@@ -33,6 +33,53 @@ describe("auditoria de links públicos sem acessar a rede", () => {
     ]);
   });
 
+  it("rejects trailing-dot local hostnames in sources and redirects without network access", async () => {
+    const reports = [
+      service("local-fqdn", "https://localhost./admin"),
+      service("internal-fqdn", "https://painel.localhost./login"),
+      service("lan-fqdn", "https://intranet.local./privado"),
+    ];
+    const report = auditPublicServiceLinks(reports);
+    expect(report.issues).toHaveLength(3);
+    expect(report.links).toHaveLength(0);
+
+    const request = vi.fn(async () => ({
+      status: 302,
+      headers: { get: () => "https://localhost./admin" },
+      body: null,
+    } as unknown as Response));
+    const result = await probePublicServiceLink("https://gov.br/servico", request);
+    expect(result).toMatchObject({ classification: "unverified", finalHostname: null });
+    expect(request).toHaveBeenCalledTimes(1);
+
+    const noNetwork = vi.fn();
+    expect((await probePublicServiceLink("https://localhost./admin", noNetwork)).classification).toBe("unverified");
+    expect(noNetwork).not.toHaveBeenCalled();
+  });
+
+  it("rejects single-label hosts in initial URLs and redirects without contacting them", async () => {
+    const report = auditPublicServiceLinks([
+      service("local-host", "https://intranet/admin"),
+      service("local-printer", "https://printer/status"),
+    ]);
+    expect(report.issues).toHaveLength(2);
+    expect(report.links).toHaveLength(0);
+
+    const noNetwork = vi.fn();
+    const initial = await probePublicServiceLink("https://intranet/admin", noNetwork);
+    expect(initial).toMatchObject({ classification: "unverified", status: null });
+    expect(noNetwork).not.toHaveBeenCalled();
+
+    const redirect = vi.fn(async () => ({
+      status: 302,
+      headers: { get: () => "https://printer/status" },
+      body: null,
+    } as unknown as Response));
+    const result = await probePublicServiceLink("https://gov.br/servico", redirect);
+    expect(result).toMatchObject({ classification: "unverified", finalHostname: null });
+    expect(redirect).toHaveBeenCalledTimes(1);
+  });
+
   it("keeps the real public service catalog structurally valid and read-only", () => {
     const report = auditPublicServiceLinks(PUBLIC_SERVICES);
     expect(report.issues).toEqual([]);
