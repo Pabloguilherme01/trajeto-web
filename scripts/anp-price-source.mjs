@@ -2,9 +2,13 @@
 export function selectWeeklyPriceSource(html, pageUrl) {
   const candidates = [];
   for (const match of String(html).matchAll(/href=["']([^"']+)["']/gi)) {
-    const url = new URL(match[1].replace(/&amp;/g, "&"), pageUrl);
+    let url;
+    try { url = new URL(match[1].replace(/&amp;/g, "&"), pageUrl); }
+    catch { continue; }
     if (url.protocol !== "https:" || url.hostname !== "www.gov.br") continue;
-    const filename = decodeURIComponent(url.pathname).split("/").find(part => /\.(xlsx?|xlsm)$/i.test(part)) ?? "";
+    let filename;
+    try { filename = decodeURIComponent(url.pathname).split("/").find(part => /\.(xlsx?|xlsm)$/i.test(part)) ?? ""; }
+    catch { continue; }
     if (!/\.(xlsx?|xlsm)$/i.test(filename) || !/posto|revend/i.test(filename)) continue;
     const dates = filename.match(/(\d{4}-\d{2}-\d{2})[_-](\d{4}-\d{2}-\d{2})/);
     if (!dates) continue;
