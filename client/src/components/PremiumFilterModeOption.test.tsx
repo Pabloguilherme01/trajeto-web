@@ -35,7 +35,7 @@ describe("shared Premium filter option", () => {
         label="Resolver online" detail="Serviços digitais"
         icon={MapPin} selected onSelect={onSelect} />
     );
-    const button = screen.getByRole("button", { name: "Resolver online" });
+    const button = screen.getByRole("button", { name: "Resolver online · Serviços digitais" });
     expect(button.className).toContain("min-h-[4.5rem]");
     expect(button.className).toContain("min-w-0");
     expect(button.getAttribute("aria-pressed")).toBe("true");

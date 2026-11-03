@@ -41,7 +41,7 @@ export default function PublicServiceCategoryQuickFilters({
             <button
               key={item.id}
               type="button"
-              aria-label={"Filtrar por " + item.shortLabel}
+              aria-label={item.shortLabel + " · filtrar categoria"}
               aria-pressed={selected}
               onClick={() => onChange(item.id)}
               className={
@@ -69,7 +69,7 @@ export default function PublicServiceCategoryQuickFilters({
           </span>
           <button
             type="button"
-            aria-label={"Remover filtro da categoria " + selectedLabel}
+            aria-label={"Limpar · remover filtro da categoria " + selectedLabel}
             onClick={() => onChange("todos")}
             className="inline-flex min-h-11 shrink-0 items-center gap-1 rounded-lg px-2 text-xs font-bold text-primary focus-visible:outline-2 focus-visible:outline-ring"
           >

@@ -14,13 +14,13 @@ describe("quick Premium service categories", () => {
     const buttons = within(group).getAllByRole("button");
     expect(buttons).toHaveLength(6);
     expect(buttons.map(button => button.getAttribute("aria-label"))).toEqual([
-      "Filtrar por Tudo", "Filtrar por Saúde", "Filtrar por Assistência",
-      "Filtrar por Trabalho", "Filtrar por Água e energia", "Filtrar por Documentos",
+      "Tudo · filtrar categoria", "Saúde · filtrar categoria", "Assistência · filtrar categoria",
+      "Trabalho · filtrar categoria", "Água e energia · filtrar categoria", "Documentos · filtrar categoria",
     ]);
-    expect(within(group).getByRole("button", { name: "Filtrar por Saúde" }).getAttribute("aria-pressed"))
+    expect(within(group).getByRole("button", { name: "Saúde · filtrar categoria" }).getAttribute("aria-pressed"))
       .toBe("true");
     expect(buttons.every(button => button.className.includes("min-h-12"))).toBe(true);
-    fireEvent.click(within(group).getByRole("button", { name: "Filtrar por Documentos" }));
+    fireEvent.click(within(group).getByRole("button", { name: "Documentos · filtrar categoria" }));
     expect(onChange).toHaveBeenCalledWith("documentos");
     expect(screen.queryByText(/Categoria ativa:/)).toBeNull();
   });
@@ -31,14 +31,14 @@ describe("quick Premium service categories", () => {
       <PublicServiceCategoryQuickFilters category="telecom" onChange={onChange} />,
     );
     expect(screen.getByText("Categoria ativa: Internet e telefone")).toBeTruthy();
-    const clear = screen.getByRole("button", { name: "Remover filtro da categoria Internet e telefone" });
+    const clear = screen.getByRole("button", { name: "Limpar · remover filtro da categoria Internet e telefone" });
     expect(clear.className).toContain("min-h-11");
     fireEvent.click(clear);
     expect(onChange).toHaveBeenCalledTimes(1);
     expect(onChange).toHaveBeenCalledWith("todos");
     rerender(<PublicServiceCategoryQuickFilters category="todos" onChange={onChange} />);
     expect(screen.queryByText(/Categoria ativa:/)).toBeNull();
-    expect(screen.getByRole("button", { name: "Filtrar por Tudo" }).getAttribute("aria-pressed"))
+    expect(screen.getByRole("button", { name: "Tudo · filtrar categoria" }).getAttribute("aria-pressed"))
       .toBe("true");
   });
 });

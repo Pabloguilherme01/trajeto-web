@@ -496,7 +496,7 @@ export default function PublicServices() {
               type="button"
               onClick={showAllServicesFromSummary}
               className="min-w-0 rounded-2xl border border-border/10 bg-background/55 p-3 text-left transition hover:border-primary/30 focus-visible:outline-2 focus-visible:outline-ring sm:min-w-0"
-              aria-label={`Ver todos os ${PUBLIC_SERVICES.length} serviços oficiais`}
+              aria-label={`${PUBLIC_SERVICES.length} serviços oficiais · ver todos`}
             >
               <span className="block text-xl font-black tracking-tight text-foreground">
                 {PUBLIC_SERVICES.length}
@@ -509,7 +509,7 @@ export default function PublicServices() {
               type="button"
               onClick={openCategoriesFromSummary}
               className="min-w-0 rounded-2xl border border-border/10 bg-background/55 p-3 text-left transition hover:border-primary/30 focus-visible:outline-2 focus-visible:outline-ring sm:min-w-0"
-              aria-label={`Abrir ${PUBLIC_SERVICE_CATEGORIES.length - 1} categorias de serviços`}
+              aria-label={`${PUBLIC_SERVICE_CATEGORIES.length - 1} categorias · abrir filtros`}
             >
               <span className="block text-xl font-black tracking-tight text-foreground">
                 {PUBLIC_SERVICE_CATEGORIES.length - 1}
@@ -522,7 +522,7 @@ export default function PublicServices() {
               type="button"
               onClick={() => openReadyRoutesFromSummary(false)}
               className="min-w-0 rounded-2xl border border-border/10 bg-background/55 p-3 text-left transition hover:border-primary/30 focus-visible:outline-2 focus-visible:outline-ring sm:min-w-0"
-              aria-label={`Ir para ${READY_SERVICE_ROUTES.length} rotas prontas`}
+              aria-label={`${READY_SERVICE_ROUTES.length} rotas prontas · ir para a seção`}
             >
               <span className="block text-xl font-black tracking-tight text-foreground">
                 {READY_SERVICE_ROUTES.length}
@@ -535,7 +535,7 @@ export default function PublicServices() {
               type="button"
               onClick={() => openReadyRoutesFromSummary(true)}
               className="min-w-0 rounded-2xl border border-border/10 bg-background/55 p-3 text-left transition hover:border-accent/30 focus-visible:outline-2 focus-visible:outline-ring sm:min-w-0"
-              aria-label={offlineRoutesChecked ? `Mostrar ${offlineReadyRouteIds.size} locais offline` : "Verificar locais offline"}
+              aria-label={offlineRoutesChecked ? `${offlineReadyRouteIds.size} locais offline · mostrar` : "… locais offline · verificar"}
             >
               <span className="block text-xl font-black tracking-tight text-foreground">
                 {offlineRoutesChecked ? offlineReadyRouteIds.size : "…"}
@@ -641,7 +641,7 @@ export default function PublicServices() {
               <button
                 key={shortcut.query}
                 type="button"
-                aria-label={"Busca rápida: " + shortcut.hint}
+                aria-label={shortcut.label + " · busca rápida: " + shortcut.hint}
                 onClick={() => {
                   setQuery(shortcut.query);
                   applyFilters(shortcut.query, "todos");

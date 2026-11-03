@@ -41,7 +41,7 @@ test("Pages: saved public services persist and reopen offline", async ({
       name: "Remover dos salvos: Serviço de Informação ao Cidadão · SIC",
     })
   ).toHaveAttribute("aria-pressed", "true");
-  await page.getByRole("button", { name: /Ver todos os \d+ serviços oficiais/ }).click();
+  await page.getByRole("button", { name: /^\d+ serviços oficiais · ver todos/ }).click();
   await page
     .getByRole("button", { name: "Serviços salvos (1)", exact: true })
     .click();
@@ -185,7 +185,7 @@ test("Pages: daily need shortcuts and new assistance contacts work offline", asy
 }) => {
   await page.setViewportSize({ width: 320, height: 568 });
   await page.goto("servicos", { waitUntil: "domcontentloaded" });
-  const cadunicoShortcut = page.getByRole("button", { name: "Busca rápida: Cadastro e Bolsa Família", exact: true });
+  const cadunicoShortcut = page.getByRole("button", { name: "CadÚnico e benefícios · busca rápida: Cadastro e Bolsa Família", exact: true });
   await expect(cadunicoShortcut).toBeVisible();
   await cadunicoShortcut.click();
   await expect(
