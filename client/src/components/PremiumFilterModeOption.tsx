@@ -29,7 +29,7 @@ export default function PremiumFilterModeOption({
       type="button"
       aria-label={[ariaLabel ?? label, detail, availability]
         .filter(value => value !== undefined)
-        .join(" · ")}
+        .join(" ")}
       aria-pressed={selected}
       onClick={onSelect}
       className={

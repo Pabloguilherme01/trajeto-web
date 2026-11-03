@@ -11,9 +11,9 @@ describe("premium modes in the public services directory", () => {
     const props = { resource: "todos" as const, onChange: vi.fn(), modeCounts: { todos: 3, contato: 1, rota: 0, online: 2 } };
     const { rerender } = render(<PublicServiceResourceModes {...props} />);
     const group = screen.getByRole("group", { name: "Recursos disponíveis" });
-    expect(within(within(group).getByRole("button", { name: /^Ver tudo ·/ })).getByText("3 serviços")).toBeTruthy();
-    expect(within(within(group).getByRole("button", { name: /^Ligar ou WhatsApp ·/ })).getByText("1 serviço")).toBeTruthy();
-    const route = within(group).getByRole("button", { name: /^Ir até o local ·/ });
+    expect(within(within(group).getByRole("button", { name: /^Ver tudo / })).getByText("3 serviços")).toBeTruthy();
+    expect(within(within(group).getByRole("button", { name: /^Ligar ou WhatsApp / })).getByText("1 serviço")).toBeTruthy();
+    const route = within(group).getByRole("button", { name: /^Ir até o local / });
     expect(within(route).getByText("0 serviços")).toBeTruthy();
     expect(route.getAttribute("aria-label")).toContain("0 serviços");
     expect(route.hasAttribute("aria-describedby")).toBe(false);
@@ -33,14 +33,14 @@ describe("premium modes in the public services directory", () => {
     expect(modes).toHaveLength(4);
     expect(modes[0].getAttribute("aria-pressed")).toBe("true");
     expect(modes.slice(1).every(button => button.getAttribute("aria-pressed") === "false")).toBe(true);
-    const contact = within(group).getByRole("button", { name: /^Ligar ou WhatsApp ·/ });
+    const contact = within(group).getByRole("button", { name: /^Ligar ou WhatsApp / });
     fireEvent.click(contact);
     expect(onChange).toHaveBeenCalledWith("contato");
     rerender(<PublicServiceResourceModes resource="contato" onChange={onChange} />);
-    expect(within(group).getByRole("button", { name: /^Ligar ou WhatsApp ·/ }).getAttribute("aria-pressed")).toBe("true");
-    expect(within(group).getByRole("button", { name: /^Ver tudo ·/ }).getAttribute("aria-pressed")).toBe("false");
-    fireEvent.click(within(group).getByRole("button", { name: /^Ir até o local ·/ }));
-    fireEvent.click(within(group).getByRole("button", { name: /^Resolver online ·/ }));
+    expect(within(group).getByRole("button", { name: /^Ligar ou WhatsApp / }).getAttribute("aria-pressed")).toBe("true");
+    expect(within(group).getByRole("button", { name: /^Ver tudo / }).getAttribute("aria-pressed")).toBe("false");
+    fireEvent.click(within(group).getByRole("button", { name: /^Ir até o local / }));
+    fireEvent.click(within(group).getByRole("button", { name: /^Resolver online / }));
     expect(onChange.mock.calls.map(call => call[0])).toEqual(["contato", "rota", "online"]);
   });
 
@@ -50,7 +50,7 @@ describe("premium modes in the public services directory", () => {
     expect(group.className).toContain("grid-cols-2");
     expect(within(group).getAllByRole("button").every(button => button.className.includes("min-h-[4.5rem]")))
       .toBe(true);
-    expect(within(group).getByRole("button", { name: /^Ir até o local ·/ }).getAttribute("aria-pressed"))
+    expect(within(group).getByRole("button", { name: /^Ir até o local / }).getAttribute("aria-pressed"))
       .toBe("true");
   });
 });
