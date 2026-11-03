@@ -514,7 +514,7 @@ it("separates unpositioned company records and restores the missing-location dee
   mapSearch.value = "?camada=compras&q=Empresa+teste&coordenadas=0";
   render(<CityMap />);
   const modes = within(screen.getByRole("group", { name: "Recursos dos destinos" }));
-  expect(modes.getByRole("button", { name: "Sem coordenadas" }).getAttribute("aria-pressed")).toBe("true");
+  expect(modes.getByRole("button", { name: /^Sem coordenadas ·/ }).getAttribute("aria-pressed")).toBe("true");
   expect(screen.getByText("Empresa teste sem posição", { selector: "article p" })).toBeTruthy();
   expect(screen.queryByText("Empresa teste com posição", { selector: "article p" })).toBeNull();
   expect(screen.getByText(/não geram marcadores ou rotas locais garantidas/)).toBeTruthy();
@@ -548,7 +548,7 @@ it("opens a sourced bairros-only layer without businesses, ANP, GPS or invented 
   const network = vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("offline network"));
   render(<CityMap />);
   const categories = within(screen.getByRole("group", { name: "Categorias do mapa" }));
-  expect(categories.getByRole("button", { name: "Bairros e setores" }).getAttribute("aria-pressed")).toBe("true");
+  expect(categories.getByRole("button", { name: /^Bairros e setores ·/ }).getAttribute("aria-pressed")).toBe("true");
   expect(catalogEnabled.values.every(flag => flag === false)).toBe(true);
   expect(network.mock.calls.some(([url]) => String(url).includes("aguas-lindas-anp.json"))).toBe(false);
   expect(screen.getByText("Jardim Brasília", { selector: "article p" })).toBeTruthy();
