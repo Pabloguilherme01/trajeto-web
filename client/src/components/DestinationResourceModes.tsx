@@ -24,7 +24,7 @@ export default function DestinationResourceModes({ value, counts, onChange, stre
       <p className="text-xs font-black uppercase tracking-[.12em] text-primary">Escolha o tipo de destino</p>
       <div role="group" aria-label="Recursos dos destinos" className="mt-2 grid min-w-0 grid-cols-2 gap-2">
         {modes.filter(mode => streets || (mode.value !== "streets" && mode.value !== "areas" && mode.value !== "prepared")).map(mode => (
-          <PremiumFilterModeOption key={mode.value} layout="grid" label={mode.label} ariaLabel={mode.label}
+          <PremiumFilterModeOption key={mode.value} layout="grid" label={mode.label}
             detail={mode.detail} icon={mode.icon} selected={value === mode.value} onSelect={() => onChange(mode.value)}
             availability={updating ? "Atualizando" : `${counts[mode.value] ?? 0} ${(counts[mode.value] ?? 0) === 1 ? "destino" : "destinos"}`} />
         ))}

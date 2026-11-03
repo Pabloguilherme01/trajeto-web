@@ -1247,7 +1247,7 @@ export default function PublicServices() {
                           onClick={() =>
                             openOrganicDestination(route.destination, route.label)
                           }
-                          aria-label={"Abrir " + route.label + " no Organic Maps"}
+                          aria-label={`Organic · ${navigationModeLabel} · abrir ${route.label}`}
                           className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-xl border border-primary/20 bg-primary/[.05] px-2 text-xs font-black text-primary"
                         >
                           <Navigation className="size-3.5 shrink-0" />

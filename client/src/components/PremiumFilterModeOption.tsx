@@ -7,7 +7,6 @@ type Props = {
   icon: LucideIcon;
   selected: boolean;
   onSelect: () => void;
-  ariaLabel?: string;
   availability?: string;
   layout: "rail" | "grid";
 };
@@ -19,7 +18,6 @@ export default function PremiumFilterModeOption({
   icon: Icon,
   selected,
   onSelect,
-  ariaLabel,
   availability,
   layout,
 }: Props) {
@@ -27,9 +25,6 @@ export default function PremiumFilterModeOption({
   return (
     <button
       type="button"
-      aria-label={[ariaLabel ?? label, detail, availability]
-        .filter(value => value !== undefined)
-        .join(" ")}
       aria-pressed={selected}
       onClick={onSelect}
       className={

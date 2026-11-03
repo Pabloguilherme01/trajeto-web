@@ -163,7 +163,7 @@ test("resumo da Central abre filtros e rotas offline em 320 px", async ({ page }
   await summary.getByRole("button", { name: /^\d+ categorias · abrir filtros/ }).click();
   await expect(page.locator("#service-filters details")).toHaveJSProperty("open", true);
 
-  await summary.getByRole("button", { name: /Mostrar \d+ locais offline/ }).click();
+  await summary.getByRole("button", { name: /^\d+ locais offline · mostrar/ }).click();
   const offline = page.getByRole("button", { name: /Mostrar somente locais offline/ });
   await expect(offline).toHaveAttribute("aria-pressed", "true");
   await expect(page.locator("#ready-routes")).toBeVisible();

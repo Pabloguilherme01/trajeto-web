@@ -31,7 +31,7 @@ describe("shared Premium filter option", () => {
   it("preserves an exact accessible label for grid resource mode", () => {
     const onSelect = vi.fn();
     render(
-      <PremiumFilterModeOption layout="grid" ariaLabel="Resolver online"
+      <PremiumFilterModeOption layout="grid"
         label="Resolver online" detail="Serviços digitais"
         icon={MapPin} selected onSelect={onSelect} />
     );
