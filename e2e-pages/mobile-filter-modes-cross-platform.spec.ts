@@ -74,7 +74,7 @@ test("Android/iOS: sourced bairros stay separate from streets and accessible in 
   await layers.getByRole("button", { name: "Ruas e avenidas" }).click();
   await expect(page).toHaveURL(/camada=ruas/);
   await page.goto("planejar?destinos=1", { waitUntil: "domcontentloaded" });
-  const areaMode = page.getByRole("group", { name: "Recursos dos destinos" }).getByRole("button", { name: "Bairros e setores" });
+  const areaMode = page.getByRole("group", { name: "Recursos dos destinos" }).getByRole("button", { name: /^Bairros e setores ·/ });
   await areaMode.click();
   await expect(areaMode).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("textbox", { name: "Filtrar todos os destinos disponíveis" }).fill("Jardim Brasília");
@@ -90,7 +90,7 @@ test("Android/iOS: map can show unpositioned records, retain refinements and saf
   await page.goto("mapa?camada=compras&q=mercado", { waitUntil: "domcontentloaded" });
   await page.locator("summary").filter({ hasText: /^Refinar destinos/ }).click();
   const modes = page.getByRole("group", { name: "Recursos dos destinos" });
-  const missing = modes.getByRole("button", { name: "Sem coordenadas", exact: true });
+  const missing = modes.getByRole("button", { name: /^Sem coordenadas ·/ });
   await missing.click();
   await expect(missing).toHaveAttribute("aria-pressed", "true");
   await expect(page).toHaveURL(/coordenadas=0/);
@@ -120,7 +120,7 @@ test("Android/iOS: municipal bairros remain scoped in map URL and planner offlin
   await expect(page).toHaveURL(new RegExp("/mapa/?$"));
   await page.goto("planejar?destinos=1", { waitUntil: "domcontentloaded" });
   await page.getByRole("combobox", { name: "Filtrar destinos por bairro ou setor" }).selectOption("bairro-jardim-brasilia");
-  const saved = page.getByRole("group", { name: "Recursos dos destinos" }).getByRole("button", { name: "Rota offline salva" });
+  const saved = page.getByRole("group", { name: "Recursos dos destinos" }).getByRole("button", { name: /^Rota offline salva ·/ });
   await saved.click();
   await expect(saved).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByText(/Informe a origem para encontrar rotas/)).toBeVisible();
@@ -134,7 +134,7 @@ test("Android/iOS: planner street references remain searchable offline and prese
   page.on("pageerror", error => errors.push(error.message));
   await page.goto("planejar?destinos=1", { waitUntil: "domcontentloaded" });
   const modes = page.getByRole("group", { name: "Recursos dos destinos" });
-  const streets = modes.getByRole("button", { name: "Ruas e avenidas", exact: true });
+  const streets = modes.getByRole("button", { name: /^Ruas e avenidas ·/ });
   await expect(streets.getByText(/^39\d destinos$/)).toBeVisible();
   await streets.click();
   await expect(streets).toHaveAttribute("aria-pressed", "true");
@@ -159,7 +159,7 @@ test("Android/iOS: map coordinate filter preserves query and category after relo
   await page.goto("mapa?camada=saude&q=UPA", { waitUntil: "domcontentloaded" });
   await page.locator("summary").filter({ hasText: /^Refinar destinos/ }).click();
   const modes = page.getByRole("group", { name: "Recursos dos destinos" });
-  const positioned = modes.getByRole("button", { name: "Com coordenadas", exact: true });
+  const positioned = modes.getByRole("button", { name: /^Com coordenadas ·/ });
   await positioned.click();
   await expect(positioned).toHaveAttribute("aria-pressed", "true");
   await expect(page).toHaveURL(/coordenadas=1/);
@@ -192,7 +192,7 @@ test("Android/iOS: service mode previews match results, preserve refinements and
   const search = page.getByRole("textbox", { name: "Buscar serviços públicos" });
   const all = group.getByRole("button", { name: "Ver tudo", exact: true });
   const expectPreview = async (label: string) => {
-    const button = group.getByRole("button", { name: label, exact: true });
+    const button = group.getByRole("button", { name: new RegExp(`^${label} ·`) });
     await expect(button.getByText(/^\d+ serviços?$/)).toBeVisible();
     await button.click();
     await expect(button).toHaveAttribute("aria-pressed", "true");
@@ -217,7 +217,7 @@ test("Android/iOS: service mode previews match results, preserve refinements and
   }
   await search.fill("zzzx-servico-inexistente-2026");
   await expect(group.getByText("0 serviços", { exact: true })).toHaveCount(4);
-  await group.getByRole("button", { name: "Ir até o local" }).click();
+  await group.getByRole("button", { name: /^Ir até o local ·/ }).click();
   await expect(search).toHaveValue("zzzx-servico-inexistente-2026");
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(321);
   // The selected record remains visible even if unrelated filters exclude it.
@@ -330,9 +330,9 @@ test("Android/iOS: service modes preserve URL, semantics and mobile grid", async
   await expect(group).toBeVisible();
   await expect(group.getByRole("button")).toHaveCount(4);
 
-  const all = group.getByRole("button", { name: "Ver tudo" });
-  const online = group.getByRole("button", { name: "Resolver online" });
-  const contact = group.getByRole("button", { name: "Ligar ou WhatsApp" });
+  const all = group.getByRole("button", { name: /^Ver tudo ·/ });
+  const online = group.getByRole("button", { name: /^Resolver online ·/ });
+  const contact = group.getByRole("button", { name: /^Ligar ou WhatsApp ·/ });
   await expect(all).toHaveAttribute("aria-pressed", "true");
 
   await online.click();
@@ -383,17 +383,17 @@ test("Android/iOS: advanced category stays visible and clears without resetting 
   await expect(page.getByText("Categoria ativa: Internet e telefone")).toBeVisible();
 
   await page.getByRole("button", {
-    name: "Remover filtro da categoria Internet e telefone",
+    name: "Limpar · remover filtro da categoria Internet e telefone",
   }).click();
   await expect.poll(() => new URL(page.url()).searchParams.get("categoria")).toBeNull();
   expect(new URL(page.url()).searchParams.get("q")).toBe("anatel");
   expect(new URL(page.url()).searchParams.get("recurso")).toBe("online");
 
-  const health = shortcuts.getByRole("button", { name: "Filtrar por Saúde" });
+  const health = shortcuts.getByRole("button", { name: "Saúde · filtrar categoria" });
   await health.click();
   await expect(health).toHaveAttribute("aria-pressed", "true");
   await expect.poll(() => new URL(page.url()).searchParams.get("categoria")).toBe("saude");
-  await expect(shortcuts.getByRole("button", { name: "Filtrar por Tudo" }))
+  await expect(shortcuts.getByRole("button", { name: "Tudo · filtrar categoria" }))
     .toHaveAttribute("aria-pressed", "false");
 
   const heights = await shortcuts.getByRole("button").evaluateAll(

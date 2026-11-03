@@ -669,7 +669,7 @@ it("opens the catalog with one button and clears only catalog refinements, keepi
   expect((textbox as HTMLInputElement).value).toBe("BuscaTeste");
   fireEvent.click(filters.getByRole("button", { name: "Limpar todos os refinamentos" }));
   expect((textbox as HTMLInputElement).value).toBe("");
-  expect(modes.getByRole("button", { name: "Todos os destinos" }).getAttribute("aria-pressed")).toBe("true");
+  expect(modes.getByRole("button", { name: /^Todos os destinos ·/ }).getAttribute("aria-pressed")).toBe("true");
   expect((screen.getByPlaceholderText("De onde você sai") as HTMLInputElement).value).toBe("Casa");
   expect((screen.getByPlaceholderText("Para onde você vai") as HTMLInputElement).value).toBe("Trabalho");
   fireEvent.click(toggle);

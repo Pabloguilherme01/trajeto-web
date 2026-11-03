@@ -114,7 +114,7 @@ describe("PublicServices deep links", () => {
     expect(source).toContain("openReadyRoutesFromSummary");
     expect(source).toContain('id="ready-routes"');
     expect(source).toContain('id="service-results"');
-    expect(source).toContain("Ir para ${READY_SERVICE_ROUTES.length} rotas prontas");
+    expect(source).toContain("${READY_SERVICE_ROUTES.length} rotas prontas · ir para a seção");
     expect(source).toContain("Mostrar ${offlineReadyRouteIds.size} locais offline");
     expect(source).toContain("Verificar locais offline");
     expect(source).toContain('{offlineRoutesChecked ? offlineReadyRouteIds.size : "…"}');
