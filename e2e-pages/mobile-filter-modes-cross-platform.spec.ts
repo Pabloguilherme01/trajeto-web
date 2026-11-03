@@ -190,7 +190,7 @@ test("Android/iOS: service mode previews match results, preserve refinements and
   await page.goto("servicos?q=cras&categoria=assistencia", { waitUntil: "domcontentloaded" });
   const group = page.getByRole("group", { name: "Recursos disponíveis" });
   const search = page.getByRole("textbox", { name: "Buscar serviços públicos" });
-  const all = group.getByRole("button", { name: "Ver tudo", exact: true });
+  const all = group.getByRole("button", { name: /^Ver tudo ·/ });
   const expectPreview = async (label: string) => {
     const button = group.getByRole("button", { name: new RegExp(`^${label} ·`) });
     await expect(button.getByText(/^\d+ serviços?$/)).toBeVisible();
