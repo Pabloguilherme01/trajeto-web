@@ -514,11 +514,11 @@ it("separates unpositioned company records and restores the missing-location dee
   mapSearch.value = "?camada=compras&q=Empresa+teste&coordenadas=0";
   render(<CityMap />);
   const modes = within(screen.getByRole("group", { name: "Recursos dos destinos" }));
-  expect(modes.getByRole("button", { name: /^Sem coordenadas / }).getAttribute("aria-pressed")).toBe("true");
+  expect(modes.getByRole("button", { name: /^Sem coordenadas/ }).getAttribute("aria-pressed")).toBe("true");
   expect(screen.getByText("Empresa teste sem posição", { selector: "article p" })).toBeTruthy();
   expect(screen.queryByText("Empresa teste com posição", { selector: "article p" })).toBeNull();
   expect(screen.getByText(/não geram marcadores ou rotas locais garantidas/)).toBeTruthy();
-  fireEvent.click(modes.getByRole("button", { name: /^Com coordenadas / }));
+  fireEvent.click(modes.getByRole("button", { name: /^Com coordenadas/ }));
   expect(screen.getByText("Empresa teste com posição", { selector: "article p" })).toBeTruthy();
   expect(screen.queryByText("Empresa teste sem posição", { selector: "article p" })).toBeNull();
   expect(navigate).toHaveBeenLastCalledWith(expect.stringContaining("coordenadas=1"), { replace: true });
