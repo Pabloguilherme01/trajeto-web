@@ -389,11 +389,11 @@ test("Android/iOS: advanced category stays visible and clears without resetting 
   expect(new URL(page.url()).searchParams.get("q")).toBe("anatel");
   expect(new URL(page.url()).searchParams.get("recurso")).toBe("online");
 
-  const health = shortcuts.getByRole("button", { name: "Saúde · filtrar categoria" });
+  const health = shortcuts.getByRole("button", { name: /^Saúde.*filtrar categoria/ });
   await health.click();
   await expect(health).toHaveAttribute("aria-pressed", "true");
   await expect.poll(() => new URL(page.url()).searchParams.get("categoria")).toBe("saude");
-  await expect(shortcuts.getByRole("button", { name: "Tudo · filtrar categoria" }))
+  await expect(shortcuts.getByRole("button", { name: /^Tudo.*filtrar categoria/ }))
     .toHaveAttribute("aria-pressed", "false");
 
   const heights = await shortcuts.getByRole("button").evaluateAll(
