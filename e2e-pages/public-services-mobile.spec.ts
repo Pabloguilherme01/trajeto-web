@@ -31,7 +31,7 @@ for (const width of [320, 390]) {
       return ids.length === new Set(ids).size;
     })).toBe(true);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
-    await expect(page.getByRole("button", { name: /^Organic Maps · .* · abrir / }).first()).toBeVisible();
+    await expect(page.getByRole("button", { name: /^Organic · .* · abrir / }).first()).toBeVisible();
     const mode = page.getByRole("combobox", { name: "Modo de navegação no Organic Maps" });
     await mode.selectOption("bike");
     await expect(mode).toHaveValue("bike");
@@ -80,7 +80,7 @@ test("service needs and Organic Maps modes remain usable at 320px", async ({ pag
   await page.locator("summary").filter({ hasText: /^Modo de navegação no Organic Maps$/ }).click();
   const mode = page.getByRole("combobox", { name: "Modo de navegação no Organic Maps" });
   await mode.selectOption("walk");
-  await expect(page.getByRole("button", { name: /^Organic Maps · .* · abrir / })).toContainText("a pé");
+  await expect(page.getByRole("button", { name: /^Organic · .* · abrir / })).toContainText("a pé");
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   await page.goto("servicos?categoria=capacitacao", { waitUntil: "domcontentloaded" });
   await expect(page.locator("#service-results article")).toHaveCount(2);
