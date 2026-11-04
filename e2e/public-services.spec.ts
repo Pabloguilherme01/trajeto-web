@@ -56,7 +56,7 @@ test("busca de rotas prontas filtra destinos sem overflow em 320 px", async ({ p
   const libraryCard = routes.locator("article").filter({ hasText: "Biblioteca Municipal · Jardim Barragem II" });
   await expect(libraryCard).toBeVisible();
   await expect(libraryCard.getByRole("button", { name: /Planejar rota para Biblioteca Municipal/ })).toBeVisible();
-  const organic = libraryCard.getByRole("button", { name: /no Organic Maps/ });
+  const organic = libraryCard.getByRole("button", { name: /^Organic · .* · abrir Biblioteca Municipal/ });
   await expect(organic).toBeVisible();
   await expect(organic).toContainText("Organic · carro");
   await expect(routes.getByRole("status")).toContainText("1 destinos neste filtro · 1 exibidos");
@@ -85,7 +85,7 @@ test("rotas prontas incluem serviços físicos novos sem overflow em 320 px", as
   await expect(agriculture).toBeVisible();
   await expect(
     agriculture.getByRole("button", {
-      name: /Organic Maps .* abrir Secretaria Municipal de Agricultura e Abastecimento/i,
+      name: /^Organic · .* · abrir Secretaria Municipal de Agricultura e Abastecimento/i,
     })
   ).toBeVisible();
 
@@ -110,7 +110,7 @@ test("rotas prontas acompanham automaticamente o catálogo e excluem bases de em
   const sus = routes.locator("article").filter({ hasText: "Ouvidoria SUS" });
   await expect(sus).toBeVisible();
   await expect(
-    sus.getByRole("button", { name: /Organic Maps .* abrir Ouvidoria SUS/i })
+    sus.getByRole("button", { name: /^Organic · .* · abrir Ouvidoria SUS/i })
   ).toBeVisible();
 
   await search.fill("SAMU");
@@ -259,12 +259,12 @@ test("card de serviço prioriza planejar e contato e mantém Organic Maps em mai
   await expect(card.getByRole("button", { name: "Planejar rota" })).toBeVisible();
   await expect(card.getByRole("link", { name: /.*ligar para Secretaria Municipal de Agricultura/i })).toBeVisible();
   await expect(
-    card.getByRole("button", { name: /Organic Maps .* abrir Secretaria Municipal de Agricultura e Abastecimento/i })
+    card.getByRole("button", { name: /^Organic · .* · abrir Secretaria Municipal de Agricultura e Abastecimento/i })
   ).toHaveCount(0);
 
   await card.getByText("Mais opções · navegar e compartilhar").click();
   await expect(
-    card.getByRole("button", { name: /Organic Maps .* abrir Secretaria Municipal de Agricultura e Abastecimento/i })
+    card.getByRole("button", { name: /^Organic · .* · abrir Secretaria Municipal de Agricultura e Abastecimento/i })
   ).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
