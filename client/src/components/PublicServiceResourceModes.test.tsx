@@ -15,7 +15,7 @@ describe("premium modes in the public services directory", () => {
     expect(within(within(group).getByRole("button", { name: /^Ligar ou WhatsApp/ })).getByText("1 serviço")).toBeTruthy();
     const route = within(group).getByRole("button", { name: /^Ir até o local/ });
     expect(within(route).getByText("0 serviços")).toBeTruthy();
-    expect(route.getAttribute("aria-label")).toContain("0 serviços");
+    expect(route.hasAttribute("aria-label")).toBe(false);
     expect(route.hasAttribute("aria-describedby")).toBe(false);
     fireEvent.click(route);
     expect(props.onChange).toHaveBeenCalledWith("rota");
