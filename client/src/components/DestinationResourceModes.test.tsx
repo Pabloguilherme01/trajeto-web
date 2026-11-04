@@ -16,7 +16,7 @@ it("shows accessible previews and preserves zero-result modes while updating", (
   fireEvent.click(streets);
   expect(onChange).toHaveBeenCalledWith("streets");
   const coordinates = within(group).getByRole("button", { name: /^Com coordenadas/ });
-  expect(coordinates.getAttribute("aria-label")).toContain("1 destino");
+  expect(coordinates.hasAttribute("aria-label")).toBe(false);
   expect(coordinates.hasAttribute("aria-describedby")).toBe(false);
   rerender(<DestinationResourceModes {...props} updating />);
   expect(within(group).getAllByText("Atualizando")).toHaveLength(6);
