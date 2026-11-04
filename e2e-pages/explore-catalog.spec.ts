@@ -71,7 +71,7 @@ test("Pages: food, commerce and grouped shortcuts use the imported catalog at 32
   await expect(page.locator("#ready-routes article")).toHaveCount(24);
   await page.getByRole("searchbox", { name: "Buscar rota pronta" }).fill("baixar empresa");
   await expect(page.getByRole("button", { name: /Planejar rota para Sala do Empreendedor/ })).toBeVisible();
-  await page.getByRole("button", { name: "Documentos · filtrar categoria", exact: true }).click();
+  await page.getByRole("button", { name: /^Documentos.*filtrar categoria$/ }).click();
   await expect(page).toHaveURL(/categoria=documentos/);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   await page.screenshot({ path: "test-results/home-services-options.png", fullPage: false });
