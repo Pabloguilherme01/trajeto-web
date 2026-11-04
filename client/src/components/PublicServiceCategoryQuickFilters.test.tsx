@@ -13,14 +13,14 @@ describe("quick Premium service categories", () => {
     const group = screen.getByRole("group", { name: "Categorias mais usadas" });
     const buttons = within(group).getAllByRole("button");
     expect(buttons).toHaveLength(6);
-    expect(buttons.map(button => button.getAttribute("aria-label"))).toEqual([
-      "Tudo · filtrar categoria", "Saúde · filtrar categoria", "Assistência · filtrar categoria",
-      "Trabalho · filtrar categoria", "Água e energia · filtrar categoria", "Documentos · filtrar categoria",
-    ]);
-    expect(within(group).getByRole("button", { name: "Saúde · filtrar categoria" }).getAttribute("aria-pressed"))
+    expect(buttons.every(button => !button.hasAttribute("aria-label"))).toBe(true);
+    for (const label of ["Tudo", "Saúde", "Assistência", "Trabalho", "Água e energia", "Documentos"]) {
+      expect(within(group).getByRole("button", { name: new RegExp("^" + label + ".*filtrar categoria$") })).toBeTruthy();
+    }
+    expect(within(group).getByRole("button", { name: /^Saúde.*filtrar categoria$/ }).getAttribute("aria-pressed"))
       .toBe("true");
     expect(buttons.every(button => button.className.includes("min-h-12"))).toBe(true);
-    fireEvent.click(within(group).getByRole("button", { name: "Documentos · filtrar categoria" }));
+    fireEvent.click(within(group).getByRole("button", { name: /^Documentos.*filtrar categoria$/ }));
     expect(onChange).toHaveBeenCalledWith("documentos");
     expect(screen.queryByText(/Categoria ativa:/)).toBeNull();
   });
@@ -38,7 +38,7 @@ describe("quick Premium service categories", () => {
     expect(onChange).toHaveBeenCalledWith("todos");
     rerender(<PublicServiceCategoryQuickFilters category="todos" onChange={onChange} />);
     expect(screen.queryByText(/Categoria ativa:/)).toBeNull();
-    expect(screen.getByRole("button", { name: "Tudo · filtrar categoria" }).getAttribute("aria-pressed"))
+    expect(screen.getByRole("button", { name: /^Tudo.*filtrar categoria$/ }).getAttribute("aria-pressed"))
       .toBe("true");
   });
 });
