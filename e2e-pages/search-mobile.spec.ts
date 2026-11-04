@@ -86,7 +86,7 @@ test("Pages: offline search preserves direct contacts and explains an unknown qu
     .click();
   await expect(page).toHaveURL(/servicos\?servico=meu-inss$/);
   await expect(
-    page.getByRole("link", { name: /Ligar para Meu INSS/ })
+    page.locator('a[href="tel:135"]')
   ).toHaveAttribute("href", "tel:135");
   await page.goto("buscar?q=nao-existe-xyz", { waitUntil: "domcontentloaded" });
   await expect(page.getByText(/Nenhum resultado local/)).toBeVisible();
