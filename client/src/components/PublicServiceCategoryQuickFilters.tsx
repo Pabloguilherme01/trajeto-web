@@ -41,7 +41,6 @@ export default function PublicServiceCategoryQuickFilters({
             <button
               key={item.id}
               type="button"
-              aria-label={item.shortLabel + " · filtrar categoria"}
               aria-pressed={selected}
               onClick={() => onChange(item.id)}
               className={
@@ -53,11 +52,11 @@ export default function PublicServiceCategoryQuickFilters({
             >
               <span className="min-w-0 break-words leading-tight">{item.shortLabel}</span>
               <span
-                aria-hidden="true"
                 className="shrink-0 rounded-full bg-background/75 px-1.5 py-0.5 text-[11px] tabular-nums text-foreground"
               >
                 {item.id === "todos" ? PUBLIC_SERVICES.length : SERVICE_CATEGORY_COUNTS[item.id] ?? 0}
               </span>
+              <span className="sr-only"> · filtrar categoria</span>
             </button>
           );
         })}
