@@ -259,12 +259,12 @@ test("card de serviço prioriza planejar e contato e mantém Organic Maps em mai
   await expect(card.getByRole("button", { name: "Planejar rota" })).toBeVisible();
   await expect(card.getByRole("link", { name: /.*ligar para Secretaria Municipal de Agricultura/i })).toBeVisible();
   await expect(
-    card.getByRole("button", { name: /^Organic · .* · abrir Secretaria Municipal de Agricultura e Abastecimento/i })
+    card.getByRole("button", { name: /Organic Maps .* abrir Secretaria Municipal de Agricultura e Abastecimento/i })
   ).toHaveCount(0);
 
   await card.getByText("Mais opções · navegar e compartilhar").click();
   await expect(
-    card.getByRole("button", { name: /^Organic · .* · abrir Secretaria Municipal de Agricultura e Abastecimento/i })
+    card.getByRole("button", { name: /Organic Maps .* abrir Secretaria Municipal de Agricultura e Abastecimento/i })
   ).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
