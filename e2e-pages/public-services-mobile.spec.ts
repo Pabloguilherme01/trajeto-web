@@ -80,7 +80,12 @@ test("service needs and Organic Maps modes remain usable at 320px", async ({ pag
   await page.locator("summary").filter({ hasText: /^Modo de navegação no Organic Maps$/ }).click();
   const mode = page.getByRole("combobox", { name: "Modo de navegação no Organic Maps" });
   await mode.selectOption("walk");
-  await expect(page.getByRole("button", { name: /^Organic · .* · abrir / })).toContainText("a pé");
+  const organic = page
+    .locator("#service-upa-mansoes-odisseia")
+    .getByRole("button")
+    .filter({ hasText: "Organic" });
+  await expect(organic).toHaveCount(1);
+  await expect(organic).toContainText(/a pé/i);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   await page.goto("servicos?categoria=capacitacao", { waitUntil: "domcontentloaded" });
   await expect(page.locator("#service-results article")).toHaveCount(2);
