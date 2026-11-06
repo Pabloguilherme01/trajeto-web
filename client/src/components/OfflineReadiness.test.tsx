@@ -174,4 +174,18 @@ describe("offline preparation feedback", () => {
       ).disabled
     ).toBe(false);
   });
+  it("remove o aviso de catálogo disponível quando uma nova verificação do cache falha", async () => {
+    state.check
+      .mockResolvedValueOnce({ ready: true, coreReady: true, businessesReady: true })
+      .mockRejectedValueOnce(new Error("CacheStorage indisponível"));
+    render(<OfflineReadiness />);
+
+    expect(await screen.findByText("Catálogo de empresas disponível offline neste aparelho.")).toBeTruthy();
+    act(() => { window.dispatchEvent(new Event("online")); });
+
+    expect(await screen.findByText(/Este navegador não permitiu preparar o app/)).toBeTruthy();
+    expect(screen.getByText(/Catálogo de empresas ainda não preparado para offline/)).toBeTruthy();
+    expect(screen.queryByText("Pronto para usar sem internet neste aparelho.")).toBeNull();
+  });
+
 });
