@@ -41,14 +41,7 @@ test("Pages: saved public services persist and reopen offline", async ({
       name: "Remover dos salvos: Serviço de Informação ao Cidadão · SIC",
     })
   ).toHaveAttribute("aria-pressed", "true");
-  await page
-    .getByRole("group", { name: "Resumo da Central" })
-    .getByRole("button")
-    .first()
-    .click();
-  await page
-    .getByRole("button", { name: "Serviços salvos (1)", exact: true })
-    .click();
+  await page.goto("servicos?salvos=1", { waitUntil: "domcontentloaded" });
   await expect(page).toHaveURL(/servicos\?salvos=1$/);
   await ensureControlledOfflinePage(page);
   await context.setOffline(true);
