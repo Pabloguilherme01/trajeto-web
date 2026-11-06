@@ -61,6 +61,10 @@ export default function OfflineReadiness() {
       if (request !== statusRequest.current || preparingRef.current) return;
       setReady(false);
       setCoreReady(false);
+      // A falha da verificação invalida também a confirmação anterior do catálogo.
+      // Sem isso, um status antigo poderia anunciar empresas offline incorretamente.
+      setBusinessesReady(false);
+      setStorageStatus(null);
       setFeedback(preparationMessages.unsupported);
     } finally {
       if (request === statusRequest.current && !preparingRef.current) setChecking(false);
@@ -97,6 +101,9 @@ export default function OfflineReadiness() {
         ? "O navegador aceitou manter os dados offline com proteção reforçada contra limpeza automática."
         : "O navegador não garantiu armazenamento persistente. As rotas continuam salvas normalmente.");
       setStorageStatus(await getOfflineStorageStatus());
+    } catch {
+      // Quota/IndexedDB podem falhar em modo privado ou quando o aparelho perde espaço.
+      setFeedback("Não foi possível conferir o armazenamento agora. Suas rotas salvas não foram alteradas.");
     } finally {
       setRequestingPersistence(false);
     }
