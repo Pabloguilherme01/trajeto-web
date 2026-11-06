@@ -36,7 +36,7 @@ for (const width of [320, 360, 390]) {
     const card = page.locator("#service-upa-mansoes-odisseia");
     await card.locator("summary").filter({ hasText: "Mais opções" }).click();
     await expectRow([
-      card.getByRole("button", { name: "Abrir UPA Mansões Odisseia no Organic Maps", exact: true }),
+      card.getByRole("button", { name: /Organic Maps .* abrir UPA Mansões Odisseia/ }),
       card.getByRole("button", { name: "Compartilhar serviço: UPA Mansões Odisseia", exact: true }),
     ]);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);

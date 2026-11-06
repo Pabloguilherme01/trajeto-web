@@ -31,11 +31,11 @@ describe("shared Premium filter option", () => {
   it("preserves an exact accessible label for grid resource mode", () => {
     const onSelect = vi.fn();
     render(
-      <PremiumFilterModeOption layout="grid" ariaLabel="Resolver online"
+      <PremiumFilterModeOption layout="grid"
         label="Resolver online" detail="Serviços digitais"
         icon={MapPin} selected onSelect={onSelect} />
     );
-    const button = screen.getByRole("button", { name: "Resolver online" });
+    const button = screen.getByRole("button", { name: "Resolver onlineServiços digitais" });
     expect(button.className).toContain("min-h-[4.5rem]");
     expect(button.className).toContain("min-w-0");
     expect(button.getAttribute("aria-pressed")).toBe("true");

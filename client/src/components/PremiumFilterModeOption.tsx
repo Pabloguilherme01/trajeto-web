@@ -1,4 +1,4 @@
-import React, { useId } from "react";
+import React from "react";
 import type { LucideIcon } from "lucide-react";
 
 type Props = {
@@ -7,7 +7,6 @@ type Props = {
   icon: LucideIcon;
   selected: boolean;
   onSelect: () => void;
-  ariaLabel?: string;
   availability?: string;
   layout: "rail" | "grid";
 };
@@ -19,17 +18,13 @@ export default function PremiumFilterModeOption({
   icon: Icon,
   selected,
   onSelect,
-  ariaLabel,
   availability,
   layout,
 }: Props) {
   const inRail = layout === "rail";
-  const availabilityId = useId();
   return (
     <button
       type="button"
-      aria-label={ariaLabel}
-      aria-describedby={ariaLabel && availability !== undefined ? availabilityId : undefined}
       aria-pressed={selected}
       onClick={onSelect}
       className={
@@ -58,7 +53,7 @@ export default function PremiumFilterModeOption({
           {detail}
         </span>
         {availability !== undefined && (
-          <span id={availabilityId} className="mt-1.5 inline-flex rounded-full bg-muted/50 px-2 py-0.5 text-[11px] font-bold leading-tight tabular-nums text-foreground">
+          <span className="mt-1.5 inline-flex rounded-full bg-muted/50 px-2 py-0.5 text-[11px] font-bold leading-tight tabular-nums text-foreground">
             {availability}
           </span>
         )}

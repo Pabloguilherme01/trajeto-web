@@ -199,13 +199,13 @@ export default function PublicServiceCard({
                 : undefined
             }
             aria-label={
-              (primaryContact.channel === "whatsapp"
-                ? "WhatsApp de "
-                : "Ligar para ") +
-              service.name +
-              (primaryContact.label ? " · " + primaryContact.label : "") +
-              ": " +
-              primaryContact.number
+              (primaryContact.label ||
+                (primaryContact.channel === "whatsapp" ? "WhatsApp" : "Ligar")) +
+              " · " +
+              primaryContact.number +
+              " · " +
+              (primaryContact.channel === "whatsapp" ? "WhatsApp de " : "ligar para ") +
+              service.name
             }
             className={
               "inline-flex min-h-11 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-accent/25 bg-accent/[.06] px-2 text-center text-sm font-bold text-accent " +
@@ -342,13 +342,13 @@ export default function PublicServiceCard({
                   : undefined
               }
               aria-label={
-                (contact.channel === "whatsapp"
-                  ? "WhatsApp de "
-                  : "Ligar para ") +
-                service.name +
-                (contact.label ? " · " + contact.label : "") +
-                ": " +
-                contact.number
+                (contact.label ||
+                  (contact.channel === "whatsapp" ? "WhatsApp" : "Ligar")) +
+                " · " +
+                contact.number +
+                " · " +
+                (contact.channel === "whatsapp" ? "WhatsApp de " : "ligar para ") +
+                service.name
               }
               className="inline-flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-xl border border-accent/20 bg-accent/[.05] px-3 text-center text-sm font-bold text-accent"
             >
@@ -406,7 +406,7 @@ export default function PublicServiceCard({
             <button
               type="button"
               onClick={() => openOrganicMaps(service)}
-              aria-label={"Abrir " + service.name + " no Organic Maps"}
+              aria-label={`Organic Maps · ${navigationModeLabel} · abrir ${service.name}`}
               className="inline-flex min-h-11 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-primary/20 bg-primary/[.05] px-2 py-2 text-xs font-bold text-primary"
             >
               <Navigation className="size-4 shrink-0" />
@@ -438,7 +438,7 @@ export default function PublicServiceCard({
               <button
                 type="button"
                 onClick={() => openOrganicMaps(service)}
-                aria-label={"Abrir " + service.name + " no Organic Maps"}
+                aria-label={`Organic Maps · ${navigationModeLabel} · abrir ${service.name}`}
                 className="inline-flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/[.05] px-2 py-2 text-xs font-bold text-primary"
               >
                 <Navigation className="size-4 shrink-0" />
@@ -476,13 +476,12 @@ export default function PublicServiceCard({
                       : undefined
                   }
                   aria-label={
-                    (contact.channel === "whatsapp"
-                      ? "WhatsApp de "
-                      : "Ligar para ") +
-                    service.name +
-                    (contact.label ? " · " + contact.label : "") +
-                    ": " +
-                    contact.number
+                    (contact.label || "Contato alternativo") +
+                    " · " +
+                    contact.number +
+                    (contact.channel === "whatsapp" ? " · WhatsApp" : "") +
+                    " · " +
+                    service.name
                   }
                   className="inline-flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-xl border border-accent/20 bg-accent/[.05] px-2 py-2 text-xs font-bold text-accent"
                 >

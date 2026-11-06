@@ -40,7 +40,6 @@ export default function PublicServiceResourceModes({
           <PremiumFilterModeOption
             key={value}
             layout="grid"
-            ariaLabel={label}
             label={label}
             detail={detail}
             availability={modeCounts

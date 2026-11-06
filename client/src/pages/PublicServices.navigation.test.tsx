@@ -32,10 +32,10 @@ it("keeps the Premium service search editable while reporting only completed res
   expect(document.querySelectorAll("#service-results article")).toHaveLength(0);
   fireEvent.change(input, { target: { value: "anatel" } });
   await waitFor(() => expect(document.querySelectorAll("#service-results article").length).toBeGreaterThan(0));
-  fireEvent.click(screen.getByRole("button", { name: "Resolver online" }));
+  fireEvent.click(screen.getByRole("button", { name: /^Resolver online/ }));
   await waitFor(() => expect(window.location.search).toContain("recurso=online"));
   expect(input.value).toBe("anatel");
-  expect(screen.getByRole("button", { name: "Resolver online" }).getAttribute("aria-pressed")).toBe("true");
+  expect(screen.getByRole("button", { name: /^Resolver online/ }).getAttribute("aria-pressed")).toBe("true");
 }, 15000);
 
 it("batches broad filters and retains expansion across delayed effects", async () => {
@@ -172,7 +172,7 @@ it("restores ready routes after an empty search", () => {
 it("keeps the current resource filter when Escape clears the search", async () => {
   window.history.replaceState({}, "", "/servicos?q=anatel");
   render(<PublicServices />);
-  fireEvent.click(screen.getByRole("button", { name: "Resolver online" }));
+  fireEvent.click(screen.getByRole("button", { name: /^Resolver online/ }));
   await waitFor(() => expect(window.location.search).toContain("recurso=online"));
   const input = screen.getByRole("textbox", { name: "Buscar serviços públicos" });
   input.focus();
@@ -232,7 +232,7 @@ it("offers Organic Maps transport modes after selecting a physical service", () 
   const mode = screen.getByRole("combobox", { name: "Modo de navegação no Organic Maps" });
   fireEvent.change(mode, { target: { value: "walk" } });
   expect((mode as HTMLSelectElement).value).toBe("walk");
-  expect(screen.getByRole("button", { name: /Abrir .* no Organic Maps/ }).textContent).toContain("a pé");
+  expect(screen.getByRole("button", { name: /^Organic Maps · .* · abrir/ }).textContent).toContain("a pé");
 });
 
 it("finds both official course catalogs without assigning a local route", () => {
@@ -294,7 +294,7 @@ it("clears an advanced category directly without losing the search or Premium re
   render(<PublicServices />);
   expect(screen.getByText("Categoria ativa: Internet e telefone")).toBeTruthy();
   fireEvent.click(screen.getByRole("button", {
-    name: "Remover filtro da categoria Internet e telefone",
+    name: "Limpar · remover filtro da categoria Internet e telefone",
   }));
   await waitFor(() => {
     const params = new URLSearchParams(window.location.search);
@@ -302,7 +302,7 @@ it("clears an advanced category directly without losing the search or Premium re
     expect(params.get("q")).toBe("anatel");
     expect(params.get("recurso")).toBe("online");
   });
-  expect(screen.getByRole("button", { name: "Resolver online" }).getAttribute("aria-pressed"))
+  expect(screen.getByRole("button", { name: /^Resolver online/ }).getAttribute("aria-pressed"))
     .toBe("true");
 });
 

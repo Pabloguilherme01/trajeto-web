@@ -92,7 +92,7 @@ describe("PublicServices deep links", () => {
 
   it("offers Organic Maps directly from ready-route cards without nesting actions", () => {
     expect(source).toContain("openOrganicDestination(route.destination, route.label)");
-    expect(source).toContain('aria-label={"Abrir " + route.label + " no Organic Maps"}');
+    expect(source).toContain('aria-label={`Organic · ${navigationModeLabel} · abrir ${route.label}`}');
     expect(source).toContain("Organic · {navigationModeLabel}</span>");
     expect(source).toContain(">Planejar</span>");
     expect(source).toContain("snap-x snap-mandatory");
@@ -114,9 +114,9 @@ describe("PublicServices deep links", () => {
     expect(source).toContain("openReadyRoutesFromSummary");
     expect(source).toContain('id="ready-routes"');
     expect(source).toContain('id="service-results"');
-    expect(source).toContain("Ir para ${READY_SERVICE_ROUTES.length} rotas prontas");
-    expect(source).toContain("Mostrar ${offlineReadyRouteIds.size} locais offline");
-    expect(source).toContain("Verificar locais offline");
+    expect(source).toContain('<span className="sr-only"> · ir para a seção</span>');
+    expect(source).toContain('offlineRoutesChecked ? "mostrar" : "verificar"');
+    expect(source).toContain('<span className="sr-only"> · {offlineRoutesChecked ? "mostrar" : "verificar"}</span>');
     expect(source).toContain('{offlineRoutesChecked ? offlineReadyRouteIds.size : "…"}');
   });
 

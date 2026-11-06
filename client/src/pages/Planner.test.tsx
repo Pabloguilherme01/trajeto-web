@@ -630,9 +630,9 @@ it("combines municipal sector refinements with local prepared-route mode without
   expect(selector.value).toBe("bairro-jardim-brasilia");
   expect(screen.getByText(/Região mencionada no registro: Jardim Brasília/)).toBeTruthy();
   const modes = within(screen.getByRole("group", { name: "Recursos dos destinos" }));
-  fireEvent.click(modes.getByRole("button", { name: "Rota offline salva" }));
+  fireEvent.click(modes.getByRole("button", { name: /^Rota offline salva/ }));
   expect(screen.getByText(/Informe a origem para encontrar rotas/)).toBeTruthy();
-  expect(modes.getByRole("button", { name: "Rota offline salva" }).getAttribute("aria-pressed")).toBe("true");
+  expect(modes.getByRole("button", { name: /^Rota offline salva/ }).getAttribute("aria-pressed")).toBe("true");
   fireEvent.click(screen.getByRole("button", { name: "Ver todas as regiões" }));
   expect(selector.value).toBe("");
 });
@@ -641,7 +641,7 @@ it("shows sourced neighborhood names in the planner without presenting them as v
   state.search = "destinos=1";
   render(<Planner />);
   const modes = within(screen.getByRole("group", { name: "Recursos dos destinos" }));
-  fireEvent.click(modes.getByRole("button", { name: "Bairros e setores" }));
+  fireEvent.click(modes.getByRole("button", { name: /^Bairros e setores/ }));
   const picker = screen.getByRole("textbox", { name: "Filtrar todos os destinos disponíveis" });
   fireEvent.change(picker, { target: { value: "Jardim Brasília" } });
   const region = within(screen.getByRole("region", { name: "Lista de destinos disponíveis" }));
@@ -659,7 +659,7 @@ it("opens the catalog with one button and clears only catalog refinements, keepi
   const picker = screen.getByRole("combobox", { name: "Filtrar destinos por bairro ou setor" });
   fireEvent.change(picker, { target: { value: "bairro-jardim-brasilia" } });
   const modes = within(screen.getByRole("group", { name: "Recursos dos destinos" }));
-  fireEvent.click(modes.getByRole("button", { name: "Bairros e setores" }));
+  fireEvent.click(modes.getByRole("button", { name: /^Bairros e setores/ }));
   const textbox = screen.getByRole("textbox", { name: "Filtrar todos os destinos disponíveis" });
   fireEvent.change(textbox, { target: { value: "BuscaTeste" } });
   const filters = within(screen.getByRole("group", { name: "Filtros ativos dos destinos" }));
@@ -669,7 +669,7 @@ it("opens the catalog with one button and clears only catalog refinements, keepi
   expect((textbox as HTMLInputElement).value).toBe("BuscaTeste");
   fireEvent.click(filters.getByRole("button", { name: "Limpar todos os refinamentos" }));
   expect((textbox as HTMLInputElement).value).toBe("");
-  expect(modes.getByRole("button", { name: "Todos os destinos" }).getAttribute("aria-pressed")).toBe("true");
+  expect(modes.getByRole("button", { name: /^Todos os destinos/ }).getAttribute("aria-pressed")).toBe("true");
   expect((screen.getByPlaceholderText("De onde você sai") as HTMLInputElement).value).toBe("Casa");
   expect((screen.getByPlaceholderText("Para onde você vai") as HTMLInputElement).value).toBe("Trabalho");
   fireEvent.click(toggle);

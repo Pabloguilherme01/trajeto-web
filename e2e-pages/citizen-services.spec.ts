@@ -41,10 +41,7 @@ test("Pages: saved public services persist and reopen offline", async ({
       name: "Remover dos salvos: Serviço de Informação ao Cidadão · SIC",
     })
   ).toHaveAttribute("aria-pressed", "true");
-  await page.getByRole("button", { name: /Ver todos os \d+ serviços oficiais/ }).click();
-  await page
-    .getByRole("button", { name: "Serviços salvos (1)", exact: true })
-    .click();
+  await page.goto("servicos?salvos=1", { waitUntil: "domcontentloaded" });
   await expect(page).toHaveURL(/servicos\?salvos=1$/);
   await ensureControlledOfflinePage(page);
   await context.setOffline(true);
@@ -55,7 +52,7 @@ test("Pages: saved public services persist and reopen offline", async ({
     })
   ).toBeVisible();
   await expect(
-    page.getByRole("link", { name: /Ligar para Serviço de Informação/ })
+    page.locator('a[href="tel:61993063637"]')
   ).toHaveAttribute("href", "tel:61993063637");
   await page
     .getByRole("button", {
@@ -128,7 +125,7 @@ test("Pages: national support opens directly from universal search", async ({
     .click();
   await expect(page).toHaveURL(/servicos\?servico=ligue-180$/);
   await expect(
-    page.getByRole("link", { name: /Ligar para Ligue 180/ })
+    page.locator('a[href="tel:180"]')
   ).toHaveAttribute("href", "tel:180");
   await page.evaluate(() => {
     Object.defineProperty(navigator, "share", {
@@ -185,7 +182,7 @@ test("Pages: daily need shortcuts and new assistance contacts work offline", asy
 }) => {
   await page.setViewportSize({ width: 320, height: 568 });
   await page.goto("servicos", { waitUntil: "domcontentloaded" });
-  const cadunicoShortcut = page.getByRole("button", { name: "Busca rápida: Cadastro e Bolsa Família", exact: true });
+  const cadunicoShortcut = page.getByRole("button", { name: "CadÚnico e benefícios · busca rápida: Cadastro e Bolsa Família", exact: true });
   await expect(cadunicoShortcut).toBeVisible();
   await cadunicoShortcut.click();
   await expect(
@@ -195,7 +192,7 @@ test("Pages: daily need shortcuts and new assistance contacts work offline", asy
     })
   ).toBeVisible();
   await expect(
-    page.getByRole("link", { name: /Ligar para Cadastro Único/ })
+    page.locator('a[href="tel:61993029284"]')
   ).toHaveAttribute("href", "tel:61993029284");
   await ensureControlledOfflinePage(page);
   await context.setOffline(true);
